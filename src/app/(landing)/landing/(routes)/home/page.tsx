@@ -1,3 +1,9 @@
+import HomeContent from "@/content/landing/home.mdx";
+
 export default function LandingHomePage() {
-  return <div>Landing Home</div>;
+  return (
+    <main>
+      <HomeContent />
+    </main>
+  );
 }
