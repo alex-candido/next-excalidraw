@@ -1,23 +1,25 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
-import "./src/config/env-config";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactCompiler: true,
-    async redirects() {
+  async redirects() {
     return [
       {
-        source: '/',
-        destination: '/landing/home',
+        source: "/",
+        destination: "/landing/home",
         permanent: true,
       },
       {
-        source: '/landing',
-        destination: '/landing/home',
+        source: "/landing",
+        destination: "/landing/home",
         permanent: true,
-      }
+      },
     ];
   },
 };
 
-export default nextConfig;
+const withMDX = createMDX({});
+
+export default withMDX(nextConfig);
