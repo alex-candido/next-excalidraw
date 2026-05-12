@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/base/theme-toggle";
 import type { Locale } from "@/i18n/dictionaries";
 
 export default async function LandingHomePage({
@@ -12,6 +13,9 @@ export default async function LandingHomePage({
 
   return (
     <main>
+      <div className="fixed top-4 right-4">
+        <ThemeToggle />
+      </div>
       <Content />
     </main>
   );
