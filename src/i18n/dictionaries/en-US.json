@@ -1,0 +1,14 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "tryAgain": "Try again",
+    "returnHome": "Return home"
+  },
+  "landing": {
+    "home": {
+      "title": "Welcome to Next Excalidraw",
+      "description": "Build beautiful AI-powered presentations with Excalidraw."
+    }
+  }
+}

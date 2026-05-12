@@ -1,5 +1,5 @@
-import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
+import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
@@ -7,13 +7,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/",
-        destination: "/landing/home",
-        permanent: true,
-      },
-      {
-        source: "/landing",
-        destination: "/landing/home",
+        source: "/:lang/landing",
+        destination: "/:lang/landing/home",
         permanent: true,
       },
     ];
