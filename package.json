@@ -6,10 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.71",
+    "@libsql/client": "^0.17.3",
     "@mastra/core": "^1.32.1",
     "@mastra/evals": "^1.2.2",
     "@mastra/libsql": "^1.10.0",
@@ -20,6 +25,7 @@
     "@next/mdx": "^16.2.6",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@types/mdx": "^2.0.13",
+    "drizzle-orm": "^0.45.2",
     "mastra": "^1.8.1",
     "next": "16.2.6",
     "react": "19.2.4",
@@ -32,10 +38,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.11.0"
+  "packageManager": "bun@1.2.21"
 }
