@@ -8,8 +8,8 @@ export const outlineSemanticScorer = createScorer({
   type: "agent",
   judge: {
     model: {
-      id: `google/${process.env.GEMINI_MODEL}`,
-      apiKey: process.env.GEMINI_API_KEY,
+      id: `google/${process.env.GOOGLE_GENERATIVE_AI_MODEL}`,
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     },
     instructions: outlineSemanticScorerPrompt,
   },

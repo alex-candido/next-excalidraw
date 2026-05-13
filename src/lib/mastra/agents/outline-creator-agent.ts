@@ -7,8 +7,8 @@ export const outlineCreatorAgent = new Agent({
   name: "outline-creator-agent",
   instructions: outlineCreatorPrompt,
   model: {
-    id: `google/${process.env.GEMINI_MODEL}`,
-    apiKey: process.env.GEMINI_API_KEY!,
+    id: `google/${process.env.GOOGLE_GENERATIVE_AI_MODEL}`,
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
   },
   tools: { outlineStructureTool },
 });
