@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "topic é obrigatório" }, { status: 400 });
   }
 
-  const workflow = mastra.getWorkflow("outline-workflow");
-  const run = workflow.createRun();
+  const workflow = mastra.getWorkflow("outlineWorkflow");
+  const run = await workflow.createRun();
   const result = await run.start({ inputData: { topic } });
 
   return Response.json(result);

@@ -17,6 +17,12 @@
 /.next/
 /out/
 
+# mastra
+/.mastra/
+*.db
+*.db-shm
+*.db-wal
+
 # production
 /build
 
@@ -30,7 +36,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — only local overrides are ignored, base files are committed
+# env files
+.env
 .env*.local
 
 # vercel

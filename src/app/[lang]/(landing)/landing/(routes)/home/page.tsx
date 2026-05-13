@@ -1,4 +1,4 @@
-import { ThemeToggle } from "@/components/base/theme-toggle";
+import { ThemeToggle } from "@/components/ui/base/theme-toggle";
 import type { Locale } from "@/i18n/dictionaries";
 
 export default async function LandingHomePage({
