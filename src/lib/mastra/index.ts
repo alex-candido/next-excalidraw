@@ -1,5 +1,5 @@
 import { Mastra } from '@mastra/core/mastra';
-import { LibSQLStore } from '@mastra/libsql';
+import { PostgresStore } from '@mastra/pg';
 import { PinoLogger } from '@mastra/loggers';
 import { outlineCreatorAgent } from './agents/outline-creator-agent';
 import { outlineSemanticScorer } from './scorers/outline-semantic-scorer';
@@ -15,9 +15,8 @@ export const mastra = new Mastra({
   scorers: {
     outlineSemanticScorer,
   },
-  storage: new LibSQLStore({
-    id: 'mastra-storage',
-    url: process.env.DATABASE_URL!,
+  storage: new PostgresStore({
+    connectionString: process.env.DATABASE_URL!,
   }),
   logger: new PinoLogger({
     name: 'mastra',
