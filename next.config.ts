@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactCompiler: true,
+  transpilePackages: ["@excalidraw/excalidraw", "@excalidraw/utils", "@excalidraw/math"],
   async redirects() {
     return [
       {

@@ -15,6 +15,7 @@
   "dependencies": {
     "@ai-sdk/google": "^3.0.71",
     "@base-ui/react": "^1.4.1",
+    "@excalidraw/excalidraw": "^0.18.1",
     "@getbrevo/brevo": "^5.0.4",
     "@hookform/resolvers": "^5.2.2",
     "@mastra/core": "^1.33.0",
