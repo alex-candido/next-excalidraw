@@ -1,5 +1,7 @@
 "use client";
 
+import { AppProviders } from "@/providers/app";
+import { QueryProvider } from "@/providers/next/query-provider";
 import { ThemeProvider } from "@/providers/next/theme-provider";
 
 interface ProvidersProps {
@@ -7,5 +9,11 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return (
+    <ThemeProvider>
+      <QueryProvider>
+        <AppProviders>{children}</AppProviders>
+      </QueryProvider>
+    </ThemeProvider>
+  );
 }
