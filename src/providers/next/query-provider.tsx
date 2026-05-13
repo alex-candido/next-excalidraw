@@ -20,7 +20,9 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const [persister] = useState(() =>
-    createAsyncStoragePersister({ storage: window.localStorage })
+    createAsyncStoragePersister({
+      storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    })
   );
 
   return (

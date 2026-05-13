@@ -1,30 +1,29 @@
-import { NextResponse } from "next/server";
+import { authRouteMiddleware } from "@/middleware/auth-route-middleware";
+import { globalRouteMiddleware } from "@/middleware/global-route-middleware";
 import type { NextRequest } from "next/server";
-import { locales, defaultLocale, hasLocale } from "@/i18n/dictionaries";
+import { NextResponse } from "next/server";
 
-function getLocale(request: NextRequest) {
-  const acceptLanguage = request.headers.get("accept-language") ?? "";
-  const preferred = acceptLanguage.split(",")[0].trim().split(";")[0];
-  return hasLocale(preferred) ? preferred : defaultLocale;
-}
+export async function proxy(request: NextRequest) {
+  try {
+    let response: NextResponse | undefined;
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+    response = await authRouteMiddleware(request);
+    if (response) return response;
 
-  const pathnameHasLocale = locales.some(
-    (locale) =>
-      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
+    response = await globalRouteMiddleware(request);
+    if (response) return response;
 
-  if (pathnameHasLocale) return NextResponse.next();
-
-  const locale = getLocale(request);
-  request.nextUrl.pathname = `/${locale}${pathname}`;
-  return NextResponse.redirect(request.nextUrl);
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Proxy error:", error);
+    return NextResponse.redirect(
+      new URL("/pt-BR/auth/sign-in", request.url)
+    );
+  }
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!api|_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|images|.*\\.(?:png|jpg|jpeg|gif|webp|svg|css|js)$).*)",
   ],
 };

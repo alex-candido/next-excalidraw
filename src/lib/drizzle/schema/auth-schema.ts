@@ -1,5 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, smallint, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+
+export const Role = {
+  admin: 0,
+  member: 1,
+  guest: 2,
+  viewer: 3,
+} as const;
+
+export type RoleKey = keyof typeof Role;
+export type RoleValue = (typeof Role)[RoleKey];
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +17,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  role: smallint("role").default(Role.guest).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
