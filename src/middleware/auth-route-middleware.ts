@@ -9,7 +9,7 @@ const authRoutes = ["/auth"];
 export async function authRouteMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const pathnameWithoutLocale = pathname.replace(/^\/(pt-BR|en-US)/, "");
+  const pathnameWithoutLocale = pathname.replace(/^\/(pt-BR|en-US|es)/, "");
 
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathnameWithoutLocale.startsWith(route)

@@ -1,0 +1,14 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "tryAgain": "Intentar de nuevo",
+    "returnHome": "Volver al inicio"
+  },
+  "landing": {
+    "home": {
+      "title": "Bienvenido a Next Excalidraw",
+      "description": "Crea hermosas presentaciones potenciadas por IA con Excalidraw."
+    }
+  }
+}

@@ -9,12 +9,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/:lang(pt-BR|en-US)",
+        source: "/:lang(pt-BR|en-US|es)",
         destination: "/:lang/landing/home",
         permanent: false,
       },
       {
-        source: "/:lang(pt-BR|en-US)/landing",
+        source: "/:lang(pt-BR|en-US|es)/landing",
         destination: "/:lang/landing/home",
         permanent: false,
       },
