@@ -17,6 +17,7 @@ erDiagram
         uuid id PK
         text name UK
         text description
+        text created_by FK
         timestamp created_at
     }
 
@@ -24,6 +25,7 @@ erDiagram
         uuid id PK
         text user_id FK
         uuid group_id FK
+        text assigned_by FK
         timestamp created_at
     }
 
@@ -38,6 +40,7 @@ erDiagram
         uuid id PK
         uuid group_id FK
         uuid permission_id FK
+        text assigned_by FK
     }
 
     USER_PERMISSION {
@@ -174,6 +177,9 @@ erDiagram
     USER         ||--o{ LOG                 : "user_id"
     USER         ||--o{ USER_GROUP          : "user_id"
     USER         ||--o{ USER_PERMISSION     : "user_id"
+    USER         ||--o{ GROUP               : "created_by"
+    USER         ||--o{ USER_GROUP          : "assigned_by"
+    USER         ||--o{ GROUP_PERMISSION    : "assigned_by"
     GROUP        ||--o{ USER_GROUP          : "group_id"
     GROUP        ||--o{ GROUP_PERMISSION    : "group_id"
     PERMISSION   ||--o{ GROUP_PERMISSION    : "permission_id"

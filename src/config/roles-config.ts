@@ -1,23 +1,26 @@
-import { Role, type RoleKey } from "@/lib/drizzle/schema/auth-schema";
+export const GroupName = {
+  admin: "admin",
+  member: "member",
+  guest: "guest",
+  viewer: "viewer",
+} as const;
 
-export { Role };
-export type { RoleKey };
+export type GroupNameKey = keyof typeof GroupName;
 
-export const roleRedirects: Record<RoleKey, string> = {
+export const groupRedirects: Record<GroupNameKey, string> = {
   admin: "/admin/dashboard",
   member: "/app/dashboard",
   guest: "/app/dashboard",
   viewer: "/app/dashboard",
 };
 
-export const roleAllowedRoutes: Record<RoleKey, string[]> = {
+export const groupAllowedRoutes: Record<GroupNameKey, string[]> = {
   admin: ["/admin", "/app"],
   member: ["/app"],
   guest: ["/app"],
   viewer: ["/app"],
 };
 
-export function getRoleKey(value: number): RoleKey {
-  const entry = Object.entries(Role).find(([, v]) => v === value);
-  return (entry?.[0] ?? "guest") as RoleKey;
+export function getGroupNameKey(name: string): GroupNameKey {
+  return (Object.values(GroupName).includes(name as GroupNameKey) ? name : "guest") as GroupNameKey;
 }

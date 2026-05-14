@@ -1,7 +1,7 @@
 import { betterFetch } from "@better-fetch/fetch";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
-import { getRoleKey, roleAllowedRoutes, roleRedirects } from "@/config/roles-config";
+import { getGroupNameKey, groupAllowedRoutes, groupRedirects } from "@/config/roles-config";
 
 const protectedRoutes = ["/app", "/admin"];
 const authRoutes = ["/auth"];
@@ -20,7 +20,7 @@ export async function authRouteMiddleware(request: NextRequest) {
 
   if (!isProtectedRoute && !isAuthRoute) return undefined;
 
-  const { data: session } = await betterFetch<{ user: { role: number } }>(
+  const { data: session } = await betterFetch<{ user: { group: string } }>(
     "/api/auth/get-session",
     {
       baseURL: request.nextUrl.origin,
@@ -37,12 +37,12 @@ export async function authRouteMiddleware(request: NextRequest) {
   }
 
   if (session) {
-    const roleKey = getRoleKey(session.user.role);
-    const allowedRoutes = roleAllowedRoutes[roleKey];
+    const groupKey = getGroupNameKey(session.user.group ?? "guest");
+    const allowedRoutes = groupAllowedRoutes[groupKey];
 
     if (isAuthRoute) {
       return NextResponse.redirect(
-        new URL(`/${locale}${roleRedirects[roleKey]}`, request.url)
+        new URL(`/${locale}${groupRedirects[groupKey]}`, request.url)
       );
     }
 
@@ -52,7 +52,7 @@ export async function authRouteMiddleware(request: NextRequest) {
 
     if (!hasAccess) {
       return NextResponse.redirect(
-        new URL(`/${locale}${roleRedirects[roleKey]}`, request.url)
+        new URL(`/${locale}${groupRedirects[groupKey]}`, request.url)
       );
     }
   }
