@@ -1,5 +1,5 @@
-import type { LineInput } from "@/schemas/excalidraw/line-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { LineInput } from "@/schemas/excalidraw/elements/line-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateLine(input: LineInput) {
   const { id, x, y, width = 100, height = 0, ...opts } = input

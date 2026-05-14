@@ -6,6 +6,7 @@
 //  presentation_id             :uuid              not null
 //  outline_id                  :uuid              not null
 //  order                       :smallint          not null
+//  composition                 :jsonb
 //  elements                    :jsonb
 //  app_state                   :jsonb
 //  files                       :jsonb
@@ -46,6 +47,7 @@ export const slide = pgTable(
       .notNull()
       .references(() => outline.id, { onDelete: "cascade" }),
     order: smallint("order").notNull(),
+    composition: jsonb("composition"),
     elements: jsonb("elements"),
     appState: jsonb("app_state"),
     files: jsonb("files"),

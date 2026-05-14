@@ -1,7 +1,7 @@
 import { describe, it, expect } from "bun:test"
 import { generateText } from "@/lib/excalidraw/generators/text-generator"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
-import { TEXT_DEFAULTS } from "@/schemas/excalidraw/text-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
+import { TEXT_DEFAULTS } from "@/schemas/excalidraw/elements/text-schema"
 
 describe("generateText", () => {
   it("sets required fields", () => {

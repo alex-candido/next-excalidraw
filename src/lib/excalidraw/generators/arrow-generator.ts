@@ -1,5 +1,5 @@
-import type { ArrowInput } from "@/schemas/excalidraw/arrow-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { ArrowInput } from "@/schemas/excalidraw/elements/arrow-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateArrow(input: ArrowInput) {
   const {

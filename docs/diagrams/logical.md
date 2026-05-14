@@ -124,7 +124,7 @@ erDiagram
         text description
         array concepts
         smallint representation
-        smallint layout
+        text layout
         real score
         timestamp created_at
         timestamp updated_at
@@ -135,6 +135,7 @@ erDiagram
         uuid presentation_id FK
         uuid outline_id FK
         smallint order
+        jsonb composition
         jsonb elements
         jsonb app_state
         jsonb files
@@ -206,7 +207,7 @@ erDiagram
 | `presentation_member` | `role` | `0` viewer · `1` editor |
 | `outline` | `type` | `0` cover · `1` agenda · `2` content · `3` summary · `4` closing |
 | `outline` | `representation` | `0` auto · `1` flowchart · `2` mindmap · `3` orgchart · `4` sequence · `5` class · `6` er · `7` gantt · `8` timeline · `9` tree · `10` network · `11` architecture · `12` dataflow · `13` state · `14` swimlane · `15` fishbone · `16` pyramid · `17` venn · `18` matrix · `19` funnel · `20` infographic |
-| `outline` | `layout` | `0` auto · `1` title_only · `2` title_content · `3` two_column · `4` image_text · `5` full_image · `6` bullets · `7` blank |
+| `outline` | `layout` | texto livre — descrição de intenção de layout gerada pela IA (ex: "slide com mapa mental centralizado") |
 | `slide` | `status` | `0` active · `1` inactive · `2` trash |
 | `generation` | `type` | `0` outline · `1` slide |
 | `generation` | `status` | `0` pending · `1` running · `2` completed · `3` failed |

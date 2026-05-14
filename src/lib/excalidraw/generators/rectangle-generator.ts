@@ -1,5 +1,5 @@
-import type { RectangleInput } from "@/schemas/excalidraw/rectangle-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { RectangleInput } from "@/schemas/excalidraw/elements/rectangle-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateRectangle(input: RectangleInput) {
   const { id, x, y, width, height, label, rounded = false, ...opts } = input

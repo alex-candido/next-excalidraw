@@ -10,7 +10,7 @@ import { generateText } from "@/lib/excalidraw/generators/text-generator"
 import { generateArrow } from "@/lib/excalidraw/generators/arrow-generator"
 import { generateLine } from "@/lib/excalidraw/generators/line-generator"
 import { generateFrame } from "@/lib/excalidraw/generators/frame-generator"
-import { COLORS } from "@/schemas/excalidraw/base-shape-schema"
+import { COLORS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 const GENERATORS = {
   rectangle: () => [

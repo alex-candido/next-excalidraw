@@ -1,5 +1,5 @@
-import type { DiamondInput } from "@/schemas/excalidraw/diamond-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { DiamondInput } from "@/schemas/excalidraw/elements/diamond-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateDiamond(input: DiamondInput) {
   const { id, x, y, width, height, label, ...opts } = input

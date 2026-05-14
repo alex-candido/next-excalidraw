@@ -1,5 +1,5 @@
-import type { EllipseInput } from "@/schemas/excalidraw/ellipse-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { EllipseInput } from "@/schemas/excalidraw/elements/ellipse-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateEllipse(input: EllipseInput) {
   const { id, x, y, width, height, label, ...opts } = input

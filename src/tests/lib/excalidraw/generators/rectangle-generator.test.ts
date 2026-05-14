@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test"
 import { generateRectangle } from "@/lib/excalidraw/generators/rectangle-generator"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 describe("generateRectangle", () => {
   it("sets required fields", () => {

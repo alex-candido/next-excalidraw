@@ -1,6 +1,6 @@
-import type { TextInput } from "@/schemas/excalidraw/text-schema"
-import { TEXT_DEFAULTS } from "@/schemas/excalidraw/text-schema"
-import { DEFAULTS } from "@/schemas/excalidraw/base-shape-schema"
+import type { TextInput } from "@/schemas/excalidraw/elements/text-schema"
+import { TEXT_DEFAULTS } from "@/schemas/excalidraw/elements/text-schema"
+import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 export function generateText(input: TextInput) {
   const { id, x, y, text, containerId, ...opts } = input

@@ -10,7 +10,7 @@
 //  description                 :text
 //  concepts                    :text[]
 //  representation              :smallint          default(0), not null
-//  layout                      :smallint          default(0), not null
+//  layout                      :text
 //  score                       :real
 //  created_at                  :timestamp         default(fn()), not null
 //  updated_at                  :timestamp         default(fn()), not null
@@ -59,17 +59,6 @@ export const OutlineRepresentation = {
   infographic: 20,
 } as const;
 
-export const OutlineLayout = {
-  auto: 0,
-  title_only: 1,
-  title_content: 2,
-  two_column: 3,
-  image_text: 4,
-  full_image: 5,
-  bullets: 6,
-  blank: 7,
-} as const;
-
 export const outline = pgTable(
   "outline",
   {
@@ -83,7 +72,7 @@ export const outline = pgTable(
     description: text("description"),
     concepts: text("concepts").array(),
     representation: smallint("representation").default(0).notNull(),
-    layout: smallint("layout").default(0).notNull(),
+    layout: text("layout"),
     score: real("score"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")

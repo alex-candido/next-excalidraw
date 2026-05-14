@@ -1,4 +1,4 @@
-import type { FrameInput } from "@/schemas/excalidraw/frame-schema"
+import type { FrameInput } from "@/schemas/excalidraw/elements/frame-schema"
 
 export function generateFrame(input: FrameInput) {
   const { id, children, name } = input
