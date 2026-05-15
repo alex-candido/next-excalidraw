@@ -1,6 +1,11 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { outlineItemSchema, type OutlineWorkflowOutput } from "@/schemas/app/outline-schema";
+import {
+  outlineItemSchema,
+  outlineToolOutputSchema,
+  REPRESENTATION_BY_TYPE,
+  type OutlineToolOutput,
+} from "@/schemas/app/outline-schema";
 
 export const outlineStructureTool = createTool({
   id: "outline-structure-tool",
@@ -9,21 +14,25 @@ export const outlineStructureTool = createTool({
     title:    z.string().describe("Título da apresentação"),
     outlines: z.array(outlineItemSchema).describe("Array de slides do outline"),
   }),
-  outputSchema: z.object({
-    title:    z.string(),
-    outlines: z.array(outlineItemSchema),
-  }),
-  execute: async (inputData): Promise<OutlineWorkflowOutput> => {
+  outputSchema: outlineToolOutputSchema,
+  execute: async (inputData): Promise<OutlineToolOutput> => {
     const outlines = inputData.outlines
-      .map((s, i) => ({
-        order:          s.order ?? i + 1,
-        type:           s.type,
-        title:          s.title.trim(),
-        description:    s.description.trim(),
-        concepts:       s.concepts.map((c) => c.trim()).filter(Boolean),
-        representation: s.representation.trim(),
-        layout:         s.layout.trim(),
-      }))
+      .map((s, i) => {
+        const allowed = REPRESENTATION_BY_TYPE[s.type]
+        const representation = allowed && !allowed.includes(s.representation)
+          ? "auto"
+          : s.representation
+
+        return {
+          order:          s.order ?? i + 1,
+          type:           s.type,
+          title:          s.title.trim(),
+          description:    s.description.trim(),
+          concepts:       s.concepts.map((c) => c.trim()).filter(Boolean),
+          representation: representation.trim(),
+          layout:         s.layout.trim(),
+        }
+      })
       .sort((a, b) => a.order - b.order)
 
     return { title: inputData.title.trim(), outlines }

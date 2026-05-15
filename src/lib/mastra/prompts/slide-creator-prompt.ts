@@ -190,8 +190,45 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   swimlane: `## Guia para representação visual: swimlane
 - Grade de retângulos com headers em linha e coluna, fluxo cruzando raias`,
 
+  class: `## Guia para representação visual: class (UML)
+- Retângulos divididos em 3 seções: nome da classe (topo, fundo colorido), atributos (meio), métodos (base)
+- Herança: seta com triângulo vazio do filho para o pai
+- Associação/dependência: seta simples com label
+- Distribuição: classes pai no topo, filhas abaixo; classes relacionadas lado a lado`,
+
+  er: `## Guia para representação visual: er (Entidade-Relacionamento)
+- Entidades: retângulos com nome da entidade centralizado
+- Atributos: elipses conectadas à entidade por linhas
+- Relacionamentos: losangos entre entidades com setas de conexão
+- Cardinalidade: label nas setas (1, N, M)
+- Chave primária: atributo com texto sublinhado ou fundo diferenciado`,
+
+  gantt: `## Guia para representação visual: gantt
+- Linha de tempo no topo (eixo x): períodos como retângulos de header em y=40
+- Tarefas no eixo y: nomes como texto em x=20, y variando de 80 a 400
+- Barras de tarefa: retângulos horizontais cuja largura representa duração
+- Cores: use verde para concluído, azul para em andamento, cinza para não iniciado
+- Layout: cabeçalho fixo no topo, tarefas empilhadas verticalmente com espaço uniforme`,
+
+  fishbone: `## Guia para representação visual: fishbone (Ishikawa)
+- Espinha central: arrow grossa da esquerda para a direita até o "problema" (retângulo à direita, x~700)
+- Categorias: arrows diagonais conectando-se à espinha central, alternando acima e abaixo
+- Causas: retângulos pequenos nas pontas das setas de categoria com label
+- Cores: cada categoria principal em cor diferente
+- Layout: problema no lado direito, causas se ramificando para a esquerda`,
+
+  funnel: `## Guia para representação visual: funnel (funil)
+- Estágios: retângulos horizontais centralizados em x=400, empilhados verticalmente
+- Largura decrescente de cima para baixo: stage 1 mais largo (~600px), último mais estreito (~150px)
+- Rótulos: texto com nome do estágio e valor/percentual dentro de cada retângulo
+- Cores: gradiente do topo ao fundo (ex: azul escuro → azul claro) para indicar funil
+- Layout: centrado horizontalmente no canvas, estágios com espaçamento uniforme`,
+
   infographic: `## Guia para representação visual: infographic
-- Misture texto, formas e ícones textuais para criar hierarquia visual`,
+- Misture texto, formas e ícones textuais para criar hierarquia visual
+- Use frames para agrupar módulos de informação independentes
+- Combine dados numéricos em destaque (fontSize grande) com descrição auxiliar menor
+- Cores variadas mas coerentes com a paleta — 3-4 cores principais`,
 }
 
 export function buildSlideCreatorPrompt(type: string, representation: string): string {

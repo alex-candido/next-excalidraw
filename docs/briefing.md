@@ -1,86 +1,52 @@
-# Briefing do Projeto
+# Briefing
 
-## O que é
+## Descrição
 
-SaaS de criação de apresentações com IA. O usuário fornece um tema e a plataforma gera automaticamente os slides — com conteúdo estruturado, diagramas e layouts visuais — usando Excalidraw como engine de renderização.
+Plataforma SaaS que transforma prompts de texto em apresentações visuais completas no estilo Excalidraw, geradas por IA. O usuário descreve o que quer apresentar e recebe slides prontos — com estrutura, layout e elementos visuais criados automaticamente.
 
----
+## Objetivo
 
-## Fluxo principal
+Eliminar a fricção entre ter uma ideia e comunicá-la visualmente. Hoje, criar uma apresentação com qualidade exige tempo, habilidade de design e ferramentas complexas. Nosso objetivo é reduzir esse processo a um único prompt.
 
-```
-Usuário fornece um tema
-    ↓
-outline-workflow (IA)
-Gera a estrutura da apresentação: lista de outlines com tipo, título,
-descrição, conceitos, representação e intenção de layout para cada slide.
-    ↓
-Usuário revisa e edita os outlines
-    ↓
-slide-workflow (IA)
-Para cada outline, gera a SlideComposition — a especificação semântica
-do slide: qual estrutura usar, quais elementos, quais relações.
-    ↓
-lib/excalidraw pipeline
-composeLayout → normalizeArrows → serializeSkeleton
-Traduz a SlideComposition em elementos visuais do Excalidraw.
-    ↓
-Editor de slides
-O usuário visualiza, edita e ajusta os slides gerados.
-    ↓
-Modo apresentação
-```
+## Público-alvo
 
----
+| Segmento | Perfil | Dor principal |
+|---|---|---|
+| Educadores | Professores, instrutores, criadores de conteúdo | Tempo para criar material didático visual |
+| Profissionais técnicos | Engenheiros, arquitetos de software, PMs | Documentar e comunicar sistemas rapidamente |
+| Gestores | Líderes de equipe, executivos | Apresentações executivas sem depender de design |
 
-## Conceitos centrais
+## Funcionalidades principais esperadas
 
-**Outline**
-Especificação de um slide antes de ser gerado visualmente. Contém:
-- `type` — papel do slide na apresentação (cover, agenda, content, summary, closing)
-- `title` — título do slide
-- `description` — descrição do conteúdo esperado
-- `concepts[]` — conceitos-chave que devem aparecer
-- `representation` — tipo de diagrama sugerido (flowchart, mindmap, orgchart, etc.)
-- `layout` — descrição livre da intenção visual (texto gerado pela IA)
+- Geração de apresentação completa a partir de um prompt
+- Estrutura inteligente: outline com tipos de slide (cover, agenda, content, summary, closing)
+- Representações visuais automáticas: flowchart, mindmap, timeline, architecture, etc.
+- Editor Excalidraw integrado para ajustes pós-geração
+- Modo apresentação fullscreen
+- Colaboração em tempo real (roadmap)
+- Exportação PDF / PPT (roadmap)
+- Apresentações públicas com link compartilhável (roadmap)
 
-**SlideComposition**
-O que a IA gera a partir de um outline. Union discriminada por `kind`:
-`title_only | bullets | title_content | two_column | image_text | full_image | blank`
-
-A composição é armazenada em `SLIDE.composition` antes de passar pelo pipeline visual, permitindo regeneração sem chamar a IA novamente.
-
-**lib/excalidraw pipeline**
-Camada de processamento que transforma `SlideComposition` em elementos visuais.
-A IA não gera coordenadas — o pipeline calcula toda a geometria.
-
----
-
-## Stack
+## Stacks trabalhadas
 
 | Camada | Tecnologia |
-|--------|-----------|
-| Framework | Next.js (App Router) |
-| Runtime | Bun |
-| Banco de dados | Drizzle ORM + PostgreSQL |
-| UI | shadcn/ui |
-| IA / Workflows | Mastra |
-| Modelo de IA | Gemini 2.5 Flash |
-| Engine visual | Excalidraw (`@excalidraw/excalidraw`) |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| AI Pipeline | Mastra + Google Gemini |
+| Canvas | Excalidraw (ExcalidrawElementSkeleton API) |
+| Banco de dados | PostgreSQL + Drizzle ORM |
+| Auth | Better Auth |
+| Email | Brevo |
+| UI | shadcn/ui + Tailwind CSS |
 
----
+## Contexto de mercado
 
-## Rotas principais
+Ferramentas atuais de apresentação (Slides, PowerPoint, Gamma, Beautiful.ai) exigem que o usuário saiba design ou aceite templates genéricos. Ferramentas de diagramação (Excalidraw, Miro, Figma) têm curva de aprendizado e são manuais.
 
-| Rota | Função |
-|------|--------|
-| `/app/presentations/new` | Criar apresentação — dispara o outline-workflow |
-| `/app/presentations/[id]/outline` | Revisar e editar os outlines gerados |
-| `/app/presentations/[id]/editor` | Editor visual dos slides |
-| `/app/presentations/[id]/present` | Modo apresentação |
+O diferencial está na combinação: **geração AI + canvas Excalidraw**. O estilo handdrawn é reconhecível, menos formal e mais adequado para comunicação técnica e educacional do que slides corporativos tradicionais.
 
----
+## Resultados esperados
 
-## API
-
-`POST /api/v1/app/presentations/generate` — recebe `{ topic }`, executa os workflows de geração.
+- **MVP**: usuário consegue gerar uma apresentação de 5–9 slides a partir de um prompt em menos de 60 segundos
+- **Médio prazo**: plataforma com apresentações salvas, editáveis e compartilháveis
+- **Longo prazo**: hub de apresentações públicas, monetização por uso de geração AI

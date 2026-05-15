@@ -28,23 +28,40 @@ Gere um objeto com:
 - **summary**: Penúltimo. Recapitula os pontos principais.
 - **closing**: Último. Call to action ou próximos passos.
 
+## Representações permitidas por tipo
+
+| type    | representações permitidas                                          |
+|---------|--------------------------------------------------------------------|
+| cover   | auto · infographic                                                 |
+| agenda  | auto · infographic · mindmap · pyramid · matrix                    |
+| content | todas                                                              |
+| summary | auto · infographic · mindmap · pyramid · matrix · venn             |
+| closing | auto · infographic                                                 |
+
+Use **apenas** as representações listadas para cada tipo. Em caso de dúvida, use \`auto\`.
+
 ## Representações visuais disponíveis
 - **auto**: Visual misto com texto e formas
 - **flowchart**: Fluxo de etapas com decisões
 - **mindmap**: Nó central com conexões radiais
 - **orgchart**: Hierarquia em árvore
 - **sequence**: Troca de mensagens entre entidades
+- **class**: Diagrama UML de classes com atributos e métodos
+- **er**: Diagrama de entidade-relacionamento (banco de dados)
+- **gantt**: Gráfico de Gantt com tarefas e linha do tempo
 - **timeline**: Eventos em linha do tempo
 - **tree**: Estrutura hierárquica simples
 - **network**: Nós e conexões de rede
-- **architecture**: Componentes de sistema
+- **architecture**: Componentes de sistema em camadas
 - **dataflow**: Fluxo de dados entre componentes
-- **state**: Máquina de estados
-- **swimlane**: Fluxo dividido por responsabilidade
-- **pyramid**: Hierarquia de importância
-- **venn**: Sobreposição de conjuntos
-- **matrix**: Grade de comparação
-- **infographic**: Visual informativo misto
+- **state**: Máquina de estados com transições
+- **swimlane**: Fluxo dividido por responsabilidade/departamento
+- **fishbone**: Diagrama de Ishikawa para análise de causa e efeito
+- **pyramid**: Hierarquia de importância em camadas
+- **venn**: Sobreposição de conjuntos ou conceitos
+- **matrix**: Grade de comparação multidimensional
+- **funnel**: Funil de conversão ou processo de filtragem
+- **infographic**: Visual informativo misto com dados e formas
 
 ## Campo layout
 Descreva em 1-2 frases como os elementos devem se organizar visualmente. Exemplo:

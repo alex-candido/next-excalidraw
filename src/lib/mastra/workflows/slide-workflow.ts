@@ -1,9 +1,11 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
 import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt";
+import { buildWorkflowMetadata } from "../utils/workflow-metadata";
 import {
   slideWorkflowInputSchema,
   slideWorkflowOutputSchema,
+  type SlideToolOutput,
   type SlideWorkflowOutput,
 } from "@/schemas/app/slide-schema";
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
@@ -14,9 +16,9 @@ const generateSlideStep = createStep({
   outputSchema: slideWorkflowOutputSchema,
   scorers: { slideSemanticScorer: { scorer: slideSemanticScorer } },
   execute: async ({ inputData, mastra }) => {
-    const agent = mastra.getAgent("slideCreatorAgent")
-    const language = LANGUAGE_NAMES[inputData.language] ?? "English"
-
+    const startedAt = Date.now()
+    const agent       = mastra.getAgent("slideCreatorAgent")
+    const language    = LANGUAGE_NAMES[inputData.language] ?? "English"
     const instructions = buildSlideCreatorPrompt(inputData.type, inputData.representation)
 
     const parts: string[] = [
@@ -26,16 +28,37 @@ const generateSlideStep = createStep({
       `Representação visual: ${inputData.representation}`,
       `Idioma: ${language}`,
     ]
-    if (inputData.layout) parts.push(`Layout desejado: ${inputData.layout}`)
+    if (inputData.layout)          parts.push(`Layout desejado: ${inputData.layout}`)
     if (inputData.concepts.length) parts.push(`Conceitos-chave: ${inputData.concepts.join(", ")}`)
 
     const response = await agent.stream(
       [{ role: "user", content: parts.join("\n") }],
       { instructions },
     )
-    const toolResults = await response.toolResults
-    const toolResult = toolResults[0]
-    return toolResult.payload.result as SlideWorkflowOutput
+
+    const [toolResults, usage] = await Promise.all([
+      response.toolResults,
+      response.usage.catch(() => null),
+    ])
+
+    const result = toolResults[0].payload.result as SlideToolOutput
+    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-2.5-flash"
+
+    return {
+      ...result,
+      metadata: {
+        ...buildWorkflowMetadata({
+          agentId:   "slide-creator-agent",
+          startedAt,
+          usage,
+          modelName,
+          context: {
+            slideOrder: inputData.order,
+            outlineId:  inputData.outlineId,
+          },
+        }),
+      },
+    } satisfies SlideWorkflowOutput
   },
 })
 

@@ -1,11 +1,13 @@
-import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
 import {
   outlineWorkflowInputSchema,
   outlineWorkflowOutputSchema,
+  type OutlineToolOutput,
   type OutlineWorkflowOutput,
 } from "@/schemas/app/outline-schema";
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
+import { createStep, createWorkflow } from "@mastra/core/workflows";
+import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
+import { buildWorkflowMetadata } from "../utils/workflow-metadata";
 
 const generateOutlineStep = createStep({
   id: "generate-outline",
@@ -13,8 +15,9 @@ const generateOutlineStep = createStep({
   outputSchema: outlineWorkflowOutputSchema,
   scorers: { outlineSemanticScorer: { scorer: outlineSemanticScorer } },
   execute: async ({ inputData, mastra }) => {
-    const agent = mastra.getAgent("outlineCreatorAgent")
-    const language = LANGUAGE_NAMES[inputData.language] ?? "English"
+    const startedAt = Date.now()
+    const agent     = mastra.getAgent("outlineCreatorAgent")
+    const language  = LANGUAGE_NAMES[inputData.language] ?? "English"
     const slideCount = inputData.slideCount > 0 ? inputData.slideCount : "between 5 and 9"
 
     const parts: string[] = [
@@ -29,9 +32,28 @@ const generateOutlineStep = createStep({
     const response = await agent.stream([
       { role: "user", content: parts.join("\n") },
     ])
-    const toolResults = await response.toolResults
-    const toolResult = toolResults[0]
-    return toolResult.payload.result as OutlineWorkflowOutput
+
+    const [toolResults, usage] = await Promise.all([
+      response.toolResults,
+      response.usage.catch(() => null),
+    ])
+
+    const result = toolResults[0].payload.result as OutlineToolOutput
+    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-2.5-flash"
+
+    return {
+      ...result,
+      metadata: buildWorkflowMetadata({
+        agentId:   "outline-creator-agent",
+        startedAt,
+        usage,
+        modelName,
+        context: {
+          outlineCount:      result.outlines.length,
+          presentationTitle: result.title,
+        },
+      }),
+    } satisfies OutlineWorkflowOutput
   },
 })
 
