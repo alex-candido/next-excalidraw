@@ -1,3 +1,5 @@
+import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/transform"
+
 type Edge = "left" | "right" | "top" | "bottom"
 type Rect = { x: number; y: number; width: number; height: number }
 

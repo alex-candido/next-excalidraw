@@ -1,24 +1,19 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
+import { slideWorkflowOutputSchema } from "@/schemas/app/slide-schema";
+import { validateSkeletons } from "@/lib/excalidraw/parse/element-parser";
+import { normalizeArrows } from "@/lib/excalidraw/normalize/arrows-normalizer";
 
 export const slideStructureTool = createTool({
   id: "slide-structure-tool",
-  description: "Estrutura o conteúdo do slide, garantindo título, corpo e bullets bem definidos",
+  description: "Valida e normaliza os elementos Excalidraw gerados pela IA para o slide",
   inputSchema: z.object({
-    title:   z.string().describe("Título do slide"),
-    body:    z.string().describe("Texto principal ou subtítulo do slide"),
-    bullets: z.array(z.string()).optional().describe("Lista de bullets para slides de conteúdo"),
+    elements: z.array(z.record(z.string(), z.unknown())).describe("Array de ExcalidrawElementSkeleton gerados pela IA"),
   }),
-  outputSchema: z.object({
-    title:   z.string(),
-    body:    z.string(),
-    bullets: z.array(z.string()),
-  }),
+  outputSchema: slideWorkflowOutputSchema,
   execute: async (inputData) => {
-    return {
-      title:   inputData.title.trim(),
-      body:    inputData.body.trim(),
-      bullets: (inputData.bullets ?? []).map((b) => b.trim()).filter(Boolean),
-    };
+    const validated = validateSkeletons(inputData.elements)
+    const normalized = normalizeArrows(validated)
+    return { elements: normalized as Record<string, unknown>[] }
   },
-});
+})

@@ -1,3 +1,5 @@
+import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/transform"
+
 const VALID_TYPES = new Set(["rectangle", "ellipse", "diamond", "text", "arrow", "line", "frame"])
 
 function stripCodeFences(text: string): string {

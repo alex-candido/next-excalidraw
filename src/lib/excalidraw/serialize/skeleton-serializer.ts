@@ -1,6 +1,7 @@
 import { convertToExcalidrawElements } from "@excalidraw/excalidraw"
+import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/transform"
 
-export function serializeSkeleton(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawFile {
+export function serializeSkeleton(skeletons: ExcalidrawElementSkeleton[]) {
   return {
     type: "excalidraw",
     version: 2,
