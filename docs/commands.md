@@ -46,7 +46,7 @@ bunx mastra dev               # inicia servidor Mastra (porta 4111)
 bunx mastra build             # build do projeto Mastra
 bunx mastra start             # inicia aplicação Mastra buildada
 bunx mastra lint              # lint do projeto Mastra
-bunx mastra migrate           # migrations do storage do Mastra
+bunx mastra migrate --dir src/lib/mastra --root .   # migrations do storage do Mastra
 bunx mastra studio            # abre Mastra Studio (UI de agentes/workflows)
 bunx mastra scorers           # gerencia scorers de avaliação de outputs
 ```

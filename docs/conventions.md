@@ -158,7 +158,9 @@ lib/
     migrations/   arquivos SQL gerados pelo drizzle-kit
     seeds/        dados iniciais para dev e prod (por entidade)
   excalidraw/
-    generators/   funções de criação de cada tipo de elemento (sandbox)
+    generators/
+      elements/       funções de criação de cada tipo de elemento (sandbox)
+      representations/ geradores de representações visuais completas (flowchart, mindmap, etc.)
     normalize/    normalização de setas (arrows-normalizer)
     parse/        parsing de output bruto do LLM (validateSkeletons, parseSkeletons)
     serialize/    conversão skeleton → ExcalidrawElement (client-side only)
@@ -167,8 +169,8 @@ lib/
     agents/       definição dos agentes LLM
     prompts/      system prompts de cada agente
     scorers/      avaliadores de qualidade de output
+    mappers/      mappers de output dos workflows (ex: workflow-metadata-mapper)
     tools/        tools chamadas pelos agentes via tool call
-    utils/        utilitários compartilhados entre workflows (ex: buildWorkflowMetadata)
     workflows/    pipelines de geração (outlineWorkflow, slideWorkflow)
   utils/          utilitários compartilhados por toda a aplicação
 ```
@@ -176,7 +178,7 @@ lib/
 Regras:
 - `lib/drizzle/seeds/` contém seeds do banco — distinto de `src/data/` que é para mocks e fixtures da aplicação
 - `lib/excalidraw/serialize/` é client-side only — nunca importar em contexto SSR
-- `lib/utils/` é o único lugar para utilitários globais — não criar `utils/` em outros módulos de `lib/` exceto `mastra/utils/` que é específico de workflows
+- `lib/utils/` é o único lugar para utilitários globais — não criar `utils/` em outros módulos de `lib/`
 
 ## src/schemas/
 

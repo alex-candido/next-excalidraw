@@ -78,10 +78,20 @@ function extractObjects(text: string): unknown[] {
   return results
 }
 
+const TEXT_STROKE_FALLBACK = "#1e1e1e"
+
 function isValidSkeleton(obj: unknown): obj is ExcalidrawElementSkeleton {
   if (!obj || typeof obj !== "object") return false
   const el = obj as Record<string, unknown>
   return typeof el.type === "string" && VALID_TYPES.has(el.type)
+}
+
+function applyFallbacks(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton {
+  const el = skeleton as Record<string, unknown>
+  if (el.type === "text" && !el.strokeColor) {
+    return { ...skeleton, strokeColor: TEXT_STROKE_FALLBACK }
+  }
+  return skeleton
 }
 
 /**
@@ -93,16 +103,17 @@ export function parseSkeletons(text: string): ExcalidrawElementSkeleton[] {
 
   const arr = repairAndParseArray(cleaned)
   if (arr) {
-    const valid = arr.filter(isValidSkeleton)
+    const valid = arr.filter(isValidSkeleton).map(applyFallbacks)
     if (valid.length > 0) return valid
   }
 
-  return extractObjects(cleaned).filter(isValidSkeleton)
+  return extractObjects(cleaned).filter(isValidSkeleton).map(applyFallbacks)
 }
 
 /**
  * Validates and filters a raw array (e.g. from a Mastra tool call) into skeletons.
+ * Applies fallbacks: text elements missing strokeColor default to #1e1e1e.
  */
 export function validateSkeletons(raw: unknown[]): ExcalidrawElementSkeleton[] {
-  return raw.filter(isValidSkeleton)
+  return raw.filter(isValidSkeleton).map(applyFallbacks)
 }

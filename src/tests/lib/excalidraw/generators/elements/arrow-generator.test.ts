@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { generateArrow } from "@/lib/excalidraw/generators/arrow-generator"
+import { generateArrow } from "@/lib/excalidraw/generators/elements/arrow-generator"
 
 describe("generateArrow", () => {
   it("sets required fields", () => {

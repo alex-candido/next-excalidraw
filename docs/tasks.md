@@ -76,7 +76,7 @@ outline API route
 ---
 
 **Pipeline AI**
-- [ ] `P1` Melhorar `slide-creator-prompt` — validar v2 em sandbox, substituir v1 como definitiva, adicionar tipos `class`, `er`, `gantt`, `fishbone`, `swot`, `funnel`
+- [ ] `P2` Otimizar `slide-creator-prompt` — reduzir tokens, eliminar redundâncias, focar em regras de posicionamento programático; validar em sandbox antes de substituir
 - [ ] `P1` Melhorar `outline-creator-prompt` — alinhar representações com os novos tipos adicionados
 
 **Integração**
@@ -98,13 +98,14 @@ outline API route
 - [ ] `P3` Desenvolver `slide-composition` — próximo ciclo após conclusão dos fluxos atuais
 
 **lib/excalidraw**
-- [ ] `P2` `validateSkeletons` — adicionar validação de `strokeColor` em elementos `text`, fallback para `#1e1e1e` se ausente
+- [x] `P2` `validateSkeletons` — adicionar validação de `strokeColor` em elementos `text`, fallback para `#1e1e1e` se ausente
 - [ ] `P3` `parseSkeletons` — suporte a output com múltiplos blocos JSON separados (LLMs às vezes dividem em chunks)
 - [ ] `P3` `element-sizing.ts` — funções utilitárias: `calcTextWidth` (com ajuste por idioma), `calcContainerHeight`, `snapToGrid` (grid de 20px)
 
 **UI**
 - [ ] `P1` Página `/presentations/new` — form com prompt, idioma, slideCount
-- [ ] `P2` Página `/presentations/[id]/outline` — listagem e edição dos outlines
+- [ ] `P2` Página `/presentations/[id]/outline` — listagem e edição dos outlines, com opção de regenerar item individual
+- [ ] `P3` Volume de elementos por slide — aprimorar prompt para gerar slides mais ricos e detalhados sem ultrapassar limites do canvas
 - [ ] `P2` Página `/presentations/[id]/editor` — editor Excalidraw por slide (ref: `inscribed/Canvas.tsx`)
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen com `exportToImageUrls` (ref: `inscribed/PresentationMode.tsx`)
 - [ ] `P2` Loading states durante geração
@@ -113,6 +114,12 @@ outline API route
 - [ ] `P3` Thumbnail gerado automaticamente após criação do slide
 - [ ] `P3` Exportação PDF / PPT
 - [ ] `P3` Apresentações públicas (visibility: public)
+
+**Custos & Estimativas**
+- [ ] `P3` Analisar tokens consumidos por workflow — medir outline + slide em diferentes cenários (tipos, representações, idiomas) e avaliar se vale trocar de framework (Mastra) ou modelo
+- [ ] `P3` Calcular custo real por geração — integrar tabela de preços por modelo/provider com `metadata.usage` (promptTokens, completionTokens)
+- [ ] `P3` Modelo de estimativa de custo por plano — ex: "100 usuários × N apresentações/mês × custo médio por apresentação = custo total de infra AI"
+- [ ] `P3` Definir tiers de plano com base nas estimativas — limites de geração por plano alinhados à margem esperada
 
 **Monetização**
 - [ ] `P3` Integração de pagamento (Stripe)
@@ -139,3 +146,6 @@ outline API route
 - [x] Flows documentados — `outline-generation-flow.md`, `slide-generation-flow.md`, `excalidraw-flow.md`
 - [x] `slide-creator-prompt.v2.ts` — reescrita com filosofia "argue not display", paleta semântica, container discipline, anti-patterns
 - [x] Análise de repositórios de referência — `docs/reports/references-analysis.md`
+- [x] Workflow sandbox (`/dev/sandbox/workflow`) — teste visual de `outlineWorkflow` e `slideWorkflow` com ExcalidrawEditor integrado
+- [x] `slide-creator-prompt` — regras de posicionamento: `textAlign:center` usa x como centro, `{{CENTER_X}}`/`{{CENTER_Y}}` como âncoras, proibição de markdown, limites de largura de texto, padding de contêineres
+- [x] `slide-boundary` — retângulo de delimitação dinâmico por `aspectRatio`, centralizado via `scrollToContent` no sandbox

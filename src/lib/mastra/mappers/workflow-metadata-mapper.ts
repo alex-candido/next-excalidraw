@@ -25,7 +25,7 @@ export type WorkflowMetaBase = z.infer<typeof workflowMetaBaseSchema>
 
 type RawUsage = { inputTokens?: number; outputTokens?: number } | null
 
-export function buildWorkflowMetadata<T extends Record<string, unknown>>(params: {
+export function mapWorkflowMetadata<T extends Record<string, unknown>>(params: {
   agentId:   string
   startedAt: number
   usage:     RawUsage

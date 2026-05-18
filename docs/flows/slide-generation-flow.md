@@ -123,7 +123,7 @@ const elements = convertToExcalidrawElements(slide.elements, { regenerateIds: fa
 - Execução **sequencial** — um slide por vez, na ordem do outline
 - `representation` chega pré-validado pelo outline workflow — não é revalidado aqui
 - Skeletons são salvos brutos no banco — conversão acontece no frontend
-- Canvas fixo: 800×450px (16:9) com margem mínima de 20px
+- Canvas dinâmico por `aspectRatio`: 16:9 → 800×450 · 4:3 → 800×600 · 9:16 → 450×800 · 1:1 → 600×600 · A4 → 595×842
 - Entre 4 e 20 elementos por slide (definido no prompt)
 - `composition` existe no schema mas não é usado — campo legado da abordagem SlideComposition (abandonada)
 - `thumbnail` é gerado posteriormente — não preenchido nesta etapa

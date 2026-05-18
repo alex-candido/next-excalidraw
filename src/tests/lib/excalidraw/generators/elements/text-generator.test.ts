@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { generateText } from "@/lib/excalidraw/generators/text-generator"
+import { generateText } from "@/lib/excalidraw/generators/elements/text-generator"
 import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 import { TEXT_DEFAULTS } from "@/schemas/excalidraw/elements/text-schema"
 

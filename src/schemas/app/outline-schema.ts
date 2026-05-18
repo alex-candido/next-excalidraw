@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { presentationWorkflowInputSchema } from "./presentation-schema"
-import { workflowMetaBaseSchema } from "@/lib/mastra/utils/workflow-metadata"
+import { workflowMetaBaseSchema } from "@/lib/mastra/mappers/workflow-metadata-mapper"
 
 const OUTLINE_TYPES = Object.keys(OutlineType)           as [string, ...string[]]
 const OUTLINE_REPS  = Object.keys(OutlineRepresentation) as [string, ...string[]]

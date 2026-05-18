@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { generateRectangle } from "@/lib/excalidraw/generators/rectangle-generator"
+import { generateRectangle } from "@/lib/excalidraw/generators/elements/rectangle-generator"
 import { DEFAULTS } from "@/schemas/excalidraw/elements/base-shape-schema"
 
 describe("generateRectangle", () => {
