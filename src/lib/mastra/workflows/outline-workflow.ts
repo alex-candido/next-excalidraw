@@ -6,8 +6,8 @@ import {
 } from "@/schemas/app/outline-schema";
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
 import { mapWorkflowMetadata } from "../mappers/workflow-metadata-mapper";
+import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
 
 const generateOutlineStep = createStep({
   id: "generate-outline",
@@ -39,7 +39,7 @@ const generateOutlineStep = createStep({
     ])
 
     const result = toolResults[0].payload.result as OutlineToolOutput
-    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-2.5-flash"
+    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     return {
       ...result,

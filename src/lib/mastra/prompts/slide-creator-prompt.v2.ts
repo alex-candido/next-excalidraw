@@ -9,8 +9,10 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 
 ## Canvas
 
-- Largura: 800px, Altura: 450px (proporção 16:9)
-- Margem mínima de 20px — área útil: x 20–780, y 20–430
+- Largura: {{WIDTH}}px, Altura: {{HEIGHT}}px (proporção {{RATIO}})
+- Um retângulo de contorno com id \`slide-boundary\` já existe no canvas — não o inclua nos elementos gerados
+- Margem mínima de 20px — área útil: x 20–{{XMAX}}, y 20–{{YMAX}}
+- Todo elemento deve caber inteiro: \`x + width ≤ {{XMAX}}\` e \`y + height ≤ {{YMAX}}\`
 - Planeje coordenadas antes de gerar: sem sobreposições, mínimo 40px de espaço entre elementos
 
 ## Etapas de Execução
@@ -33,14 +35,22 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 ### 1) Retângulo / Elipse / Losango (rectangle / ellipse / diamond)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`
 - **Opcional**: \`width\`, \`height\`, \`strokeColor\`, \`backgroundColor\`, \`strokeWidth\`, \`strokeStyle\` (solid|dashed|dotted), \`fillStyle\` (solid|hachure|zigzag|cross-hatch), \`roughness\`, \`opacity\`, \`angle\`, \`roundness\`, \`locked\`
-- **Contêiner de texto**: forneça \`label.text\` — tamanho calculado automaticamente se \`width/height\` omitidos
+- **Contêiner de texto**: forneça \`label.text\` com \`width\` e \`height\` **sempre explícitos**
+- **Label dentro da forma**: posicione texto livre usado como rótulo no centro visual da forma, nunca na borda — mínimo 20px de distância da borda da shape
+  - \`width\` controla onde o texto quebra de linha — sem ele o texto não quebra e estoura o elemento
+  - Excalidraw adiciona ~15px de padding horizontal em cada lado — área útil de texto = \`width − 30px\`
+  - Quebre o texto manualmente com \`\\n\` se ele não couber na largura útil
+  - \`height\` = \`linhas × (fontSize × 1.5) + 30\` — prefira aumentar \`height\` a deixar texto cortado
   - Opcionais do label: \`fontSize\`, \`fontFamily\`, \`strokeColor\`, \`textAlign\`, \`verticalAlign\`
 
 ### 2) Texto livre (text)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`, \`text\`
 - **Automático**: \`width\` e \`height\` calculados por medição — não forneça
+- **Largura máxima**: quebre com \`\\n\` antes de ultrapassar o canvas — limite: \`({{XMAX}} − x) ÷ (fontSize × 0.6)\` caracteres por linha
+- **CRÍTICO**: \`strokeColor\` em elementos \`text\` define a **cor do texto** — sempre defina explicitamente
+- **Proibido**: nunca use markdown (\`**negrito**\`, \`*itálico*\`, \`# heading\`) — Excalidraw renderiza literalmente
+- **Centralização**: para \`textAlign: center\`, o campo \`x\` é o centro horizontal do texto — use \`x = {{CENTER_X}}\` para centralizar no canvas
 - **Opcional**: \`fontSize\`, \`fontFamily\` (1|2|3), \`strokeColor\`, \`opacity\`, \`angle\`, \`textAlign\`, \`verticalAlign\`
-- **CRÍTICO**: \`strokeColor\` em elementos \`text\` define a **cor do texto**. Sempre defina explicitamente — se omitido o texto pode ficar invisível
 
 ### 3) Linha estrutural (line)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`
@@ -58,6 +68,8 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 - **Roteamento**: \`"elbowed": true\` para ângulos retos automáticos
 - **Rótulo**: \`label.text\` adiciona texto sobre a seta (máx. 12 caracteres)
 - **Proibido**: não passe \`points\` — gerado automaticamente
+- **Limites**: para setas não vinculadas, garanta \`x + width ≤ {{XMAX}}\` e \`y + height ≤ {{YMAX}}\`
+- **Direção de anotação**: setas que conectam anotações laterais ao diagrama devem ter a ponta voltada para o diagrama — anotação à esquerda usa \`points: [[0,0],[width,0]]\`; anotação à direita usa \`points: [[0,0],[-width,0]]\` com \`x\` na borda direita do diagrama
 
 ### 5) Frame (frame)
 - **Obrigatório**: \`type\`, \`children\` (array de IDs)
@@ -126,20 +138,22 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 ## Regras Críticas
 
 1. **strokeColor em text é a cor do texto** — sempre defina. Nunca omita
-2. **boundElements: null** quando vazio — nunca \`[]\`
-3. **Setas vinculadas por id**: x/y/width/height são calculados automaticamente — não force valores
-4. **IDs descritivos**: "cover_title", "step_processamento", "arrow_a_b"
-5. **Não coloque texto em containers de zona/agrupamento grandes** — use texto livre posicionado no topo
+2. **Setas vinculadas por id**: x/y/width/height são calculados automaticamente — não force valores
+3. **IDs descritivos**: "cover_title", "step_processamento", "arrow_a_b"
+4. **Não coloque texto em containers de zona/agrupamento grandes** — use texto livre posicionado no topo
+5. **Centralização horizontal**: para centrar container de largura W, use x = ({{WIDTH}} − W) / 2; para \`text\` com \`textAlign: center\`, o \`x\` é o centro do texto — use x = {{CENTER_X}}
+6. **Texto livre longo**: quebre manualmente com \`\\n\` — texto livre não quebra automaticamente e ultrapassa o canvas
 
 ## Anti-Patterns
 
 - ❌ Grade uniforme de caixas iguais com labels — use formas que espelham o comportamento do conceito
-- ❌ >30% dos textos dentro de containers — prefira texto livre com hierarquia tipográfica
-- ❌ \`boundElements: []\` — use \`null\`
+- ❌ Texto livre sem \`\\n\` quando longo — sempre quebre antes de ultrapassar o canvas
+- ❌ Container sem \`width\` e \`height\` explícitos — texto não quebra e estoura o elemento
 - ❌ Seta com label de >12 caracteres em espaço <120px
 - ❌ \`strokeColor\` omitido em elementos \`text\`
 - ❌ IDs curtos genéricos como "r1", "t2", "a3"
 - ❌ Elementos sobrepostos — respeite o espaço mínimo de 40px
+- ❌ Markdown em qualquer texto (\`**negrito**\`, \`*itálico*\`) — Excalidraw renderiza literalmente
 
 ## Exemplos de Referência
 
@@ -190,16 +204,17 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 
 ## Restrições Finais
 - Gere entre 4 e 20 elementos por slide
-- Respeite os limites do canvas: x 20–780, y 20–430
+- Respeite os limites do canvas: x 20–{{XMAX}}, y 20–{{YMAX}}
 - Gere TODO o conteúdo textual no idioma indicado
 `.trim()
 
 const SLIDE_TYPE_GUIDES: Record<string, string> = {
   cover: `## Guia para tipo de slide: cover
-- Título grande centralizado como texto livre (fontSize 36–48, strokeColor "#1e293b") em y≈160
-- Subtítulo abaixo como texto livre (fontSize 18–22, strokeColor "#64748b") em y≈230
-- Elementos decorativos opcionais: linhas, formas geométricas simples sem texto dentro
-- Evite containers desnecessários — texto livre centralizado é suficiente`,
+- Título e subtítulo devem estar verticalmente centrados — posicione o conjunto em torno de y={{CENTER_Y}} ({{HEIGHT}} / 2)
+- Título: elemento \`text\`, fontSize 36–44, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}} − 60, strokeColor "#1e293b"
+- Subtítulo: elemento \`text\`, fontSize 18–22, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}} + 20, strokeColor "#64748b"
+- Elementos decorativos (linhas ou formas simples) ficam fora da faixa y=({{CENTER_Y}}−80) até y=({{CENTER_Y}}+80) — nunca setas, nunca sobre o texto
+- Máximo de 5 elementos no total`,
 
   agenda: `## Guia para tipo de slide: agenda
 - Título no topo como texto livre (fontSize 24, y=35, strokeColor "#1e293b")
@@ -345,11 +360,30 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 - 3–4 cores da paleta, regra 60-30-10`,
 }
 
-export function buildSlideCreatorPrompt(type: string, representation: string): string {
-  const parts: string[] = [BASE_PROMPT]
+export function buildSlideCreatorPrompt(
+  type: string,
+  representation: string,
+  canvas: { width: number; height: number; label: string },
+): string {
+  const xMax    = canvas.width - 20
+  const yMax    = canvas.height - 20
+  const centerX = Math.round(canvas.width / 2)
+  const centerY = Math.round(canvas.height / 2)
+
+  const replacePlaceholders = (s: string) =>
+    s
+      .replace(/\{\{WIDTH\}\}/g,    canvas.width.toString())
+      .replace(/\{\{HEIGHT\}\}/g,   canvas.height.toString())
+      .replace(/\{\{RATIO\}\}/g,    canvas.label)
+      .replace(/\{\{XMAX\}\}/g,     xMax.toString())
+      .replace(/\{\{YMAX\}\}/g,     yMax.toString())
+      .replace(/\{\{CENTER_X\}\}/g, centerX.toString())
+      .replace(/\{\{CENTER_Y\}\}/g, centerY.toString())
+
+  const parts: string[] = [replacePlaceholders(BASE_PROMPT)]
 
   const typeGuide = SLIDE_TYPE_GUIDES[type]
-  if (typeGuide) parts.push(typeGuide)
+  if (typeGuide) parts.push(replacePlaceholders(typeGuide))
 
   const repKey = representation.trim().toLowerCase()
   const repGuide = REPRESENTATION_GUIDES[repKey]

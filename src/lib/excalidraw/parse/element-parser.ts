@@ -86,12 +86,35 @@ function isValidSkeleton(obj: unknown): obj is ExcalidrawElementSkeleton {
   return typeof el.type === "string" && VALID_TYPES.has(el.type)
 }
 
+function normalizeTextContent(value: unknown): unknown {
+  if (typeof value !== "string") return value
+  return value.replace(/\\n/g, "\n")
+}
+
 function applyFallbacks(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton {
   const el = skeleton as Record<string, unknown>
-  if (el.type === "text" && !el.strokeColor) {
-    return { ...skeleton, strokeColor: TEXT_STROKE_FALLBACK }
+  const patches: Record<string, unknown> = {}
+
+  // fix literal \n in text content
+  if (typeof el.text === "string") patches.text = normalizeTextContent(el.text)
+  if (el.label && typeof el.label === "object") {
+    const label = el.label as Record<string, unknown>
+    if (typeof label.text === "string") {
+      patches.label = { ...label, text: normalizeTextContent(label.text) }
+    }
   }
-  return skeleton
+
+  // fix strokeColor: must be a string (LLM sometimes outputs a number)
+  if (el.type === "text" && (typeof el.strokeColor !== "string" || !el.strokeColor)) {
+    patches.strokeColor = TEXT_STROKE_FALLBACK
+  }
+
+  // fix backgroundColor: empty string is invalid, normalize to "transparent"
+  if (typeof el.backgroundColor === "string" && el.backgroundColor === "") {
+    patches.backgroundColor = "transparent"
+  }
+
+  return Object.keys(patches).length ? { ...skeleton, ...patches } : skeleton
 }
 
 /**

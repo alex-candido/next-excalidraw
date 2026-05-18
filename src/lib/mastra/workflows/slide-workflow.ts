@@ -1,15 +1,16 @@
-import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
-import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt";
-import { mapWorkflowMetadata } from "../mappers/workflow-metadata-mapper";
+import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
 import {
+  CANVAS_DIMENSIONS,
   slideWorkflowInputSchema,
   slideWorkflowOutputSchema,
   type SlideToolOutput,
   type SlideWorkflowOutput,
 } from "@/schemas/app/slide-schema";
-import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema"
-import { CANVAS_DIMENSIONS } from "@/schemas/app/slide-schema";
+import { createStep, createWorkflow } from "@mastra/core/workflows";
+import { parseSkeletons, validateSkeletons } from "@/lib/excalidraw/parse/element-parser";
+import { mapWorkflowMetadata } from "../mappers/workflow-metadata-mapper";
+import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt.v2";
+import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
 
 const generateSlideStep = createStep({
   id: "generate-slide",
@@ -38,13 +39,24 @@ const generateSlideStep = createStep({
       { instructions },
     )
 
-    const [toolResults, usage] = await Promise.all([
+    const [toolResults, text, usage] = await Promise.all([
       response.toolResults,
+      response.text,
       response.usage.catch(() => null),
     ])
 
-    const result = toolResults[0].payload.result as SlideToolOutput
-    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-2.5-flash"
+    let elements: SlideToolOutput["elements"]
+
+    if (toolResults?.length && toolResults[0]?.payload) {
+      elements = (toolResults[0].payload.result as SlideToolOutput).elements
+    } else if (text) {
+      elements = parseSkeletons(text)
+    } else {
+      throw new Error("Agent returned no tool results and no text output")
+    }
+
+    const result: SlideToolOutput = { elements: validateSkeletons(elements as unknown[]) }
+    const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     const slideBoundary = {
       type:            "rectangle",

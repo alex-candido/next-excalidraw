@@ -39,6 +39,18 @@ Ciclo 3 — Qualidade & Features
 
 Ciclo 4 — Infraestrutura & Monetização
   Exportações, thumbnails, planos, billing, apresentações públicas
+
+Ciclo 5 — Modalidades de Produto
+  Single (diagrama único) e Multi (apresentação), input com imagem
+```
+
+### Modalidades de produto (Ciclo 5)
+
+```
+Multi (atual)  — apresentação completa: outline → N slides
+Single         — diagrama único: prompt → 1 slide/diagrama
+                 uso: explicar conceito em documento, vídeo, post
+                 input: texto OU imagem → representação Excalidraw
 ```
 
 ### Dependências críticas
@@ -120,6 +132,11 @@ outline API route
 - [ ] `P3` Calcular custo real por geração — integrar tabela de preços por modelo/provider com `metadata.usage` (promptTokens, completionTokens)
 - [ ] `P3` Modelo de estimativa de custo por plano — ex: "100 usuários × N apresentações/mês × custo médio por apresentação = custo total de infra AI"
 - [ ] `P3` Definir tiers de plano com base nas estimativas — limites de geração por plano alinhados à margem esperada
+
+**Modalidades (Ciclo 5)**
+- [ ] `P3` Modalidade **Single** — fluxo simplificado: prompt → 1 diagrama/slide sem outline
+- [ ] `P3` Modalidade **Multi** — renomear fluxo atual para "multi" explicitamente na UI/rotas
+- [ ] `P3` Input com imagem no Single — upload de imagem como referência visual para geração do diagrama (vision model)
 
 **Monetização**
 - [ ] `P3` Integração de pagamento (Stripe)
