@@ -29,10 +29,8 @@ import { presentation } from "./presentation";
 
 export const OutlineType = {
   cover: 0,
-  agenda: 1,
-  content: 2,
-  summary: 3,
-  closing: 4,
+  content: 1,
+  closing: 2,
 } as const;
 
 export const OutlineRepresentation = {

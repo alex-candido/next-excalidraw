@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:3000/api/v1/app
+@presentationId = <presentationId>
+@outlineId = <outlineId>
+
+# ─── Outlines ─────────────────────────────────────────────────────────────────
+
+### POST /presentations/:id/outlines/generate — gerar outlines
+POST {{baseUrl}}/presentations/{{presentationId}}/outlines/generate
+Content-Type: application/json
+
+{
+  "userPrompt": "Uma apresentação sobre inteligência artificial no mercado de trabalho",
+  "language": 0,
+  "slideCount": 0,
+  "keywords": ["IA", "automação", "futuro do trabalho"]
+}
+
+###
+
+### PATCH /presentations/:id/outlines — atualizar outlines em bulk
+PATCH {{baseUrl}}/presentations/{{presentationId}}/outlines
+Content-Type: application/json
+
+{
+  "outlines": [
+    {
+      "id": "outline-id-1",
+      "title": "Título editado",
+      "description": "Descrição editada pelo usuário",
+      "representation": 0
+    }
+  ]
+}
+
+###
+
+### POST /presentations/:id/outlines/:outlineId/generate — regenerar outline individual
+POST {{baseUrl}}/presentations/{{presentationId}}/outlines/{{outlineId}}/generate
+Content-Type: application/json
+
+{
+  "userPrompt": "Uma apresentação sobre inteligência artificial no mercado de trabalho",
+  "language": 0,
+  "type": 1,
+  "order": 2
+}

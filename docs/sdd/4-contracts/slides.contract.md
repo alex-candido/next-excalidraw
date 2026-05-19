@@ -1,6 +1,6 @@
 # Contract: Slides
 
-Endpoints de leitura e atualização de slides de uma apresentação.
+Endpoints de leitura, atualização e geração de slides de uma apresentação.
 
 Base path: `/api/v1/app/presentations/[id]/slides`
 
@@ -46,9 +46,7 @@ Retorna os slides de uma apresentação, ordenados por `order`. Cada slide inclu
 
 ## PATCH /api/v1/app/presentations/[id]/slides
 
-Salva o estado atual dos slides após edição no editor. Bulk update — aceita um ou mais slides.
-
-Disparado pelo botão "Salvar" no editor (sem auto-save).
+Salva o estado atual dos slides após edição no editor. Bulk update — aceita um ou mais slides. Disparado pelo botão "Salvar" no editor (sem auto-save).
 
 ### Path params
 
@@ -72,7 +70,7 @@ Disparado pelo botão "Salvar" no editor (sem auto-save).
 
 ```ts
 // HTTP 200
-{ updated: number }   // quantidade de slides atualizados
+{ updated: number }
 ```
 
 ### Erros
@@ -83,3 +81,53 @@ Disparado pelo botão "Salvar" no editor (sem auto-save).
 | 401 | Sem sessão |
 | 403 | Presentation não pertence ao usuário |
 | 404 | Presentation não encontrada |
+
+---
+
+## POST /api/v1/app/presentations/[id]/slides/[slideId]/generate
+
+Regenera um slide individual via `slideWorkflow`, substituindo o conteúdo existente.
+
+### Path params
+
+| Param | Tipo | Descrição |
+|-------|------|-----------|
+| `id`      | string | presentationId |
+| `slideId` | string | slideId a regenerar |
+
+### Request
+
+```ts
+{
+  outlineId:      string
+  type:           number
+  title:          string
+  description:    string
+  concepts:       string[]
+  representation: number
+  layout:         string
+}
+```
+
+> `language` e `aspectRatio` são herdados da Presentation.
+
+### Response
+
+```ts
+// HTTP 200
+{
+  id:        string
+  order:     number
+  outlineId: string
+}
+```
+
+### Erros
+
+| Status | Condição |
+|--------|----------|
+| 400 | Input inválido (Zod) |
+| 401 | Sem sessão |
+| 403 | Presentation não pertence ao usuário |
+| 404 | Presentation ou slide não encontrado |
+| 500 | Falha no `slideWorkflow` |

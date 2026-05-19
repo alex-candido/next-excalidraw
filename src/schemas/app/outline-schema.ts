@@ -6,10 +6,9 @@ import { workflowMetaBaseSchema } from "@/lib/mastra/mappers/workflow-metadata-m
 const OUTLINE_TYPES = Object.keys(OutlineType)           as [string, ...string[]]
 const OUTLINE_REPS  = Object.keys(OutlineRepresentation) as [string, ...string[]]
 
-export const REPRESENTATION_BY_TYPE: Partial<Record<string, string[]>> = {
+export const REPRESENTATION_BY_TYPE: Record<string, string[]> = {
   cover:   ["auto", "infographic"],
-  agenda:  ["auto", "infographic", "mindmap", "pyramid", "matrix"],
-  summary: ["auto", "infographic", "mindmap", "pyramid", "matrix", "venn"],
+  content: Object.keys(OutlineRepresentation),
   closing: ["auto", "infographic"],
 }
 

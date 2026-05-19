@@ -1,0 +1,69 @@
+@baseUrl = http://localhost:3000/api/v1/app
+@presentationId = <presentationId>
+@slideId = <slideId>
+
+# ─── Slides ───────────────────────────────────────────────────────────────────
+
+### POST /presentations/:id/slides/generate — gerar slides
+POST {{baseUrl}}/presentations/{{presentationId}}/slides/generate
+Content-Type: application/json
+
+{
+  "outlines": [
+    {
+      "outlineId": "outline-id-1",
+      "type": 0,
+      "title": "Capa",
+      "description": "Slide de abertura da apresentação",
+      "concepts": ["IA", "automação"],
+      "representation": 0,
+      "layout": "cover"
+    },
+    {
+      "outlineId": "outline-id-2",
+      "type": 1,
+      "title": "O impacto da IA no mercado",
+      "description": "Análise das mudanças causadas pela automação",
+      "concepts": ["desemprego estrutural", "novos empregos", "requalificação"],
+      "representation": 1,
+      "layout": "two-columns"
+    }
+  ]
+}
+
+###
+
+### GET /presentations/:id/slides — listar slides
+GET {{baseUrl}}/presentations/{{presentationId}}/slides
+
+###
+
+### PATCH /presentations/:id/slides — salvar estado dos slides (editor)
+PATCH {{baseUrl}}/presentations/{{presentationId}}/slides
+Content-Type: application/json
+
+{
+  "slides": [
+    {
+      "id": "slide-id-1",
+      "elements": [],
+      "appState": {}
+    }
+  ]
+}
+
+###
+
+### POST /presentations/:id/slides/:slideId/generate — regenerar slide individual
+POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/generate
+Content-Type: application/json
+
+{
+  "outlineId": "outline-id-1",
+  "type": 1,
+  "title": "O impacto da IA no mercado",
+  "description": "Análise das mudanças causadas pela automação",
+  "concepts": ["desemprego estrutural", "novos empregos", "requalificação"],
+  "representation": 1,
+  "layout": "two-columns"
+}

@@ -5,5 +5,5 @@ export default function AppIndexPage({
 }: {
   params: { lang: string };
 }) {
-  redirect(`/${params.lang}/app/dashboard`);
+  redirect(`/${params.lang}/app/presentations`);
 }

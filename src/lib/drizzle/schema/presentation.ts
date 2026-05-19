@@ -6,12 +6,14 @@
 //  code                        :text              not null, unique
 //  slug                        :text              not null, unique
 //  user_id                     :text              not null
+//  type                        :smallint          default(1), not null
 //  title                       :text              not null
 //  user_prompt                 :text
 //  system_prompt               :text
 //  language                    :smallint          default(0), not null
 //  aspect_ratio                :smallint          default(0), not null
 //  slide_count                 :smallint          default(0), not null
+//  theme                       :smallint          default(0), not null
 //  keywords                    :text[]
 //  visibility                  :smallint          default(1), not null
 //  status                      :smallint          default(0), not null
@@ -66,6 +68,11 @@ export const AspectRatio = {
   custom: 5,
 } as const;
 
+export const PresentationType = {
+  single: 0,
+  multi: 1,
+} as const;
+
 export const presentation = pgTable(
   "presentation",
   {
@@ -75,12 +82,14 @@ export const presentation = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    type: smallint("type").default(1).notNull(),
     title: text("title").notNull(),
     userPrompt: text("user_prompt"),
     systemPrompt: text("system_prompt"),
     language: smallint("language").default(0).notNull(),
     aspectRatio: smallint("aspect_ratio").default(0).notNull(),
     slideCount: smallint("slide_count").default(0).notNull(),
+    theme: smallint("theme").default(0).notNull(),
     keywords: text("keywords").array(),
     visibility: smallint("visibility").default(1).notNull(),
     status: smallint("status").default(0).notNull(),

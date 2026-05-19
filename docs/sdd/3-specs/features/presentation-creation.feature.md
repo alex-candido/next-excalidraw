@@ -1,28 +1,31 @@
 # Feature: Presentation Creation
 
-Cobre o ciclo completo de criação de uma apresentação — da submissão do formulário até o editor. Os detalhes dos workflows AI estão documentados em `outline-generation-flow.md` e `slide-generation-flow.md`.
+Cobre o ciclo completo de criação de uma apresentação — da submissão do formulário até o editor. Os detalhes dos workflows AI estão documentados em `pipeline/outline-generation.pipeline.md` e `pipeline/slide-generation.pipeline.md`.
 
 ## Visão geral
 
 ```
-/presentations/new (form)
+/presentations/[type]/new (form)
         │
         ▼
-POST /api/v1/app/presentations                        → cria Presentation + gera outline
+POST /api/v1/app/presentations                               → cria Presentation (draft)
         │
         ▼
-/presentations/[id]/outline (UI)                      → revisão e confirmação dos outlines
+POST /api/v1/app/presentations/[id]/outlines/generate        → gera outlines
         │
         ▼
-POST /api/v1/app/presentations/[id]/slides/generate   → gera slides para cada outline
+/presentations/[id]/outline (UI)                             → revisão e edição dos outlines
         │
         ▼
-/presentations/[id]/editor                            → canvas Excalidraw por slide
+POST /api/v1/app/presentations/[id]/slides/generate          → gera slides
+        │
+        ▼
+/presentations/[id]/editor                                   → canvas Excalidraw por slide
 ```
 
 ---
 
-## Etapa 1 — Criação da Presentation + Geração do Outline
+## Etapa 1 — Criação da Presentation
 
 ### Entrada
 
@@ -30,6 +33,7 @@ POST /api/v1/app/presentations/[id]/slides/generate   → gera slides para cada 
 
 ```ts
 {
+  type:        number     // 0=single · 1=multi
   userPrompt:  string     // min 1 char
   language:    number     // 0–9, default 0 (en)
   aspectRatio: number     // 0–5, default 0 (16:9)
@@ -47,17 +51,64 @@ route.ts
   └─ delega para presentation-service.create()
 
 presentation-service.create()
-  ├─ presentation-repository.create()
-  │    { userId, userPrompt, language, aspectRatio, slideCount, keywords,
-  │      title: "", status: 0(draft), visibility: 1(private) }
+  └─ presentation-repository.create()
+       { userId, type, userPrompt, language, aspectRatio, slideCount, keywords,
+         title: "", status: 0(draft), visibility: 1(private) }
+```
+
+### Saída da API
+
+```ts
+// HTTP 201
+{
+  presentationId: string
+  type:           number
+}
+```
+
+### Redirect
+
+Frontend redireciona para `POST /presentations/[id]/outlines/generate`.
+
+---
+
+## Etapa 2 — Geração de Outlines
+
+### Entrada
+
+`POST /api/v1/app/presentations/[id]/outlines/generate`
+
+```ts
+// Path param
+presentationId: string
+
+// Body
+{
+  userPrompt:  string
+  language:    number
+  slideCount:  number
+  keywords:    string[]   // opcional
+}
+```
+
+### Camadas
+
+```
+route.ts
+  ├─ valida input com outlineGenerateSchema (Zod)
+  ├─ obtém userId da sessão
+  └─ delega para outline-service.generate()
+
+outline-service.generate()
+  ├─ presentation-repository.findById(presentationId)
+  │    valida que presentation.userId === userId (403 se não for)
   │
   ├─ generation-repository.create()
   │    { presentationId, type: 0(outline), status: 0(pending) }
   │
   ├─ try:
-  │    ├─ outlineWorkflow.start()           → ver outline-generation-flow.md
-  │    │    Persistência de Outline[] ocorre APÓS o workflow retornar —
-  │    │    o workflow não acessa o banco; apenas retorna o resultado estruturado
+  │    ├─ outlineWorkflow.start()           → ver pipeline/outline-generation.pipeline.md
+  │    │    o workflow não acessa o banco; retorna resultado estruturado
   │    │
   │    ├─ outline-repository.createMany()
   │    │    Outline[] com resultado do workflow
@@ -69,8 +120,7 @@ presentation-service.create()
   │         { status: 2(completed), completedAt, usage, model }
   │
   └─ catch (qualquer erro):
-       ├─ generation-repository.update()
-       │    { status: 3(failed), completedAt }
+       ├─ generation-repository.update() { status: 3(failed), completedAt }
        └─ Presentation permanece em status: 0(draft)
             → service lança erro → route retorna HTTP 500
 ```
@@ -85,7 +135,7 @@ presentation-service.create()
   outlines: {
     id:             string
     order:          number
-    type:           number
+    type:           number   // 0=cover · 1=content · 2=closing
     title:          string
     description:    string
     concepts:       string[]
@@ -95,15 +145,13 @@ presentation-service.create()
 }
 ```
 
-> Em caso de falha do workflow → HTTP 500, `Generation { status: 3(failed) }`, Presentation permanece em `draft`.
-
 ### Redirect
 
 Frontend redireciona para `/presentations/[id]/outline`.
 
 ---
 
-## Etapa 2 — Geração de Slides
+## Etapa 3 — Geração de Slides
 
 ### Entrada
 
@@ -147,8 +195,8 @@ slide-service.generate()
        │
        ├─ try:
        │    ├─ slideWorkflow.start()
-       │    │    O workflow não acessa o banco — retorna ExcalidrawElementSkeleton[].
-       │    │    → ver slide-generation-flow.md para detalhes do step interno
+       │    │    o workflow não acessa o banco — retorna ExcalidrawElementSkeleton[]
+       │    │    → ver pipeline/slide-generation.pipeline.md
        │    │
        │    ├─ slide-repository.create()
        │    │    { presentationId, outlineId, order, elements, app_state, files: {}, status: 0(active) }
@@ -175,72 +223,63 @@ slide-service.generate()
 }
 ```
 
-> Em falha de um slide individual: generation fica `failed`, slide não é inserido, os demais continuam.
-
 ### Redirect
 
 Frontend redireciona para `/presentations/[id]/editor`.
 
 ---
 
----
+## Etapa 2.5 — Atualização de Outlines (bulk update)
 
-## Etapa 1.5 — Atualização de Outlines (bulk update)
-
-Disparado antes da geração de slides, quando o usuário edita outlines na página `/presentations/[id]/outline`.
+Disparado quando o usuário edita outlines na página `/presentations/[id]/outline`.
 
 ### Entrada
 
 `PATCH /api/v1/app/presentations/[id]/outlines`
 
 ```ts
-// Path param
-presentationId: string
-
-// Body
 {
   outlines: {
     id:             string   // outlineId a atualizar
     title:          string
     description:    string
-    representation: number   // deve respeitar restrições por type
+    representation: number
   }[]
 }
 ```
 
-> Apenas `title`, `description` e `representation` são atualizáveis pelo usuário. `type`, `concepts`, `order` e `layout` são gerados pela AI e não são editáveis nesta etapa.
+> Apenas `title`, `description` e `representation` são editáveis. `type`, `concepts`, `order` e `layout` são gerados pela AI e não são editáveis.
 
 ### Saída
 
 ```ts
 // HTTP 200
-{ updated: number }   // quantidade de outlines atualizados
+{ updated: number }
 ```
 
 ---
 
-## Etapa 1.6 — Regeneração de Outline Individual
+## Etapa 2.6 — Regeneração de Outline Individual
 
-Disparado pelo botão "Regenerar" em um `OutlineCard` específico na página `/presentations/[id]/outline`.
+Disparado pelo botão "Regenerar" em um `OutlineCard` na página `/presentations/[id]/outline`.
 
 ### Entrada
 
-`POST /api/v1/app/outlines/[id]/regenerate`
+`POST /api/v1/app/presentations/[id]/outlines/[outlineId]/generate`
 
 ```ts
-// Path param
-outlineId: string
+// Path params
+presentationId: string
+outlineId:      string
 
 // Body
 {
   userPrompt: string   // prompt original da apresentação (contexto)
   language:   number
-  type:       number   // tipo fixo do outline a regenerar (0–4)
+  type:       number   // tipo fixo do outline a regenerar (0–2)
   order:      number   // posição deste outline na sequência
 }
 ```
-
-> A abordagem de implementação (step dedicado vs reuso do `outlineWorkflow` com `slideCount=1`) está pendente — ver `docs/adr.md`.
 
 ### Camadas
 
@@ -249,12 +288,11 @@ route.ts
   └─ delega para outline-service.regenerate()
 
 outline-service.regenerate()
-  ├─ outline-repository.findById(outlineId)
-  │    valida que outline.presentationId pertence ao userId (403 se não for)
+  ├─ presentation-repository.findById(presentationId)
+  │    valida que presentation.userId === userId (403 se não for)
   │
   ├─ try:
-  │    ├─ outlineWorkflow.start({ userPrompt, language, slideCount: 1, ... })
-  │    │    (ou step dedicado quando implementado)
+  │    ├─ outlineWorkflow.start({ userPrompt, language, slideCount: 1 })
   │    │
   │    └─ outline-repository.update(outlineId)
   │         { title, description, concepts, representation, layout }
@@ -288,6 +326,7 @@ outline-service.regenerate()
 - `language` e `aspectRatio` são salvos na Presentation mas só `language` é passado aos workflows
 - O workflow não acessa o banco — persistência é sempre responsabilidade do service
 - Geração de slides é **sequencial** — um por vez, na ordem do `outline.order`
-- Suporte a regeneração parcial: body pode conter subset dos outlines (para refazer slides individuais)
+- Suporte a regeneração parcial: body pode conter subset dos outlines
 - `title` da Presentation vem do outline, nunca do `userPrompt`
 - Schemas Zod de input das rotas ficam em `src/schemas/app/` — nunca inline no `route.ts`
+- `type=single` → slideCount forçado a 1, outline único

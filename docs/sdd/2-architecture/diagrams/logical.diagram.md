@@ -91,12 +91,14 @@ erDiagram
         text code UK
         text slug UK
         text user_id FK
+        smallint type
         text title
         text user_prompt
         text system_prompt
         smallint language
         smallint aspect_ratio
         smallint slide_count
+        smallint theme
         array keywords
         smallint visibility
         smallint status
@@ -112,6 +114,16 @@ erDiagram
         text user_id FK
         text invited_by FK
         smallint role
+        timestamp created_at
+    }
+
+    INVITE_TOKEN {
+        uuid id PK
+        uuid presentation_id FK
+        text token UK
+        smallint role
+        text invited_by FK
+        timestamp expires_at
         timestamp created_at
     }
 
@@ -186,6 +198,7 @@ erDiagram
     PERMISSION   ||--o{ GROUP_PERMISSION    : "permission_id"
     PERMISSION   ||--o{ USER_PERMISSION     : "permission_id"
     PRESENTATION ||--o{ PRESENTATION_MEMBER : "presentation_id"
+    PRESENTATION ||--o{ INVITE_TOKEN        : "presentation_id"
     PRESENTATION ||--o{ OUTLINE             : "presentation_id"
     PRESENTATION ||--o{ SLIDE               : "presentation_id"
     PRESENTATION ||--o{ GENERATION          : "presentation_id"
@@ -200,15 +213,35 @@ erDiagram
 | Tabela | Campo | Valores |
 |---|---|---|
 | `user_permission` | `type` | `0` grant · `1` deny |
+| `presentation` | `type` | `0` single · `1` multi |
 | `presentation` | `status` | `0` draft · `1` active · `2` inactive · `3` trash |
 | `presentation` | `visibility` | `0` public · `1` private |
 | `presentation` | `language` | `0` en · `1` es · `2` fr · `3` de · `4` it · `5` pt-BR · `6` ru · `7` zh · `8` ja · `9` ko |
 | `presentation` | `aspect_ratio` | `0` 16:9 · `1` 4:3 · `2` 9:16 · `3` 1:1 · `4` A4 · `5` custom |
+| `presentation` | `theme` | índice numérico do tema — `0` default; valores completos definidos em `lib/themes` |
 | `presentation_member` | `role` | `0` viewer · `1` editor |
-| `outline` | `type` | `0` cover · `1` agenda · `2` content · `3` summary · `4` closing |
+| `invite_token` | `role` | `0` viewer · `1` editor |
+| `outline` | `type` | `0` cover · `1` content · `2` closing |
 | `outline` | `representation` | `0` auto · `1` flowchart · `2` mindmap · `3` orgchart · `4` sequence · `5` class · `6` er · `7` gantt · `8` timeline · `9` tree · `10` network · `11` architecture · `12` dataflow · `13` state · `14` swimlane · `15` fishbone · `16` pyramid · `17` venn · `18` matrix · `19` funnel · `20` infographic |
-| `outline` | `layout` | texto livre — descrição de intenção de layout gerada pela IA (ex: "slide com mapa mental centralizado") |
+| `outline` | `layout` | texto livre — descrição de intenção de layout gerada pela IA |
 | `slide` | `status` | `0` active · `1` inactive · `2` trash |
+| `slide` | `composition` | legado — campo da abordagem SlideComposition abandonada; não usado |
 | `generation` | `type` | `0` outline · `1` slide |
 | `generation` | `status` | `0` pending · `1` running · `2` completed · `3` failed |
 | `log` | `level` | `0` debug · `1` info · `2` warn · `3` error |
+
+---
+
+## Regras de negócio
+
+- `presentation.type = 0 (single)` → máximo 1 outline + 1 slide
+- `presentation.type = 1 (multi)` → N outlines + N slides
+- Owner da presentation é sempre `presentation.user_id` — role `owner` não existe em `presentation_member`
+- `invite_token` — Ciclo 5 (Colaboração); token para `/invite/[token]`
+
+---
+
+## Notas
+
+- `presentation.system_prompt` — reservado para uso futuro; não usado nos workflows atuais
+- `presentation.usage` — legado; rastreamento de uso consolidado via `generation.usage`

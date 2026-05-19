@@ -2,13 +2,13 @@
 
 Endpoints de gerenciamento de outlines individuais.
 
-Base path: `/api/v1/app/outlines`
+Base path: `/api/v1/app/presentations/[id]/outlines`
 
 > Auth requerida em todos os endpoints — sem sessão válida → 401.
 
 ---
 
-## POST /api/v1/app/outlines/[id]/regenerate
+## POST /api/v1/app/presentations/[id]/outlines/[outlineId]/generate
 
 Regenera um outline individual sem reprocessar toda a apresentação. Disparado pelo botão "Regenerar" em um `OutlineCard` na página `/presentations/[id]/outline`.
 
@@ -16,7 +16,8 @@ Regenera um outline individual sem reprocessar toda a apresentação. Disparado 
 
 | Param | Tipo | Descrição |
 |-------|------|-----------|
-| `id`  | string | outlineId |
+| `id`        | string | presentationId |
+| `outlineId` | string | outlineId      |
 
 ### Request
 
@@ -24,7 +25,7 @@ Regenera um outline individual sem reprocessar toda a apresentação. Disparado 
 {
   userPrompt: string   // prompt original da apresentação (contexto)
   language:   number   // 0–9
-  type:       number   // tipo fixo do outline a regenerar (0–4)
+  type:       number   // tipo fixo do outline a regenerar (0–2)
   order:      number   // posição deste outline na sequência
 }
 ```
@@ -53,6 +54,6 @@ Regenera um outline individual sem reprocessar toda a apresentação. Disparado 
 |--------|----------|
 | 400 | Input inválido (Zod) |
 | 401 | Sem sessão |
-| 403 | Outline não pertence a uma presentation do usuário |
-| 404 | Outline não encontrado |
+| 403 | Presentation não pertence ao usuário |
+| 404 | Presentation ou outline não encontrado |
 | 500 | Falha no workflow de regeneração |

@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3000/api/v1/app
+@presentationId = <presentationId>
+
+# ─── Presentations ────────────────────────────────────────────────────────────
+
+### POST /presentations — criar apresentação (draft)
+POST {{baseUrl}}/presentations
+Content-Type: application/json
+
+{
+  "type": 1,
+  "userPrompt": "Uma apresentação sobre inteligência artificial no mercado de trabalho",
+  "language": 0,
+  "aspectRatio": 0,
+  "slideCount": 0,
+  "keywords": ["IA", "automação", "futuro do trabalho"]
+}
+
+###
+
+### GET /presentations — listar apresentações do usuário
+GET {{baseUrl}}/presentations
+
+###
+
+### GET /presentations/:id — detalhe com outlines
+GET {{baseUrl}}/presentations/{{presentationId}}
+
+###
+
+### DELETE /presentations/:id — remover apresentação
+DELETE {{baseUrl}}/presentations/{{presentationId}}

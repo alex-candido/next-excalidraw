@@ -36,13 +36,11 @@ outlineWorkflow.start({ userPrompt, language, slideCount, keywords })
 
 ## Representações por tipo de slide
 
-| type    | representações permitidas                                    |
-|---------|--------------------------------------------------------------|
-| cover   | auto · infographic                                           |
-| agenda  | auto · infographic · mindmap · pyramid · matrix              |
-| content | todas (21 opções)                                            |
-| summary | auto · infographic · mindmap · pyramid · matrix · venn       |
-| closing | auto · infographic                                           |
+| type    | representações permitidas                                     |
+|---------|---------------------------------------------------------------|
+| cover   | auto · infographic                                            |
+| content | todas as 21 opções (sem restrição)                            |
+| closing | auto · infographic                                            |
 
 > Enforçado em dois níveis: **prompt** (instrução ao agente) e **schema Zod** (validação do output da tool call).
 
