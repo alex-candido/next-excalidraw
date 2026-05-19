@@ -1,4 +1,4 @@
-# Flow: lib/excalidraw
+# Pipeline: Excalidraw
 
 ## Visão geral
 

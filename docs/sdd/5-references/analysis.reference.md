@@ -1,4 +1,4 @@
-# References Analysis
+# Reference: Analysis
 
 Análise dos repositórios de referência clonados em `temp/` e o que podemos aproveitar no projeto.
 
@@ -9,6 +9,7 @@ Análise dos repositórios de referência clonados em `temp/` e o que podemos ap
 | Repo | Propósito | Relevância |
 |------|-----------|------------|
 | `smart-excalidraw-next` | Pipeline AI principal (já analisado) | Alta — referência base |
+| `presentation-ai` | Plataforma completa: agent editing, PPTX export, themes, Plate.js | Alta — referência de produto |
 | `excalidraw-diagram-skill` | Filosofia de design, templates de elementos | Alta — melhorias de prompt |
 | `excalidraw-skill` | Spacing, anti-patterns, tipografia | Alta — melhorias de prompt |
 | `ai-excalidraw` | Regras de largura de texto, suporte multilíngue | Média — melhorias pontuais |
@@ -193,7 +194,186 @@ Toolbar ocultada via CSS: `.excalidraw .App-toolbar { display: none }`.
 
 ---
 
-## 6. O que NÃO aproveitar
+## 6. `presentation-ai` — Análise
+
+Plataforma completa de criação e edição de apresentações com AI. Stack: Next.js 16, LangChain/LangGraph, Plate.js, Prisma, PptxGenJS.
+
+> Arquivos principais: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`, `src/lib/presentation/themes.ts`, `src/components/notebook/presentation/utils/templates.tsx`
+
+---
+
+### 6.1 Agent de Edição — Chat Interativo
+
+#### Arquitetura
+
+O agent usa LangGraph com streaming via Vercel AI SDK. O frontend serializa os slides em XML e envia como contexto a cada mensagem.
+
+**Backend** (`src/app/api/agent/presentation/route.ts`):
+- Recebe: `id` (presentationId), `messages[]`, `modelProvider`, `modelId`
+- Cria grafo via `createPresentationGraph()` com LangGraph
+- Retorna stream via `createUIMessageStreamResponse()`
+
+**Frontend** (`src/components/presentation/agent/PresentationAgentPanel.tsx`):
+- Hook `useChat` do `@ai-sdk/react` gerencia o estado do chat
+- Detecta tool calls no stream → executa via `executeToolCall()` → resume stream com `regenerate()`
+- Cada tool call tem componente de preview (ex: `ChangeTheme.tsx`, `ReplaceImageCompare.tsx`)
+
+#### Tools disponíveis (8)
+
+| Tool | O que faz | Scope |
+|------|-----------|-------|
+| `edit_slide_properties` | bgColor, alignment, layoutType, width | slideIds ou "all" |
+| `replace_image` | substitui imagem por URL ou prompt de geração | slideIds |
+| `change_theme` | aplica tema pré-definido | global |
+| `regenerate_slide` | regera slide com novo conteúdo XML | slideIds[] |
+| `create_slide` | cria slide em posição específica | afterSlideId opcional |
+| `delete_slide` | remove slides | slideIds[] |
+| `webSearch` | busca web via Tavily para contexto | — |
+| `respond_to_user` | responde sem editar (clarificação) | — |
+
+#### Middleware pattern (importante)
+
+```
+pastedContentMiddleware          → processa conteúdo colado com offset
+trimMessageHistory               → limita contexto a últimas 4 mensagens
+enforceStructuredToolCallsForLocalModels → retry + JSON fallback para Ollama/LMStudio
+```
+
+**O que aproveitar:** o modelo de 8 tools é o blueprint para o nosso agent de edição (Ciclo 3). O middleware de retry automático + JSON fallback resolve o problema de LLMs que falham em tool calls — aplicar no Mastra workflow com `retryConfig`.
+
+**Adaptação para nosso stack:** as tools operam sobre `ExcalidrawElementSkeleton[]` em vez de XML Plate. A serialização muda, o conceito de tool é idêntico.
+
+---
+
+### 6.2 Colaboração e Compartilhamento
+
+O `presentation-ai` **não tem colaboração em tempo real** — sem Y.js, sem WebSocket. O modelo é simples:
+
+- `BaseDocument.isPublic: boolean` — público ou privado
+- `canReadDocument()`: `isPublic || userId === owner`
+- `canEditDocument()`: apenas o dono
+
+**Arquivos:** `temp/presentation-ai/src/server/share/authorization.ts`
+
+**O que aproveitar:** modelo de autorização simples como ponto de partida. Para colaboração real nosso schema já tem `presentation_member` — o `presentation-ai` não cobre isso.
+
+**Nosso diferencial:** `presentation_member` + `group` + `user_group` no schema permitem controle granular (owner / editor / viewer) sem precisar criar novas tabelas.
+
+---
+
+### 6.3 Sistema de Temas
+
+**Arquivo:** `temp/presentation-ai/src/lib/presentation/themes.ts`
+
+#### Estrutura do objeto de tema (`ThemeProperties`)
+
+```ts
+{
+  name:         string
+  description:  string
+  mode:         "light" | "dark"
+  colors: {
+    primary:         string   // cor principal (botões, destaques)
+    accent:          string   // cor de destaque
+    background:      string   // fundo do slide
+    text:            string   // texto corrido
+    heading:         string   // títulos
+    smartLayout:     string   // elementos de layout
+    cardBackground:  string   // fundo de cards/shapes
+  }
+  fonts: {
+    heading:       string     // nome da fonte de título
+    body:          string     // nome da fonte de corpo
+    headingWeight: string     // peso (ex: "700")
+    bodyWeight:    string     // peso (ex: "400")
+    // URLs opcionais para Google Fonts
+  }
+  borderRadius: {
+    card:   string
+    slide:  string
+    button: string
+  }
+  transitions:  { default: string }
+  shadows: {
+    card:   string
+    button: string
+    slide:  string
+  }
+  background?: {
+    type:     "solid" | "linear" | "radial" | "image"
+    override: string          // CSS direto
+    gradient: {
+      type:    string
+      angle:   number
+      stops:   { id: string; color: string; position: number }[]
+    }
+    imageUrl: string
+  }
+}
+```
+
+41 temas pré-definidos: daktilo, noir, cornflower, indigo, orbit, cosmos, piano, ebony, mystique, phantom, crimson, ember, sunset, forest, aurora, sakura, ocean, sand, lavender, rose, honey, coral, glacier, jade, etc.
+
+**O que aproveitar (Ciclo 4):** a estrutura `ThemeProperties` com `colors`, `fonts` e `background` é o modelo para nosso sistema de temas. No contexto Excalidraw, `colors` mapeiam para `strokeColor`/`backgroundColor` dos elements e `appState.viewBackgroundColor`.
+
+---
+
+### 6.4 Sistema de Templates
+
+**Arquivo:** `temp/presentation-ai/src/components/notebook/presentation/utils/templates.tsx`
+
+Biblioteca de templates pré-montados organizados por categoria. Templates são `PlateSlide` sem ID — não requerem geração AI.
+
+#### Tipos de template disponíveis
+
+| Categoria | Templates |
+|-----------|-----------|
+| Listas | bullet list, numbered list, arrow list |
+| Boxes | solid, outline, icon, sideline, joined, leaf |
+| Gráficos | bar, pie, line, area, radar, scatter, heatmap, ohlc, boxPlot (20+ tipos via AntV) |
+| Processos | cycle, staircase, pyramid/funnel, timeline (arrows, pills, parallelograms) |
+| Comparação | before-after, pros/cons |
+| Especiais | stats/KPIs, quote, table, embed |
+
+**Interface de template:**
+
+```ts
+{
+  id:         string
+  name:       string
+  categoryId: string
+  preview:    React.ReactNode   // miniatura visual
+  template:   Omit<PlateSlide, "id">
+}
+```
+
+**O que aproveitar (Ciclo 3):** o conceito de template como `ExcalidrawElementSkeleton[]` pré-montado. Nossa implementação em `lib/excalidraw/templates/` seguirá a mesma estrutura de categorias. Os tipos de template mapeiam diretamente para nossos `OutlineRepresentation` (flowchart, mindmap, timeline, etc.).
+
+---
+
+### 6.5 Exportação PPTX
+
+**Arquivo:** `temp/presentation-ai/src/components/presentation/export/domToPptxConverter.ts`
+
+Conversão DOM → PPTX client-side via PptxGenJS + Fabric.js. Faz scan do canvas para extrair posicionamento preciso de cada elemento.
+
+**O que aproveitar (Ciclo 4):** abordagem 100% client-side — sem servidor ou LibreOffice. No nosso caso, a conversão parte de `ExcalidrawElement[]` e não de DOM, mas o PptxGenJS é o mesmo destino.
+
+---
+
+### 6.6 O que NÃO aproveitar deste repo
+
+| O que | Por quê |
+|-------|---------|
+| Plate.js como editor | Incompatível com Excalidraw skeleton — é editor WYSIWYG de texto rico |
+| LangChain/LangGraph | Já usamos Mastra; conceitos de tools são transferíveis, stack não |
+| XML como formato de slide | Usamos `ExcalidrawElementSkeleton[]` — mais estruturado e tipado |
+| Schema Prisma | Já temos Drizzle com schema mais rico (Generation, Log, enums tipados) |
+| Multi-provider (Ollama/LMStudio) | Fora do escopo atual; nosso modelo dinâmico será via Gemini/Anthropic |
+
+---
+
+## 7. O que NÃO aproveitar
 
 - **`mcp-excalidraw` / `excalidraw-mcp`**: Abordagem MCP (Model Context Protocol) expõe CRUD de elementos como tools. Não se aplica — nosso pipeline é server-side via Mastra workflow.
 - **`excalidraw-ai`** (monorepo oficial): Já usamos `@excalidraw/excalidraw` como dependência npm. O monorepo tem muito mais do que precisamos.

@@ -311,10 +311,18 @@ Fluxos de funcionalidades do projeto. Um arquivo por domínio/funcionalidade:
 
 ```
 docs/flows/
-  outline-generation-flow.md    → pipeline de geração do outline
-  slide-generation-flow.md      → pipeline de geração dos slides
-  excalidraw-flow.md            → lib/excalidraw (parse → normalize → serialize)
-  auth-flow.md                  → fluxo de autenticação
+  outline-generation-flow.md      → pipeline de geração do outline (AI workflow)
+  slide-generation-flow.md        → pipeline de geração dos slides (AI workflow)
+  excalidraw-flow.md              → lib/excalidraw (parse → normalize → serialize)
+  presentation-creation-flow.md   → ciclo completo de criação: API + persistência + redirect
+  outline-page-flow.md            → página de revisão e confirmação dos outlines
+  editor-flow.md                  → editor Excalidraw por slide (inclui templates e agent chat)
+  present-flow.md                 → modo apresentação fullscreen
+  single-mode-flow.md             → modalidade Single: prompt, imagem, digitalização (Ciclo 5)
+  agent-chat-flow.md              → chat de edição interativa com tools (Ciclo 3)
+  collaboration-flow.md           → workgroups, permissões e colaboração em tempo real (Ciclo 5)
+  themes-flow.md                  → sistema de temas e personalização visual (Ciclo 4)
+  auth-flow.md                    → signup, login, OAuth, reset de senha, proteção de rotas
 ```
 
 Convenções:
