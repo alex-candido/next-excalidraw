@@ -83,9 +83,11 @@ repositories/
 ```
 
 Convenções:
-- Funções nomeadas: `findById`, `findMany`, `create`, `update`, `deleteById`
-- Recebem e retornam tipos inferidos dos schemas Zod
+- Padrão: `function nomeRepository()` com métodos internos e `return {}` no final — acoplamento explícito
+- Métodos padrão: `create`, `findById`, `findMany`, `update`, `deleteById`
+- Recebem e retornam tipos inferidos dos schemas Drizzle (`$inferInsert`, `$inferSelect`)
 - Nenhuma lógica de negócio — apenas queries
+- O mesmo padrão se aplica a qualquer módulo acoplável em `lib/` (ex: `normalizeArrows`, `parseSkeletons`)
 
 ### src/server/services/
 

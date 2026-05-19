@@ -34,6 +34,34 @@ const outlineMetadataSchema = workflowMetaBaseSchema.extend({
   }),
 })
 
+export const outlineBulkUpdateSchema = z.object({
+  outlines: z.array(z.object({
+    id:             z.string().uuid(),
+    title:          z.string(),
+    description:    z.string(),
+    representation: z.number().int(),
+  })).min(1),
+})
+
+export const outlineRegenerateSchema = z.object({
+  userPrompt: z.string().min(1),
+  language:   z.number().int().default(0),
+  type:       z.number().int(),
+  order:      z.number().int().min(1),
+})
+
+export type OutlineBulkUpdate   = z.infer<typeof outlineBulkUpdateSchema>
+export type OutlineRegenerate   = z.infer<typeof outlineRegenerateSchema>
+
+export const outlineGenerateSchema = z.object({
+  userPrompt:  z.string().min(1),
+  language:    z.number().int().default(0),
+  slideCount:  z.number().int().default(0),
+  keywords:    z.array(z.string()).optional(),
+})
+
+export type OutlineGenerate = z.infer<typeof outlineGenerateSchema>
+
 export const outlineWorkflowInputSchema  = presentationWorkflowInputSchema
 export const outlineWorkflowOutputSchema = z.object({
   title:    z.string(),

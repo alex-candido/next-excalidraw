@@ -45,6 +45,22 @@ export const slideWorkflowOutputSchema = z.object({
   metadata: slideMetadataSchema,
 })
 
+export const slideGenerateItemSchema = z.object({
+  outlineId:      z.string().uuid(),
+  type:           z.number().int(),
+  title:          z.string(),
+  description:    z.string(),
+  concepts:       z.array(z.string()),
+  representation: z.number().int(),
+  layout:         z.string(),
+})
+
+export const slideGenerateSchema = z.object({
+  outlines: z.array(slideGenerateItemSchema).min(1),
+})
+
+export type SlideGenerateItem   = z.infer<typeof slideGenerateItemSchema>
+export type SlideGenerate       = z.infer<typeof slideGenerateSchema>
 export type SlideWorkflowInput  = z.infer<typeof slideWorkflowInputSchema>
 export type SlideToolOutput     = z.infer<typeof slideToolOutputSchema>
 export type SlideWorkflowOutput = z.infer<typeof slideWorkflowOutputSchema>

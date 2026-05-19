@@ -1,11 +1,26 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from "next/server"
+import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 
-// GET /api/v1/app/presentations/[id] — get presentation detail
-export async function GET(_req: NextRequest) {
-  return Response.json({ message: "TODO" }, { status: 200 });
+const DEV_USER_ID = "00000001-0000-4000-8000-000000000001"
+
+type Params = { params: Promise<{ id: string }> }
+
+export async function GET(_req: NextRequest, { params }: Params) {
+  const { id } = await params
+  const presentation = await presentationRepository().findById(id)
+
+  if (!presentation) return Response.json({ error: "Not found" }, { status: 404 })
+  if (presentation.userId !== DEV_USER_ID) return Response.json({ error: "Forbidden" }, { status: 403 })
+
+  return Response.json(presentation, { status: 200 })
 }
 
-// DELETE /api/v1/app/presentations/[id] — delete presentation
-export async function DELETE(_req: NextRequest) {
-  return new Response(null, { status: 204 });
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  const { id } = await params
+  const presentation = await presentationRepository().findById(id)
+
+  if (!presentation) return Response.json({ error: "Not found" }, { status: 404 })
+  if (presentation.userId !== DEV_USER_ID) return Response.json({ error: "Forbidden" }, { status: 403 })
+
+  return new Response(null, { status: 204 })
 }

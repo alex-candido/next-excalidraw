@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { PresentationLanguage } from "@/lib/drizzle/schema/presentation"
+import { PresentationLanguage, PresentationType } from "@/lib/drizzle/schema/presentation"
 
 export const LANGUAGE_NAMES: Record<number, string> = {
   [PresentationLanguage.en]:   "English",
@@ -13,6 +13,17 @@ export const LANGUAGE_NAMES: Record<number, string> = {
   [PresentationLanguage.ja]:   "Japanese",
   [PresentationLanguage.ko]:   "Korean",
 }
+
+export const presentationCreateSchema = z.object({
+  type:        z.number().int().default(PresentationType.multi),
+  userPrompt:  z.string().min(1),
+  language:    z.number().int().default(PresentationLanguage.en),
+  aspectRatio: z.number().int().default(0),
+  slideCount:  z.number().int().default(0),
+  keywords:    z.array(z.string()).optional(),
+})
+
+export type PresentationCreate = z.infer<typeof presentationCreateSchema>
 
 export const presentationWorkflowInputSchema = z.object({
   userPrompt: z.string().min(1),
