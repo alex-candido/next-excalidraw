@@ -3,9 +3,9 @@ import { z } from "zod";
 import {
   outlineItemSchema,
   outlineToolOutputSchema,
-  REPRESENTATION_BY_TYPE,
   type OutlineToolOutput,
 } from "@/schemas/app/outline-schema";
+import { REPRESENTATION_BY_TYPE } from "@/schemas/app/presentations/multi-schema";
 
 export const outlineStructureTool = createTool({
   id: "outline-structure-tool",

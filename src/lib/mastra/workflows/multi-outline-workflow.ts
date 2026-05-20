@@ -1,23 +1,23 @@
 import {
-  outlineWorkflowInputSchema,
   outlineWorkflowOutputSchema,
   type OutlineToolOutput,
   type OutlineWorkflowOutput,
-} from "@/schemas/app/outline-schema";
-import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
-import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper";
-import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
+} from "@/schemas/app/outline-schema"
+import { multiWorkflowInputSchema } from "@/schemas/app/presentations/multi-schema"
+import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema"
+import { createStep, createWorkflow } from "@mastra/core/workflows"
+import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper"
+import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer"
 
-const generateOutlineStep = createStep({
-  id: "generate-outline",
-  inputSchema: outlineWorkflowInputSchema,
+const generateMultiOutlineStep = createStep({
+  id:           "generate-multi-outline",
+  inputSchema:  multiWorkflowInputSchema,
   outputSchema: outlineWorkflowOutputSchema,
   scorers: { outlineSemanticScorer: { scorer: outlineSemanticScorer } },
   execute: async ({ inputData, mastra }) => {
-    const startedAt = Date.now()
-    const agent     = mastra.getAgent("outlineCreatorAgent")
-    const language  = LANGUAGE_NAMES[inputData.language] ?? "English"
+    const startedAt  = Date.now()
+    const agent      = mastra.getAgent("multiOutlineCreatorAgent")
+    const language   = LANGUAGE_NAMES[inputData.language] ?? "English"
     const slideCount = inputData.slideCount > 0 ? inputData.slideCount : "between 5 and 9"
 
     const parts: string[] = [
@@ -40,15 +40,18 @@ const generateOutlineStep = createStep({
 
     const toolPayload = toolResults?.[0]?.payload
     if (!toolPayload || toolPayload.isError) {
-      throw new Error((toolPayload?.result as { message?: string })?.message ?? "Tool execution failed")
+      throw new Error(
+        (toolPayload?.result as { message?: string })?.message ?? "Tool execution failed",
+      )
     }
-    const result = toolPayload.result as OutlineToolOutput
+
+    const result    = toolPayload.result as OutlineToolOutput
     const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     return {
       ...result,
       metadata: workflowMetadataMapper().map({
-        agentId:   "outline-creator-agent",
+        agentId:   "multi-outline-creator-agent",
         startedAt,
         usage,
         modelName,
@@ -61,10 +64,10 @@ const generateOutlineStep = createStep({
   },
 })
 
-export const outlineWorkflow = createWorkflow({
-  id: "outline-workflow",
-  inputSchema: outlineWorkflowInputSchema,
+export const multiOutlineWorkflow = createWorkflow({
+  id:           "multi-outline-workflow",
+  inputSchema:  multiWorkflowInputSchema,
   outputSchema: outlineWorkflowOutputSchema,
-}).then(generateOutlineStep)
+}).then(generateMultiOutlineStep)
 
-outlineWorkflow.commit()
+multiOutlineWorkflow.commit()

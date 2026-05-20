@@ -95,8 +95,8 @@ outline API route
 ---
 
 **Pipeline AI**
-- [ ] `P2` Otimizar `slide-creator-prompt` — reduzir tokens, eliminar redundâncias, focar em regras de posicionamento programático; validar em sandbox antes de substituir
-- [ ] `P1` Melhorar `outline-creator-prompt` — alinhar representações com os novos tipos adicionados
+- [x] `P2` Otimizar `slide-creator-prompt` — injeção condicional de seções por representação e contexto; ~10-20% de economia de tokens por slide
+- [x] `P1` Melhorar prompts de outline — `multi-outline-creator-prompt` e `single-outline-creator-prompt` com guias de representação alinhados aos tipos
 
 **Integração & API**
 - [x] `P0` Criar API routes sem autenticação — `POST /presentations`, `POST /presentations/[id]/slides/generate`, `GET /presentations`, `GET /presentations/[id]`, `DELETE /presentations/[id]`, `PATCH /presentations/[id]/outlines`, `POST /presentations/[id]/outlines/[outlineId]/generate`, `GET /presentations/[id]/slides`, `PATCH /presentations/[id]/slides`, `POST /presentations/[id]/slides/[slideId]/generate`

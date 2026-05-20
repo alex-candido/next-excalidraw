@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
-import { outlineRegenerateSchema } from "@/schemas/app/outline-schema"
-import { outlineService } from "@/server/services/app/outline-service"
+import { outlineRegenerateSchema } from "@/schemas/app/presentations/multi-schema"
+import { multiOutlineService } from "@/server/services/app/multi-outline-service"
 
 const DEV_USER_ID = "00000001-0000-4000-8000-000000000001"
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   try {
-    const result = await outlineService().regenerate(id, outlineId, DEV_USER_ID, parsed.data)
+    const result = await multiOutlineService().regenerate(id, outlineId, DEV_USER_ID, parsed.data)
     return Response.json(result, { status: 200 })
   } catch (err: unknown) {
     const status = (err as { status?: number }).status ?? 500

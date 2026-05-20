@@ -1,8 +1,7 @@
 import { z } from "zod"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
-import { presentationWorkflowInputSchema } from "./presentation-schema"
 import { workflowMetaBaseSchema } from "@/lib/mastra/mappers/workflow-metadata-mapper"
-import { AspectRatio } from "@/lib/drizzle/schema/presentation"
+import { AspectRatio, PresentationLanguage } from "@/lib/drizzle/schema/presentation"
 
 const OUTLINE_TYPES  = Object.keys(OutlineType)           as [string, ...string[]]
 const OUTLINE_REPS   = Object.keys(OutlineRepresentation) as [string, ...string[]]
@@ -25,8 +24,12 @@ export const slideWorkflowInputSchema = z.object({
   concepts:       z.array(z.string()),
   representation: z.enum(OUTLINE_REPS),
   layout:         z.string(),
-  language:       presentationWorkflowInputSchema.shape.language,
+  language:       z.number().int().default(PresentationLanguage.en),
   aspectRatio:    z.number().int().default(AspectRatio["16:9"]),
+  amount:         z.number().int().optional(),
+  audience:       z.number().int().optional(),
+  scenario:       z.number().int().optional(),
+  theme:          z.number().int().optional(),
 })
 
 export const slideToolOutputSchema = z.object({

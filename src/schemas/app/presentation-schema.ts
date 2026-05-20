@@ -73,15 +73,12 @@ export const presentationCreateSchema = z.object({
 
 export type PresentationCreate = z.infer<typeof presentationCreateSchema>
 
-export const presentationWorkflowInputSchema = z.object({
+export const presentationGenerateSchema = z.object({
   userPrompt: z.string().min(1),
   language:   z.number().int().default(PresentationLanguage.en),
   slideCount: z.number().int().default(0),
-  amount:     z.number().int().default(PresentationAmount.auto),
-  audience:   z.number().int().default(PresentationAudience.general),
-  scenario:   z.number().int().default(PresentationScenario.auto),
-  theme:      z.number().int().default(PresentationTheme.daktilo),
   keywords:   z.array(z.string()).optional(),
 })
 
-export type PresentationWorkflowInput = z.infer<typeof presentationWorkflowInputSchema>
+export type PresentationGenerate = z.infer<typeof presentationGenerateSchema>
+

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "userPrompt is required" }, { status: 400 })
   }
 
-  const workflow = mastra.getWorkflow("outlineWorkflow")
+  const workflow = mastra.getWorkflow("multiOutlineWorkflow")
   const run = await workflow.createRun()
   const result = await run.start({ inputData: { userPrompt, language, slideCount, keywords } })
 

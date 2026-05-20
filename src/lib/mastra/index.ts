@@ -1,20 +1,24 @@
-import { Mastra } from '@mastra/core/mastra';
-import { PinoLogger } from '@mastra/loggers';
-import { PostgresStore } from '@mastra/pg';
-import { outlineCreatorAgent } from './agents/outline-creator-agent';
-import { slideCreatorAgent } from './agents/slide-creator-agent';
-import { outlineSemanticScorer } from './scorers/outline-semantic-scorer';
-import { slideSemanticScorer } from './scorers/slide-semantic-scorer';
-import { outlineWorkflow } from './workflows/outline-workflow';
-import { slideWorkflow } from './workflows/slide-workflow';
+import { Mastra } from '@mastra/core/mastra'
+import { PinoLogger } from '@mastra/loggers'
+import { PostgresStore } from '@mastra/pg'
+import { multiOutlineCreatorAgent } from './agents/multi-outline-creator-agent'
+import { singleOutlineCreatorAgent } from './agents/single-outline-creator-agent'
+import { slideCreatorAgent } from './agents/slide-creator-agent'
+import { outlineSemanticScorer } from './scorers/outline-semantic-scorer'
+import { slideSemanticScorer } from './scorers/slide-semantic-scorer'
+import { multiOutlineWorkflow } from './workflows/multi-outline-workflow'
+import { singleOutlineWorkflow } from './workflows/single-outline-workflow'
+import { slideWorkflow } from './workflows/slide-workflow'
 
 export const mastra = new Mastra({
   agents: {
-    outlineCreatorAgent,
+    multiOutlineCreatorAgent,
+    singleOutlineCreatorAgent,
     slideCreatorAgent,
   },
   workflows: {
-    outlineWorkflow,
+    multiOutlineWorkflow,
+    singleOutlineWorkflow,
     slideWorkflow,
   },
   scorers: {
@@ -30,4 +34,4 @@ export const mastra = new Mastra({
     level: 'debug',
     prettyPrint: true,
   }),
-});
+})

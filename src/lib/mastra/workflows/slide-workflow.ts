@@ -9,7 +9,7 @@ import {
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { elementParser } from "@/lib/excalidraw/parse/element-parser";
 import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper";
-import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt.v2";
+import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt";
 import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
 
 const generateSlideStep = createStep({
@@ -21,8 +21,11 @@ const generateSlideStep = createStep({
     const startedAt = Date.now()
     const agent       = mastra.getAgent("slideCreatorAgent")
     const language    = LANGUAGE_NAMES[inputData.language] ?? "English"
-    const canvas      = CANVAS_DIMENSIONS[inputData.aspectRatio] ?? CANVAS_DIMENSIONS[0]
-    const instructions = buildSlideCreatorPrompt(inputData.type, inputData.representation, canvas)
+    const canvas  = CANVAS_DIMENSIONS[inputData.aspectRatio] ?? CANVAS_DIMENSIONS[0]
+    const context = inputData.amount !== undefined
+      ? { amount: inputData.amount, audience: inputData.audience ?? 0, scenario: inputData.scenario ?? 0, theme: inputData.theme ?? 0 }
+      : undefined
+    const instructions = buildSlideCreatorPrompt(inputData.type, inputData.representation, canvas, context)
 
     const parts: string[] = [
       `Tipo: ${inputData.type}`,
@@ -39,23 +42,23 @@ const generateSlideStep = createStep({
       { instructions },
     )
 
-    const [toolResults, text, usage] = await Promise.all([
-      response.toolResults,
-      response.text,
-      response.usage.catch(() => null),
-    ])
+    const toolResults = await response.toolResults
 
     let elements: SlideToolOutput["elements"]
-
     const parser = elementParser()
 
     if (toolResults?.length && toolResults[0]?.payload) {
       elements = (toolResults[0].payload.result as SlideToolOutput).elements
-    } else if (text) {
-      elements = parser.parse(text)
     } else {
-      throw new Error("Agent returned no tool results and no text output")
+      const text = await response.text
+      if (text?.trim()) {
+        elements = parser.parse(text)
+      } else {
+        throw new Error("Agent returned no tool results and no text output")
+      }
     }
+
+    const usage = await response.usage.catch(() => null)
 
     const result: SlideToolOutput = { elements: parser.validate(elements as unknown[]) }
     const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"

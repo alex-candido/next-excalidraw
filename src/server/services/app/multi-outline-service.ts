@@ -5,8 +5,8 @@ import { generationRepository } from "@/server/repositories/app/generation-repos
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { PresentationStatus } from "@/lib/drizzle/schema/presentation"
 import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
-import type { OutlineGenerate, OutlineRegenerate, OutlineBulkUpdate } from "@/schemas/app/outline-schema"
 import type { OutlineWorkflowOutput } from "@/schemas/app/outline-schema"
+import type { MultiGenerate, OutlineRegenerate, OutlineBulkUpdate } from "@/schemas/app/presentations/multi-schema"
 
 function slugify(text: string, code: string) {
   const base = text
@@ -18,8 +18,8 @@ function slugify(text: string, code: string) {
   return `${base}-${code}`
 }
 
-export function outlineService() {
-  async function generate(presentationId: string, userId: string, input: OutlineGenerate) {
+export function multiOutlineService() {
+  async function generate(presentationId: string, userId: string, input: MultiGenerate) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
@@ -31,7 +31,7 @@ export function outlineService() {
     })
 
     try {
-      const workflow = mastra.getWorkflow("outlineWorkflow")
+      const workflow = mastra.getWorkflow("multiOutlineWorkflow")
       const run      = await workflow.createRun()
       const { result } = await run.start({ inputData: input }) as { result: OutlineWorkflowOutput }
 
@@ -100,7 +100,7 @@ export function outlineService() {
 
     const typeKey = Object.entries(OutlineType).find(([, v]) => v === input.type)?.[0] ?? "content"
 
-    const workflow = mastra.getWorkflow("outlineWorkflow")
+    const workflow = mastra.getWorkflow("multiOutlineWorkflow")
     const run      = await workflow.createRun()
     const { result } = await run.start({
       inputData: {
