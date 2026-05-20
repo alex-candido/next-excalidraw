@@ -117,26 +117,22 @@ function applyFallbacks(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementS
   return Object.keys(patches).length ? { ...skeleton, ...patches } : skeleton
 }
 
-/**
- * Parses ExcalidrawElementSkeleton[] from raw LLM text output.
- * Handles: JSON arrays, code-fenced blocks, inline JSON objects, trailing commas.
- */
-export function parseSkeletons(text: string): ExcalidrawElementSkeleton[] {
-  const cleaned = stripCodeFences(text)
+export function elementParser() {
+  function parse(text: string): ExcalidrawElementSkeleton[] {
+    const cleaned = stripCodeFences(text)
 
-  const arr = repairAndParseArray(cleaned)
-  if (arr) {
-    const valid = arr.filter(isValidSkeleton).map(applyFallbacks)
-    if (valid.length > 0) return valid
+    const arr = repairAndParseArray(cleaned)
+    if (arr) {
+      const valid = arr.filter(isValidSkeleton).map(applyFallbacks)
+      if (valid.length > 0) return valid
+    }
+
+    return extractObjects(cleaned).filter(isValidSkeleton).map(applyFallbacks)
   }
 
-  return extractObjects(cleaned).filter(isValidSkeleton).map(applyFallbacks)
-}
+  function validate(raw: unknown[]): ExcalidrawElementSkeleton[] {
+    return raw.filter(isValidSkeleton).map(applyFallbacks)
+  }
 
-/**
- * Validates and filters a raw array (e.g. from a Mastra tool call) into skeletons.
- * Applies fallbacks: text elements missing strokeColor default to #1e1e1e.
- */
-export function validateSkeletons(raw: unknown[]): ExcalidrawElementSkeleton[] {
-  return raw.filter(isValidSkeleton).map(applyFallbacks)
+  return { parse, validate }
 }

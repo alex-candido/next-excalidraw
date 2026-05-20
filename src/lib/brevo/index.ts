@@ -11,13 +11,17 @@ interface SendEmailOptions {
   react: ReactElement;
 }
 
-export async function sendEmail({ to, subject, react }: SendEmailOptions) {
-  const html = await render(react);
+export function emailClient() {
+  async function send({ to, subject, react }: SendEmailOptions) {
+    const html = await render(react);
 
-  return client.transactionalEmails.sendTransacEmail({
-    sender: { name: "Next Excalidraw", email: "noreply@nextexcalidraw.com" },
-    to: [{ email: to }],
-    subject,
-    htmlContent: html,
-  });
+    return client.transactionalEmails.sendTransacEmail({
+      sender: { name: "Next Excalidraw", email: "noreply@nextexcalidraw.com" },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    });
+  }
+
+  return { send }
 }

@@ -1,8 +1,8 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { slideToolOutputSchema, type SlideToolOutput } from "@/schemas/app/slide-schema";
-import { validateSkeletons } from "@/lib/excalidraw/parse/element-parser";
-import { normalizeArrows } from "@/lib/excalidraw/normalize/arrows-normalizer";
+import { elementParser } from "@/lib/excalidraw/parse/element-parser";
+import { arrowNormalizer } from "@/lib/excalidraw/normalize/arrows-normalizer";
 
 export const slideStructureTool = createTool({
   id: "slide-structure-tool",
@@ -12,8 +12,8 @@ export const slideStructureTool = createTool({
   }),
   outputSchema: slideToolOutputSchema,
   execute: async (inputData): Promise<SlideToolOutput> => {
-    const validated  = validateSkeletons(inputData.elements)
-    const normalized = normalizeArrows(validated)
+    const validated  = elementParser().validate(inputData.elements)
+    const normalized = arrowNormalizer().normalize(validated)
     return { elements: normalized as Record<string, unknown>[] }
   },
 })

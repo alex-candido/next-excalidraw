@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test"
-import { parseSkeletons, validateSkeletons } from "@/lib/excalidraw/parse/element-parser"
+import { elementParser } from "@/lib/excalidraw/parse/element-parser"
+
+const { parse: parseSkeletons, validate: validateSkeletons } = elementParser()
 
 const rect  = { type: "rectangle", id: "r1", x: 0, y: 0, width: 100, height: 60 }
 const text  = { type: "text", id: "t1", x: 0, y: 0, text: "hello", strokeColor: "#000000" }

@@ -7,8 +7,8 @@ import {
   type SlideWorkflowOutput,
 } from "@/schemas/app/slide-schema";
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { parseSkeletons, validateSkeletons } from "@/lib/excalidraw/parse/element-parser";
-import { mapWorkflowMetadata } from "../mappers/workflow-metadata-mapper";
+import { elementParser } from "@/lib/excalidraw/parse/element-parser";
+import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper";
 import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt.v2";
 import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
 
@@ -47,15 +47,17 @@ const generateSlideStep = createStep({
 
     let elements: SlideToolOutput["elements"]
 
+    const parser = elementParser()
+
     if (toolResults?.length && toolResults[0]?.payload) {
       elements = (toolResults[0].payload.result as SlideToolOutput).elements
     } else if (text) {
-      elements = parseSkeletons(text)
+      elements = parser.parse(text)
     } else {
       throw new Error("Agent returned no tool results and no text output")
     }
 
-    const result: SlideToolOutput = { elements: validateSkeletons(elements as unknown[]) }
+    const result: SlideToolOutput = { elements: parser.validate(elements as unknown[]) }
     const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     const slideBoundary = {
@@ -78,7 +80,7 @@ const generateSlideStep = createStep({
     return {
       elements: [slideBoundary, ...result.elements],
       metadata: {
-        ...mapWorkflowMetadata({
+        ...workflowMetadataMapper().map({
           agentId:   "slide-creator-agent",
           startedAt,
           usage,

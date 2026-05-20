@@ -92,6 +92,7 @@ https://shadcn-dashboard.kiranism.dev/dashboard/overview
 https://github.com/silicondeck/shadcn-dashboard-landing-template
 
 https://github.com/liujuntao123/smart-excalidraw-next
+https://github.com/allweonedev/presentation-ai
 https://github.com/excalidraw/excalidraw-mcp
 https://github.com/yctimlin/mcp_excalidraw
 https://github.com/coleam00/excalidraw-diagram-skill

@@ -11,6 +11,10 @@ export function slideRepository() {
     return row
   }
 
+  async function findById(id: string) {
+    return db.query.slide.findFirst({ where: eq(slide.id, id) }) ?? null
+  }
+
   async function findByPresentationId(presentationId: string) {
     return db.query.slide.findMany({
       where: eq(slide.presentationId, presentationId),
@@ -27,5 +31,14 @@ export function slideRepository() {
     return row
   }
 
-  return { create, findByPresentationId, update }
+  async function bulkUpdate(items: { id: string; elements: unknown[]; appState: Record<string, unknown> }[]) {
+    let count = 0
+    for (const item of items) {
+      await db.update(slide).set({ elements: item.elements, appState: item.appState }).where(eq(slide.id, item.id))
+      count++
+    }
+    return count
+  }
+
+  return { create, findById, findByPresentationId, update, bulkUpdate }
 }

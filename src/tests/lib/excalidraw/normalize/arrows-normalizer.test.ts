@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test"
-import { normalizeArrows } from "@/lib/excalidraw/normalize/arrows-normalizer"
+import { arrowNormalizer } from "@/lib/excalidraw/normalize/arrows-normalizer"
+
+const { normalize: normalizeArrows } = arrowNormalizer()
 import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/transform"
 
 function rect(id: string, x: number, y: number, w = 100, h = 60): ExcalidrawElementSkeleton {

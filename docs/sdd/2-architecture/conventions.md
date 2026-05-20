@@ -87,7 +87,8 @@ Convenções:
 - Métodos padrão: `create`, `findById`, `findMany`, `update`, `deleteById`
 - Recebem e retornam tipos inferidos dos schemas Drizzle (`$inferInsert`, `$inferSelect`)
 - Nenhuma lógica de negócio — apenas queries
-- O mesmo padrão se aplica a qualquer módulo acoplável em `lib/` (ex: `normalizeArrows`, `parseSkeletons`)
+- O mesmo padrão se aplica a qualquer módulo de `lib/` que exponha operações de serviço (ex: `elementParser()`, `arrowNormalizer()`, `emailClient()`)
+- Exceção: objetos de configuração de framework (Mastra agents, tools, workflows, scorers) são exportados diretamente como constantes — não usam o padrão acoplado
 
 ### src/server/services/
 
@@ -161,11 +162,11 @@ lib/
     seeds/        dados iniciais para dev e prod (por entidade)
   excalidraw/
     generators/
-      elements/       funções de criação de cada tipo de elemento (sandbox)
-      representations/ geradores de representações visuais completas (flowchart, mindmap, etc.)
-    normalize/    normalização de setas (arrows-normalizer)
-    parse/        parsing de output bruto do LLM (validateSkeletons, parseSkeletons)
-    serialize/    conversão skeleton → ExcalidrawElement (client-side only)
+      element-generators.ts  função acoplada elementsGenerator() com todos os tipos de elemento
+      representations/       geradores de representações visuais completas (flowchart, mindmap, etc.)
+    normalize/    normalização de setas — arrowNormalizer() com { normalize }
+    parse/        parsing de output bruto do LLM — elementParser() com { parse, validate }
+    serialize/    conversão skeleton → ExcalidrawElement — skeletonSerializer() com { serialize } (client-side only)
     templates/    elementos pré-montados reutilizáveis para testes e referência
   mastra/
     agents/       definição dos agentes LLM

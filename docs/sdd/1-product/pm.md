@@ -99,11 +99,11 @@ outline API route
 - [ ] `P1` Melhorar `outline-creator-prompt` — alinhar representações com os novos tipos adicionados
 
 **Integração & API**
-- [ ] `P0` Criar API routes sem autenticação — `POST /presentations`, `POST /presentations/[id]/slides/generate`, `GET /presentations`, `GET /presentations/[id]`, `PATCH /presentations/[id]/outlines`, `POST /outlines/[id]/regenerate`, `GET /presentations/[id]/slides`, `PATCH /presentations/[id]/slides`
-- [ ] `P0` Criar `.http` files para todas as rotas — `src/http/app/presentations.http`, `outlines.http`, `slides.http`
-- [ ] `P0` Conectar `slideWorkflow` à API route — gerar slides após outline
-- [ ] `P0` Persistir outline no banco após geração
-- [ ] `P0` Persistir slides no banco após geração
+- [x] `P0` Criar API routes sem autenticação — `POST /presentations`, `POST /presentations/[id]/slides/generate`, `GET /presentations`, `GET /presentations/[id]`, `DELETE /presentations/[id]`, `PATCH /presentations/[id]/outlines`, `POST /presentations/[id]/outlines/[outlineId]/generate`, `GET /presentations/[id]/slides`, `PATCH /presentations/[id]/slides`, `POST /presentations/[id]/slides/[slideId]/generate`
+- [x] `P0` Criar `.http` files para todas as rotas — `src/http/v1/app/presentations.http`, `outlines.http`, `slides.http`
+- [x] `P0` Conectar `slideWorkflow` à API route — gerar slides após outline
+- [x] `P0` Persistir outline no banco após geração
+- [x] `P0` Persistir slides no banco após geração
 
 ---
 

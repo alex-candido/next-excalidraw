@@ -34,5 +34,9 @@ export function presentationRepository() {
     return row
   }
 
-  return { create, findById, findMany, update }
+  async function remove(id: string) {
+    await db.delete(presentation).where(eq(presentation.id, id))
+  }
+
+  return { create, findById, findMany, update, remove }
 }

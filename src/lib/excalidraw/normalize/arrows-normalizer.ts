@@ -41,7 +41,8 @@ function getEdgeCenter(rect: Rect, edge: Edge): { x: number; y: number } {
   }
 }
 
-export function normalizeArrows(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawElementSkeleton[] {
+export function arrowNormalizer() {
+  function normalize(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawElementSkeleton[] {
   const elementMap = new Map<string, ExcalidrawElementSkeleton>()
   for (const el of skeletons) {
     const id = (el as Record<string, unknown>).id as string | undefined
@@ -78,4 +79,7 @@ export function normalizeArrows(skeletons: ExcalidrawElementSkeleton[]): Excalid
       height,
     }
   })
+  }
+
+  return { normalize }
 }

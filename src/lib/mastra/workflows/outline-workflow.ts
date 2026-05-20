@@ -6,7 +6,7 @@ import {
 } from "@/schemas/app/outline-schema";
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { mapWorkflowMetadata } from "../mappers/workflow-metadata-mapper";
+import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper";
 import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer";
 
 const generateOutlineStep = createStep({
@@ -43,7 +43,7 @@ const generateOutlineStep = createStep({
 
     return {
       ...result,
-      metadata: mapWorkflowMetadata({
+      metadata: workflowMetadataMapper().map({
         agentId:   "outline-creator-agent",
         startedAt,
         usage,

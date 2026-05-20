@@ -59,8 +59,31 @@ export const slideGenerateSchema = z.object({
   outlines: z.array(slideGenerateItemSchema).min(1),
 })
 
+export const slideBulkUpdateItemSchema = z.object({
+  id:       z.string().uuid(),
+  elements: z.array(z.record(z.string(), z.unknown())),
+  appState: z.record(z.string(), z.unknown()).default({}),
+})
+
+export const slideBulkUpdateSchema = z.object({
+  slides: z.array(slideBulkUpdateItemSchema).min(1),
+})
+
+export const slideRegenerateSchema = z.object({
+  outlineId:      z.string().uuid(),
+  type:           z.number().int(),
+  title:          z.string(),
+  description:    z.string(),
+  concepts:       z.array(z.string()),
+  representation: z.number().int(),
+  layout:         z.string(),
+})
+
 export type SlideGenerateItem   = z.infer<typeof slideGenerateItemSchema>
 export type SlideGenerate       = z.infer<typeof slideGenerateSchema>
+export type SlideBulkUpdateItem = z.infer<typeof slideBulkUpdateItemSchema>
+export type SlideBulkUpdate     = z.infer<typeof slideBulkUpdateSchema>
+export type SlideRegenerate     = z.infer<typeof slideRegenerateSchema>
 export type SlideWorkflowInput  = z.infer<typeof slideWorkflowInputSchema>
 export type SlideToolOutput     = z.infer<typeof slideToolOutputSchema>
 export type SlideWorkflowOutput = z.infer<typeof slideWorkflowOutputSchema>

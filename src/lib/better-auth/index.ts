@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/drizzle";
-import { sendVerificationEmail } from "@/lib/brevo/senders/send-verification-email";
+import { emailSenders } from "@/lib/brevo/senders/email-senders";
 import { env } from "@/config/env-config";
 
 export const auth = betterAuth({
@@ -14,7 +14,7 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail(user.email, url);
+      await emailSenders().sendVerification(user.email, url);
     },
   },
 });

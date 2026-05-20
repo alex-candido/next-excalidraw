@@ -22,5 +22,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!presentation) return Response.json({ error: "Not found" }, { status: 404 })
   if (presentation.userId !== DEV_USER_ID) return Response.json({ error: "Forbidden" }, { status: 403 })
 
+  await presentationRepository().remove(id)
   return new Response(null, { status: 204 })
 }

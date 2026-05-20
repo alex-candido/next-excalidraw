@@ -5,7 +5,7 @@ import { generationRepository } from "@/server/repositories/app/generation-repos
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
 import { SlideStatus } from "@/lib/drizzle/schema/slide"
-import type { SlideGenerate } from "@/schemas/app/slide-schema"
+import type { SlideGenerate, SlideBulkUpdate, SlideRegenerate } from "@/schemas/app/slide-schema"
 import type { SlideWorkflowOutput } from "@/schemas/app/slide-schema"
 
 function toTypeKey(n: number): string {
@@ -78,5 +78,68 @@ export function slideService() {
     return { presentationId, slides: results }
   }
 
-  return { generate }
+  async function bulkUpdate(presentationId: string, userId: string, input: SlideBulkUpdate) {
+    const presentation = await presentationRepository().findById(presentationId)
+    if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
+    if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
+
+    const updated = await slideRepository().bulkUpdate(input.slides)
+    return { updated }
+  }
+
+  async function regenerate(presentationId: string, slideId: string, userId: string, input: SlideRegenerate) {
+    const presentation = await presentationRepository().findById(presentationId)
+    if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
+    if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
+
+    const existing = await slideRepository().findById(slideId)
+    if (!existing) throw Object.assign(new Error("Slide not found"), { status: 404 })
+
+    const gen = await generationRepository().create({
+      presentationId,
+      type:   GenerationType.slide,
+      status: GenerationStatus.pending,
+    })
+
+    try {
+      const workflow = mastra.getWorkflow("slideWorkflow")
+      const run      = await workflow.createRun()
+      const { result } = await run.start({
+        inputData: {
+          outlineId:      input.outlineId,
+          order:          existing.order,
+          type:           toTypeKey(input.type),
+          title:          input.title,
+          description:    input.description,
+          concepts:       input.concepts,
+          representation: toRepKey(input.representation),
+          layout:         input.layout,
+          language:       presentation.language,
+          aspectRatio:    presentation.aspectRatio,
+        },
+      }) as { result: SlideWorkflowOutput }
+
+      const updated = await slideRepository().update(slideId, {
+        elements: result.elements as unknown[],
+        appState: {},
+      })
+
+      await generationRepository().update(gen.id, {
+        status:      GenerationStatus.completed,
+        completedAt: new Date(),
+        usage:       result.metadata.usage as Record<string, unknown>,
+        model:       { name: result.metadata.model } as Record<string, unknown>,
+      })
+
+      return { id: updated.id, order: updated.order, outlineId: updated.outlineId }
+    } catch (err) {
+      await generationRepository().update(gen.id, {
+        status:      GenerationStatus.failed,
+        completedAt: new Date(),
+      })
+      throw err
+    }
+  }
+
+  return { generate, bulkUpdate, regenerate }
 }
