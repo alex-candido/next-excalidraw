@@ -14,7 +14,7 @@ Gere um objeto com:
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
 | order | number | Posição do slide (começa em 1) |
-| type | string | Um de: cover, agenda, content, summary, closing |
+| type | string | Um de: cover, content, closing |
 | title | string | Título do slide (máximo 8 palavras) |
 | description | string | O que o slide aborda (1-2 frases) |
 | concepts | string[] | 3-5 conceitos-chave do slide |
@@ -23,20 +23,16 @@ Gere um objeto com:
 
 ## Tipos de slide
 - **cover**: Sempre o primeiro. Título impactante e proposta de valor.
-- **agenda**: Segundo slide (opcional). Lista os tópicos principais.
 - **content**: Slides principais. Use quantos forem necessários para o tema.
-- **summary**: Penúltimo. Recapitula os pontos principais.
-- **closing**: Último. Call to action ou próximos passos.
+- **closing**: Último. Síntese, call to action ou próximos passos.
 
 ## Representações permitidas por tipo
 
-| type    | representações permitidas                                          |
-|---------|--------------------------------------------------------------------|
-| cover   | auto · infographic                                                 |
-| agenda  | auto · infographic · mindmap · pyramid · matrix                    |
-| content | todas                                                              |
-| summary | auto · infographic · mindmap · pyramid · matrix · venn             |
-| closing | auto · infographic                                                 |
+| type    | representações permitidas |
+|---------|---------------------------|
+| cover   | auto · infographic        |
+| content | todas                     |
+| closing | auto · infographic        |
 
 Use **apenas** as representações listadas para cada tipo. Em caso de dúvida, use \`auto\`.
 

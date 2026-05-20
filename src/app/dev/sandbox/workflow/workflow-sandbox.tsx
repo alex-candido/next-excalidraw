@@ -86,7 +86,10 @@ export function WorkflowSandbox() {
       })
       const data = await res.json()
       const output = data?.result
-      if (!output?.outlines) throw new Error(data?.error ?? "Resposta inesperada do workflow")
+      if (!output?.outlines) {
+        const err = data?.error
+        throw new Error(typeof err === "object" ? (err?.message ?? JSON.stringify(err)) : (err ?? "Resposta inesperada do workflow"))
+      }
       setOutlineTitle(output.title)
       setOutlines(output.outlines)
     } catch (e) {
@@ -122,7 +125,10 @@ export function WorkflowSandbox() {
       })
       const data = await res.json()
       const output = data?.result
-      if (!output?.elements) throw new Error(data?.error ?? "Resposta inesperada do workflow")
+      if (!output?.elements) {
+        const err = data?.error
+        throw new Error(typeof err === "object" ? (err?.message ?? JSON.stringify(err)) : (err ?? "Resposta inesperada do workflow"))
+      }
       setSlideResult(output)
     } catch (e) {
       setSlideError(e instanceof Error ? e.message : "Erro desconhecido")

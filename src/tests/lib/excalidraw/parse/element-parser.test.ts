@@ -38,9 +38,9 @@ describe("validateSkeletons", () => {
     expect((result[0] as Record<string, unknown>).strokeColor).toBe("#000000")
   })
 
-  it("does not apply strokeColor fallback on non-text elements", () => {
+  it("applies strokeColor fallback on non-text elements missing strokeColor", () => {
     const result = validateSkeletons([{ type: "rectangle", id: "r1", x: 0, y: 0 }])
-    expect((result[0] as Record<string, unknown>).strokeColor).toBeUndefined()
+    expect((result[0] as Record<string, unknown>).strokeColor).toBe("#1e1e1e")
   })
 
   it("accepts all valid types", () => {

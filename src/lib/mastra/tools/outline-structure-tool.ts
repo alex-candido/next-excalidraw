@@ -27,10 +27,10 @@ export const outlineStructureTool = createTool({
           order:          s.order ?? i + 1,
           type:           s.type,
           title:          s.title.trim(),
-          description:    s.description.trim(),
-          concepts:       s.concepts.map((c) => c.trim()).filter(Boolean),
+          description:    (s.description ?? "").trim(),
+          concepts:       (s.concepts ?? []).map((c) => c.trim()).filter(Boolean),
           representation: representation.trim(),
-          layout:         s.layout.trim(),
+          layout:         (s.layout ?? "").trim(),
         }
       })
       .sort((a, b) => a.order - b.order)

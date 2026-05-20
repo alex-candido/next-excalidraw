@@ -38,7 +38,11 @@ const generateOutlineStep = createStep({
       response.usage.catch(() => null),
     ])
 
-    const result = toolResults[0].payload.result as OutlineToolOutput
+    const toolPayload = toolResults?.[0]?.payload
+    if (!toolPayload || toolPayload.isError) {
+      throw new Error((toolPayload?.result as { message?: string })?.message ?? "Tool execution failed")
+    }
+    const result = toolPayload.result as OutlineToolOutput
     const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     return {

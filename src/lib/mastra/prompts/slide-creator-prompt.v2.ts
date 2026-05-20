@@ -1,3 +1,6 @@
+import { presentationThemes } from "@/lib/excalidraw/themes/presentation-themes"
+import { AMOUNT_RANGE, AUDIENCE_HINTS, SCENARIO_HINTS, THEME_KEYS } from "@/schemas/app/presentation-schema"
+
 const BASE_PROMPT = `
 ## Tarefa
 
@@ -46,6 +49,7 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 ### 2) Texto livre (text)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`, \`text\`
 - **Automático**: \`width\` e \`height\` calculados por medição — não forneça
+- **Estimativa de largura de texto**: \`Math.max(chars × 8, 80)\` para 1 linha; \`Math.max(chars × 4 + 20, 80)\` para 2 linhas — use para calcular se o texto cabe antes de quebrar com \`\\n\`
 - **Largura máxima**: quebre com \`\\n\` antes de ultrapassar o canvas — limite: \`({{XMAX}} − x) ÷ (fontSize × 0.6)\` caracteres por linha
 - **CRÍTICO**: \`strokeColor\` em elementos \`text\` define a **cor do texto** — sempre defina explicitamente
 - **Proibido**: nunca use markdown (\`**negrito**\`, \`*itálico*\`, \`# heading\`) — Excalidraw renderiza literalmente
@@ -97,6 +101,15 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 
 **Regras**: par fill+stroke sempre da mesma categoria. Use 2–4 cores principais. Regra 60-30-10: 60% neutro/branco, 30% cor primária, 10% destaque.
 
+**Variantes de fillStyle por hierarquia de elemento:**
+
+| Hierarquia | fillStyle | Uso |
+|------------|-----------|-----|
+| Elemento principal | \`solid\` | foco visual, nó central, etapa primária |
+| Elemento secundário | \`hachure\` | suporte, contexto, sub-etapa |
+| Container / zona de agrupamento | \`cross-hatch\` | delimitação visual sem peso |
+| Elemento inativo / placeholder | vazio (\`transparent\`) | referência, estado futuro |
+
 ## Setas — Semântica de Estilo
 
 | strokeStyle | Significado |
@@ -116,6 +129,16 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 | Processo, etapa, ação | rectangle |
 | Marcador de timeline | ellipse pequena (12×12px) |
 | Hierarquia, árvore | linhas + texto livre (sem boxes) |
+
+## Dimensões de Referência por Elemento
+
+| Hierarquia | Exemplo | width | height |
+|------------|---------|-------|--------|
+| Primário | etapa principal, nó central, caixa de destaque | 120–160 | 60 |
+| Secundário | sub-etapa, nó filho, item de lista | 80–100 | 40 |
+| Ícone / Marcador | ponto de timeline, dot, indicador | 24 | 24 |
+
+Use como ponto de partida — ajuste se o texto exigir mais espaço.
 
 ## Espaçamento de Referência
 
@@ -143,6 +166,7 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 4. **Não coloque texto em containers de zona/agrupamento grandes** — use texto livre posicionado no topo
 5. **Centralização horizontal**: para centrar container de largura W, use x = ({{WIDTH}} − W) / 2; para \`text\` com \`textAlign: center\`, o \`x\` é o centro do texto — use x = {{CENTER_X}}
 6. **Texto livre longo**: quebre manualmente com \`\\n\` — texto livre não quebra automaticamente e ultrapassa o canvas
+7. **Grid de 20px**: todas as coordenadas (x, y, width, height) devem ser múltiplos de 20 — facilita alinhamento e edição manual. Arredonde: \`Math.round(value / 20) * 20\`
 
 ## Anti-Patterns
 
@@ -154,6 +178,7 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 - ❌ IDs curtos genéricos como "r1", "t2", "a3"
 - ❌ Elementos sobrepostos — respeite o espaço mínimo de 40px
 - ❌ Markdown em qualquer texto (\`**negrito**\`, \`*itálico*\`) — Excalidraw renderiza literalmente
+- ❌ Coordenadas que não são múltiplos de 20 — sempre use valores snap ao grid (20, 40, 60, 80…)
 
 ## Exemplos de Referência
 
@@ -203,7 +228,7 @@ Chame a ferramenta \`slideStructureTool\` passando o array de ExcalidrawElementS
 \`\`\`
 
 ## Restrições Finais
-- Gere entre 4 e 20 elementos por slide
+- Volume de elementos: respeite o intervalo indicado no Contexto da Apresentação (padrão: 4–20)
 - Respeite os limites do canvas: x 20–{{XMAX}}, y 20–{{YMAX}}
 - Gere TODO o conteúdo textual no idioma indicado
 `.trim()
@@ -216,22 +241,11 @@ const SLIDE_TYPE_GUIDES: Record<string, string> = {
 - Elementos decorativos (linhas ou formas simples) ficam fora da faixa y=({{CENTER_Y}}−80) até y=({{CENTER_Y}}+80) — nunca setas, nunca sobre o texto
 - Máximo de 5 elementos no total`,
 
-  agenda: `## Guia para tipo de slide: agenda
-- Título no topo como texto livre (fontSize 24, y=35, strokeColor "#1e293b")
-- Tópicos como rectangles com label, distribuídos verticalmente (y de 90 a 390)
-- Espaçamento uniforme entre tópicos (~60px entre cada um)
-- Use cores da paleta para diferenciar tópicos`,
-
   content: `## Guia para tipo de slide: content
 - Título no topo como texto livre (fontSize 22–26, y=25, strokeColor "#1e293b")
 - Conteúdo principal ocupa y=70 a y=420
 - Use a representação visual indicada para organizar o conteúdo
 - Aplique hierarquia visual: elemento principal maior, secundários menores`,
-
-  summary: `## Guia para tipo de slide: summary
-- Título como texto livre (fontSize 24, y=30, strokeColor "#1e293b")
-- 3–5 pontos-chave como rectangles com label ou texto livre com marcador (•)
-- Distribuição vertical uniforme com espaçamento de ~60px`,
 
   closing: `## Guia para tipo de slide: closing
 - Mensagem de impacto centralizada como texto livre (fontSize 32–42, strokeColor "#1e293b") em y≈170
@@ -360,10 +374,18 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 - 3–4 cores da paleta, regra 60-30-10`,
 }
 
+export type SlideCreatorContext = {
+  amount:   number
+  audience: number
+  scenario: number
+  theme:    number
+}
+
 export function buildSlideCreatorPrompt(
   type: string,
   representation: string,
   canvas: { width: number; height: number; label: string },
+  context?: SlideCreatorContext,
 ): string {
   const xMax    = canvas.width - 20
   const yMax    = canvas.height - 20
@@ -381,6 +403,27 @@ export function buildSlideCreatorPrompt(
       .replace(/\{\{CENTER_Y\}\}/g, centerY.toString())
 
   const parts: string[] = [replacePlaceholders(BASE_PROMPT)]
+
+  if (context) {
+    const themeKey    = THEME_KEYS[context.theme] ?? "daktilo"
+    const [min, max]  = AMOUNT_RANGE[context.amount] ?? [4, 20]
+    const audienceHint = AUDIENCE_HINTS[context.audience] ?? AUDIENCE_HINTS[0]
+    const scenarioHint = SCENARIO_HINTS[context.scenario] ?? SCENARIO_HINTS[0]
+
+    const { buildPalettePrompt } = presentationThemes()
+
+    parts.push([
+      `## Contexto da Apresentação`,
+      ``,
+      `**Audiência**: ${audienceHint}`,
+      `**Cenário**: ${scenarioHint}`,
+      `**Volume de elementos**: entre ${min} e ${max} elementos por slide`,
+      ``,
+      buildPalettePrompt(themeKey),
+      ``,
+      `Use **somente** as cores da paleta acima. Não use cores fora desta paleta.`,
+    ].join("\n"))
+  }
 
   const typeGuide = SLIDE_TYPE_GUIDES[type]
   if (typeGuide) parts.push(replacePlaceholders(typeGuide))

@@ -138,9 +138,19 @@ outline API route
 - [ ] `P2` Calcular custo real de geração com base nos tokens consumidos (`metadata.usage`) — integrar tabela de preços por modelo
 - [ ] `P3` Tornar o modelo dinâmico — suporte a múltiplos providers (Gemini, Anthropic, etc.) configurável por workflow ou por usuário
 
+**slide-creator-prompt — melhorias de qualidade** (fonte: `excalidraw-diagram-skill`, `ai-excalidraw`, `smart-excalidraw-next`)
+- [x] `P3` Tabela de dimensões padrão por elemento no prompt — primário `~120×60`, secundário `~80×40`, ícone `~24×24`
+- [x] `P3` Fórmula de largura de texto no prompt — `width = Math.max(chars × 8, 80)` para 1 linha; `chars × 8 / 2 + 20` para 2 linhas — evita texto truncado
+- [x] `P3` Regra de snap de grid 20px no prompt — coordenadas sempre múltiplos de 20
+- [x] `P3` Paleta estendida: variantes fill hachura/sólido/vazio por hierarquia de elemento
+- [ ] `P3` Fórmula exata de dimensões de texto no prompt — `ch_width = fontSize`, `en_width = fontSize × 0.6`, `height = linhas × fontSize × 1.25`; alertar sobre bound text bidirecional (`boundElements + containerId`) — texto standalone sem `containerId` desaparece (ref: `ai-excalidraw/prompt.ts`)
+- [ ] `P3` Ordem de emissão de elementos no prompt — background shapes primeiro, depois por nó: shape → label → setas; reduz colisões de sobreposição (ref: `excalidraw-diagram-skill/SKILL.md`)
+- [ ] `P3` Visual patterns no prompt — catálogo de padrões de composição: `fan-out` (radial), `convergence` (funil), `spiral` (loop), `cloud` (ellipses agrupadas), `assembly line` (before→process→after), `side-by-side` (ref: `excalidraw-diagram-skill/SKILL.md`)
+
 **lib/excalidraw**
-- [ ] `P3` `parseSkeletons` — suporte a output com múltiplos blocos JSON separados
-- [ ] `P3` `element-sizing.ts` — funções utilitárias: `calcTextWidth` (ajuste por idioma), `calcContainerHeight`, `snapToGrid` (grid de 20px)
+- [ ] `P3` `parseSkeletons` — suporte a output com múltiplos blocos JSON separados; melhorar JSON repair: detectar padrão `["key":value]` → inserir `{`, trim trailing comma, fallback para `jsonrepair` npm (ref: `smart-excalidraw-next/lib/json-repair.js`)
+- [ ] `P3` `optimizeArrows` — algoritmo `determineEdges()` production-grade: seleciona aresta ótima (left/right/top/bottom) por quadrante + distância; fixa bug Excalidraw `width=0 → width=1` (ref: `smart-excalidraw-next/lib/optimizeArrows.js`)
+- [x] `P3` `lib/excalidraw/math/sizing.ts` — `calcTextWidth(text, language)` com +15% para pt/es/fr/de/it, `calcContainerHeight(lines, fontSize, padding)`, `snapToGrid(value, gridSize=20)` — injetáveis como contexto no prompt
 
 **Regeneração individual de outline**
 - [ ] `P1` Definir abordagem: novo step dedicado vs reuso do `outlineWorkflow` com slideCount=1 (ver decisões abertas)
@@ -148,15 +158,18 @@ outline API route
 - [ ] `P2` Botão de regenerar por outline card na página `/presentations/[id]/outline`
 
 **Chat de Edição (Agent) — Ciclo 3**
-- [ ] `P2` Definir tools do agent de edição — baseado no modelo do `presentation-ai` (ref: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`)
-- [ ] `P2` Implementar agent com tools: `edit_slide`, `regenerate_slide`, `create_slide`, `delete_slide`, `apply_theme`, `respond_to_user`
+- [ ] `P2` Definir tools do agent de edição — baseado no modelo do `presentation-ai` (ref: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`) — 8 tools: `edit_slide_properties`, `replace_image`, `change_theme`, `regenerate_slide`, `create_slide`, `delete_slide`, `webSearch`, `respond_to_user`
+- [ ] `P2` Implementar agent com as 8 tools operando sobre `ExcalidrawElementSkeleton[]`
+- [ ] `P2` Middleware `trimMessageHistory` — limitar contexto a últimas 4 mensagens para reduzir tokens
+- [ ] `P2` Middleware de retry + JSON fallback para tool calls que falham (fonte: `presentation-ai/enforceStructuredToolCallsForLocalModels`)
 - [ ] `P2` UI do chat — painel lateral com streaming de mensagens e preview de edições
+- [ ] `P2` Edit diff tracking — capturar snapshot inicial dos elementos, computar diff (adições/remoções/movimentos), debounce 2s, alimentar o agent com o que mudou (ref: `excalidraw-mcp/src/edit-context.ts`)
 - [ ] `P3` Sugestões contextuais — agent propõe edições com base no conteúdo atual do slide
 
 **Templates no Editor — Ciclo 3**
-- [ ] `P2` Definir biblioteca de templates — tipos: cover, agenda, content (flowchart, mindmap, timeline, etc.), summary, closing
+- [ ] `P2` Definir biblioteca de templates como `ExcalidrawElementSkeleton[]` em `lib/excalidraw/templates/` — categorias: listas, boxes, gráficos, processos, comparação, especiais (fonte: `presentation-ai/templates.tsx`)
 - [ ] `P2` Criar slides a partir de template sem passar pelo outline
-- [ ] `P3` Templates como `ExcalidrawElementSkeleton[]` pré-montados em `lib/excalidraw/templates/`
+- [ ] `P3` Tipos de template mapeiam para `OutlineRepresentation` — flowchart, mindmap, timeline, etc.
 
 **Temas e Personalização — Ciclo 4**
 - [ ] `P3` Definir estrutura do objeto de tema — paleta de cores semânticas (primary, accent, background, text, heading), tipografia, background
@@ -179,7 +192,9 @@ outline API route
 
 **Infraestrutura — Ciclo 4**
 - [ ] `P3` Thumbnail gerado automaticamente após criação do slide
-- [ ] `P3` Exportação PDF / PPT (ref: `presentation-ai/domToPptxConverter.ts` — client-side via PptxGenJS)
+- [ ] `P3` Exportação PDF — jsPDF client-side, orientation auto, loop de slides (ref: `inscribed/export.ts`)
+- [ ] `P3` Exportação PPT (ref: `presentation-ai/domToPptxConverter.ts` — client-side via PptxGenJS)
+- [ ] `P3` Exportação de vídeo (WebM) e GIF — canvas + MediaRecorder para WebM, GIF.js para GIF (ref: `inscribed/export.ts`)
 - [ ] `P3` Apresentações públicas (visibility: public)
 
 **Custos & Estimativas**

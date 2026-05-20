@@ -13,6 +13,9 @@
 //  language                    :smallint          default(0), not null
 //  aspect_ratio                :smallint          default(0), not null
 //  slide_count                 :smallint          default(0), not null
+//  amount                      :smallint          default(0), not null
+//  audience                    :smallint          default(0), not null
+//  scenario                    :smallint          default(0), not null
 //  theme                       :smallint          default(0), not null
 //  keywords                    :text[]
 //  visibility                  :smallint          default(1), not null
@@ -73,6 +76,43 @@ export const PresentationType = {
   multi: 1,
 } as const;
 
+export const PresentationAmount = {
+  auto:      0,
+  minimal:   1,
+  concise:   2,
+  detailed:  3,
+  extensive: 4,
+} as const;
+
+export const PresentationAudience = {
+  general:  0,
+  business: 1,
+  investor: 2,
+  teacher:  3,
+  student:  4,
+} as const;
+
+export const PresentationScenario = {
+  auto:        0,
+  promotional: 1,
+  teaching:    2,
+  analytical:  3,
+  report:      4,
+} as const;
+
+export const PresentationTheme = {
+  daktilo:    0,
+  noir:       1,
+  cornflower: 2,
+  indigo:     3,
+  orbit:      4,
+  cosmos:     5,
+  sunset:     6,
+  forest:     7,
+  piano:      8,
+  ebony:      9,
+} as const;
+
 export const presentation = pgTable(
   "presentation",
   {
@@ -89,7 +129,10 @@ export const presentation = pgTable(
     language: smallint("language").default(0).notNull(),
     aspectRatio: smallint("aspect_ratio").default(0).notNull(),
     slideCount: smallint("slide_count").default(0).notNull(),
-    theme: smallint("theme").default(0).notNull(),
+    amount:     smallint("amount").default(0).notNull(),
+    audience:   smallint("audience").default(0).notNull(),
+    scenario:   smallint("scenario").default(0).notNull(),
+    theme:      smallint("theme").default(0).notNull(),
     keywords: text("keywords").array(),
     visibility: smallint("visibility").default(1).notNull(),
     status: smallint("status").default(0).notNull(),

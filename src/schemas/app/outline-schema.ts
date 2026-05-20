@@ -16,10 +16,10 @@ export const outlineItemSchema = z.object({
   order:          z.number().int().min(1),
   type:           z.enum(OUTLINE_TYPES),
   title:          z.string(),
-  description:    z.string(),
-  concepts:       z.array(z.string()),
+  description:    z.string().default(""),
+  concepts:       z.array(z.string()).default([]),
   representation: z.enum(OUTLINE_REPS),
-  layout:         z.string(),
+  layout:         z.string().default(""),
 })
 
 export const outlineToolOutputSchema = z.object({
