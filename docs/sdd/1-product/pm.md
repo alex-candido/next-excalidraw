@@ -7,10 +7,11 @@ Ao iniciar uma nova sessão de desenvolvimento, oriente o agente com o seguinte 
 ```
 Leia os seguintes arquivos para entender o estado atual do projeto antes de começar:
 
-1. docs/tasks.md — kanban com prioridades, dependências e decisões abertas
-2. docs/conventions.md — estrutura de pastas e regras do projeto
-3. docs/flows/ — comportamento esperado de cada pipeline
-4. docs/reports/references-analysis.md — referências analisadas e o que aproveitar
+1. docs/sdd/1-product/pm.md — ciclo atual, tarefas Active e decisões abertas
+2. docs/sdd/2-architecture/conventions.md — estrutura de pastas e regras do projeto
+3. docs/sdd/3-specs/features/ — comportamento esperado de cada feature
+4. docs/sdd/3-specs/pipeline/ — internos dos workflows de IA
+5. docs/sdd/5-references/analysis.reference.md — referências analisadas e o que aproveitar
 
 Em seguida, me diga:
 - Em qual ciclo estamos
@@ -94,16 +95,13 @@ outline API route
 ## Active
 ---
 
-**Pipeline AI**
-- [x] `P2` Otimizar `slide-creator-prompt` — injeção condicional de seções por representação e contexto; ~10-20% de economia de tokens por slide
-- [x] `P1` Melhorar prompts de outline — `multi-outline-creator-prompt` e `single-outline-creator-prompt` com guias de representação alinhados aos tipos
+**Regeneração individual de outline**
+- [ ] `P1` Definir abordagem: novo step dedicado vs reuso do `outlineWorkflow` com slideCount=1 (ver decisões abertas)
+- [ ] `P2` Implementar rota `POST /api/v1/app/outlines/[id]/regenerate`
+- [ ] `P2` Botão de regenerar por outline card na página `/presentations/[id]/outline`
 
-**Integração & API**
-- [x] `P0` Criar API routes sem autenticação — `POST /presentations`, `POST /presentations/[id]/slides/generate`, `GET /presentations`, `GET /presentations/[id]`, `DELETE /presentations/[id]`, `PATCH /presentations/[id]/outlines`, `POST /presentations/[id]/outlines/[outlineId]/generate`, `GET /presentations/[id]/slides`, `PATCH /presentations/[id]/slides`, `POST /presentations/[id]/slides/[slideId]/generate`
-- [x] `P0` Criar `.http` files para todas as rotas — `src/http/v1/app/presentations.http`, `outlines.http`, `slides.http`
-- [x] `P0` Conectar `slideWorkflow` à API route — gerar slides após outline
-- [x] `P0` Persistir outline no banco após geração
-- [x] `P0` Persistir slides no banco após geração
+**UI — Ciclo 2**
+- [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
 
 ---
 
@@ -124,7 +122,6 @@ outline API route
 - [ ] `P3` `element-sizing.ts` — funções utilitárias: `calcTextWidth` (com ajuste por idioma), `calcContainerHeight`, `snapToGrid` (grid de 20px)
 
 **UI — Ciclo 2**
-- [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, keywords
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem e edição dos outlines; botão de regenerar item individual (P2)
 - [ ] `P2` Página `/presentations/[id]/editor` — editor Excalidraw por slide (ref: `inscribed/Canvas.tsx`)
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen com `exportToImageUrls` (ref: `inscribed/PresentationMode.tsx`)
@@ -151,11 +148,6 @@ outline API route
 - [ ] `P3` `parseSkeletons` — suporte a output com múltiplos blocos JSON separados; melhorar JSON repair: detectar padrão `["key":value]` → inserir `{`, trim trailing comma, fallback para `jsonrepair` npm (ref: `smart-excalidraw-next/lib/json-repair.js`)
 - [ ] `P3` `optimizeArrows` — algoritmo `determineEdges()` production-grade: seleciona aresta ótima (left/right/top/bottom) por quadrante + distância; fixa bug Excalidraw `width=0 → width=1` (ref: `smart-excalidraw-next/lib/optimizeArrows.js`)
 - [x] `P3` `lib/excalidraw/math/sizing.ts` — `calcTextWidth(text, language)` com +15% para pt/es/fr/de/it, `calcContainerHeight(lines, fontSize, padding)`, `snapToGrid(value, gridSize=20)` — injetáveis como contexto no prompt
-
-**Regeneração individual de outline**
-- [ ] `P1` Definir abordagem: novo step dedicado vs reuso do `outlineWorkflow` com slideCount=1 (ver decisões abertas)
-- [ ] `P2` Implementar rota `POST /api/v1/app/outlines/[id]/regenerate`
-- [ ] `P2` Botão de regenerar por outline card na página `/presentations/[id]/outline`
 
 **Chat de Edição (Agent) — Ciclo 3**
 - [ ] `P2` Definir tools do agent de edição — baseado no modelo do `presentation-ai` (ref: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`) — 8 tools: `edit_slide_properties`, `replace_image`, `change_theme`, `regenerate_slide`, `create_slide`, `delete_slide`, `webSearch`, `respond_to_user`

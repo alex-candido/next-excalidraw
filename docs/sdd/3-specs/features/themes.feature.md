@@ -68,25 +68,32 @@ Toolbar do editor → "Temas"
 
 ## Temas pré-definidos
 
-Categorias inspiradas no `presentation-ai` (41 temas) — adaptar para paletas que funcionem bem com o estilo handdrawn do Excalidraw:
+10 temas implementados no Ciclo 4 MVP. Índices definidos em `src/lib/drizzle/schema/presentation.ts` (`PresentationTheme`):
 
-| Categoria | Exemplos |
-|-----------|---------|
-| Claro neutro | default, sand, glacier |
-| Escuro | dark, obsidian, midnight, noir |
-| Vibrante | crimson, sunset, coral, amber |
-| Natural | forest, ocean, jade, mint |
-| Elegante | cosmos, piano, lavender, rose |
+| Índice | Nome | Categoria |
+|--------|------|-----------|
+| 0 | daktilo | Claro neutro |
+| 1 | noir | Escuro |
+| 2 | cornflower | Claro vibrante |
+| 3 | indigo | Escuro vibrante |
+| 4 | orbit | Escuro elegante |
+| 5 | cosmos | Escuro elegante |
+| 6 | sunset | Vibrante |
+| 7 | forest | Natural |
+| 8 | piano | Escuro minimalista |
+| 9 | ebony | Escuro minimalista |
+
+> Referência: `presentation-ai` usa 41 temas — expansão planejada como melhoria pós-Ciclo 4.
 
 ---
 
 ## Persistência
 
 ```
-Presentation.theme: string   // nome do tema ativo
+Presentation.theme: smallint   // índice do tema ativo (PresentationTheme enum)
 ```
 
-> Schema já tem campo `usage: jsonb` — o tema pode ser adicionado como campo dedicado `theme: text` em uma migration.
+> Campo `theme: smallint` já existe no schema (`src/lib/drizzle/schema/presentation.ts`). Default: `0` (daktilo).
 
 ---
 

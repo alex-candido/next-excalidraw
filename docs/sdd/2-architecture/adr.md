@@ -55,17 +55,18 @@
 ## ADR-004 — Slides separados por entidade (não frames do Excalidraw)
 
 **Data:** 2026-05  
-**Status:** Pendente de decisão
+**Status:** Aceito
 
 **Contexto:** O editor precisa navegar entre slides. Duas abordagens possíveis: (1) um canvas único com N frames do Excalidraw, cada frame = um slide; (2) um array de `ExcalidrawElementSkeleton[]` por slide no banco, canvas recarregado ao navegar.
 
-**Decisão:** Ainda não definida. Decidir antes de implementar o editor.
+**Decisão:** Slides separados por entidade. Cada `slide` tem seu próprio campo `elements: jsonb` no banco. O canvas é recarregado ao navegar entre slides.
 
-**Trade-offs:**
-- Frames: navegação fluida no canvas, mais próximo do Excalidraw nativo; mas drag entre slides é mais complexo e o payload cresce com o número de slides
-- Slides separados: isolamento total, payload menor por requisição, mais simples para persistência; mas requer reload do canvas ao trocar de slide
+**Motivação:** A estrutura do banco (`slide.elements` por registro) e o pipeline de geração (um `slideWorkflow.start()` por outline) já favorecem isolamento completo. Frames adicionariam complexidade de sincronização sem benefício real no MVP.
 
-**Referência:** `inscribed/Canvas.tsx` usa frames. Nossa estrutura de banco (`slide.elements` por registro) favorece slides separados.
+**Trade-offs descartados:**
+- Frames (`inscribed/Canvas.tsx`): navegação mais fluida, mas payload cresce linearmente com o número de slides e drag entre slides seria complexo de persistir
+
+**Consequências:** A página `/presentations/[id]/editor` mantém um slide ativo por vez. Navegação via `SlideList` sidebar dispara reload do canvas com os elementos do slide selecionado.
 
 ---
 

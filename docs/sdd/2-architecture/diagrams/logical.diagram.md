@@ -98,6 +98,9 @@ erDiagram
         smallint language
         smallint aspect_ratio
         smallint slide_count
+        smallint amount
+        smallint audience
+        smallint scenario
         smallint theme
         array keywords
         smallint visibility
@@ -218,7 +221,10 @@ erDiagram
 | `presentation` | `visibility` | `0` public · `1` private |
 | `presentation` | `language` | `0` en · `1` es · `2` fr · `3` de · `4` it · `5` pt-BR · `6` ru · `7` zh · `8` ja · `9` ko |
 | `presentation` | `aspect_ratio` | `0` 16:9 · `1` 4:3 · `2` 9:16 · `3` 1:1 · `4` A4 · `5` custom |
-| `presentation` | `theme` | índice numérico do tema — `0` default; valores completos definidos em `lib/themes` |
+| `presentation` | `amount` | `0` auto · `1` minimal (4–6) · `2` concise (7–10) · `3` detailed (11–15) · `4` extensive (16–20) |
+| `presentation` | `audience` | `0` general · `1` business · `2` investor · `3` teacher · `4` student |
+| `presentation` | `scenario` | `0` auto · `1` promotional · `2` teaching · `3` analytical · `4` report |
+| `presentation` | `theme` | `0` daktilo · `1` noir · `2` cornflower · `3` indigo · `4` orbit · `5` cosmos · `6` sunset · `7` forest · `8` piano · `9` ebony |
 | `presentation_member` | `role` | `0` viewer · `1` editor |
 | `invite_token` | `role` | `0` viewer · `1` editor |
 | `outline` | `type` | `0` cover · `1` content · `2` closing |

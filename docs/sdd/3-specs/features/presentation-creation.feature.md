@@ -37,7 +37,11 @@ POST /api/v1/app/presentations/[id]/slides/generate          → gera slides
   userPrompt:  string     // min 1 char
   language:    number     // 0–9, default 0 (en)
   aspectRatio: number     // 0–5, default 0 (16:9)
-  slideCount:  number     // 0 = automático (5–9), ou número definido pelo usuário
+  slideCount:  number     // 0 = automático, ou número definido pelo usuário
+  amount:      number     // 0=auto · 1=minimal · 2=concise · 3=detailed · 4=extensive, default 0
+  audience:    number     // 0=general · 1=business · 2=investor · 3=teacher · 4=student, default 0
+  scenario:    number     // 0=auto · 1=promotional · 2=teaching · 3=analytical · 4=report, default 0
+  theme:       number     // índice do tema, default 0 (daktilo)
   keywords:    string[]   // opcional
 }
 ```
@@ -52,7 +56,8 @@ route.ts
 
 presentation-service.create()
   └─ presentation-repository.create()
-       { userId, type, userPrompt, language, aspectRatio, slideCount, keywords,
+       { userId, type, userPrompt, language, aspectRatio, slideCount,
+         amount, audience, scenario, theme, keywords,
          title: "", status: 0(draft), visibility: 1(private) }
 ```
 

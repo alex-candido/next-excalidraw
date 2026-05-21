@@ -308,28 +308,20 @@ Regras:
 - Usar `.d.ts` apenas para declarações globais ou augmentations de módulos externos
 - Tipos de payload de API e workflow ficam em `schemas/` — `types/` é para o que Zod não cobre
 
-## docs/flows/
+## docs/sdd/
 
-Fluxos de funcionalidades do projeto. Um arquivo por domínio/funcionalidade:
+Documentação de especificação do projeto. Ver `docs/sdd/README.md` para a estrutura completa e regras por tipo de arquivo.
+
+Resumo das localizações relevantes para o desenvolvimento:
 
 ```
-docs/flows/
-  outline-generation-flow.md      → pipeline de geração do outline (AI workflow)
-  slide-generation-flow.md        → pipeline de geração dos slides (AI workflow)
-  excalidraw-flow.md              → lib/excalidraw (parse → normalize → serialize)
-  presentation-creation-flow.md   → ciclo completo de criação: API + persistência + redirect
-  outline-page-flow.md            → página de revisão e confirmação dos outlines
-  editor-flow.md                  → editor Excalidraw por slide (inclui templates e agent chat)
-  present-flow.md                 → modo apresentação fullscreen
-  single-mode-flow.md             → modalidade Single: prompt, imagem, digitalização (Ciclo 5)
-  agent-chat-flow.md              → chat de edição interativa com tools (Ciclo 3)
-  collaboration-flow.md           → workgroups, permissões e colaboração em tempo real (Ciclo 5)
-  themes-flow.md                  → sistema de temas e personalização visual (Ciclo 4)
-  auth-flow.md                    → signup, login, OAuth, reset de senha, proteção de rotas
+docs/sdd/
+  1-product/           personas, journeys, prd, pm (kanban + decisões)
+  2-architecture/      adr, conventions (este arquivo), diagrams/
+  3-specs/
+    features/          fluxo de cada feature: route → service → repo (*.feature.md)
+    pipeline/          internos dos workflows de IA (*.pipeline.md)
+    integrations/      integrações externas (*.integration.md)
+  4-contracts/         contratos HTTP formais por recurso (*.contract.md)
+  5-references/        análise de repositórios de referência
 ```
-
-Convenções:
-- Nome do arquivo: `[domínio]-flow.md`
-- Cada arquivo descreve: entrada, etapas, saída e pontos de atenção
-- Sem código — só comportamento esperado
-- Criar um novo arquivo sempre que uma funcionalidade nova for implementada
