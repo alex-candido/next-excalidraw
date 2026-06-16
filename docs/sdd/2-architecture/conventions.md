@@ -198,6 +198,111 @@ Regras:
 
 Componentes React organizados por contexto de rota e domínio.
 
+### Metodologia de mapeamento de componentes
+
+Antes de implementar qualquer UI, fazemos o mapeamento estrutural dos componentes da página. O objetivo é definir o **propósito** de cada elemento antes de escrever código.
+
+#### Princípios
+
+**1. Cada elemento significativo é um componente**
+Inspirado na filosofia do styled-components: cada elemento da UI que tem um propósito semântico vira um componente nomeado. Sem divs soltas sem propósito estrutural.
+
+**2. Nomenclatura semântica**
+O nome descreve o **propósito** do componente, não sua aparência ou posição:
+- `LandingHomeHeroAnnouncement` (não `LandingHomeHeroBadge`)
+- `LandingHomeHeroSocialProof` (não `LandingHomeHeroDiscovery`)
+- `LandingHomeHeroActions` (ok — descreve o propósito)
+
+Padrão: `[Módulo][Página][Section][Propósito]`
+
+**3. Primitivos shadcn/ui**
+Todo componente é construído sobre os primitivos do shadcn/ui (`Button`, `Badge`, `Card`, etc.) e os blocks de referência em `docs/sdd/5-references/`. Sem reinventar primitivos.
+
+**4. Atomic Design**
+A composição segue a hierarquia:
+```
+atoms/        → primitivos do shadcn/ui e extensões mínimas
+molecules/    → composições simples de atoms
+organisms/    → sections completas (ex: LandingHomeHero)
+templates/    → estrutura de página com slots
+pages/        → instância final com dados reais
+```
+
+#### Fluxo de mapeamento
+
+1. **Definir sections da página** — quais blocos existem (hero, features, pricing...)
+2. **Definir sub-componentes de cada section** — com propósito semântico claro
+3. **Criar skeleton HTML simples** — apenas a estrutura, sem estilização
+4. **Depois**: implementar com shadcn/ui + identidade visual
+
+#### Exemplo — `LandingHomeHero`
+
+```tsx
+<LandingHomeHero>
+  <LandingHomeHeroAnnouncement />  {/* badge de novidade/feature */}
+  <LandingHomeHeroTitle />          {/* headline principal */}
+  <LandingHomeHeroDescription />    {/* subtítulo */}
+  <LandingHomeHeroActions />        {/* CTAs primário e secundário */}
+  <LandingHomeHeroSocialProof />    {/* prova social: trial gratuito + nº de orgs */}
+</LandingHomeHero>
+```
+
+> Identidade visual é fase separada — o mapeamento define estrutura e propósito, não aparência.
+
+#### Padrão de composição de layout
+
+Arquivos de assembly (`*-layout-header.tsx`, `*-layout-footer.tsx`, `layout.tsx`) **não contêm divs anônimas**. Cada wrapper estrutural é um componente nomeado.
+
+A composição usa dois layers:
+
+**Layer 1 — Primitivos estruturais** (`src/components/layouts/`)
+Componentes genéricos que definem estrutura e espaçamento, sem conteúdo de domínio:
+```
+LayoutHeader, LayoutFooter, LayoutMain
+LayoutContainer, LayoutSection
+LayoutNavBrand, LayoutNavStart, LayoutNavEnd
+LayoutNavMenu, LayoutNavActions, LayoutNavCtaMenu, LayoutNavMenuMobile
+LayoutFooterColumns, LayoutFooterBottom
+```
+
+**Layer 2 — Componentes de conteúdo** (`src/components/landing/`, `src/components/app/`, etc.)
+Componentes que carregam o conteúdo real de cada domínio:
+```
+LandingNavBrand, LandingNavMenu, LandingNavCta, LandingNavMobile
+LandingFooterBrand, LandingFooterNav, LandingFooterCopyright
+```
+
+O arquivo de assembly compõe os dois layers sem introduzir estrutura própria:
+
+```tsx
+// landing-layout-header.tsx — só composição, nenhuma div avulsa
+export function LandingLayoutHeader() {
+  return (
+    <LayoutHeader>
+      <LayoutContainer>
+        <LayoutNavBrand><LandingNavBrand /></LayoutNavBrand>
+        <LayoutNavStart>
+          <LayoutNavMenu><LandingNavMenu /></LayoutNavMenu>
+        </LayoutNavStart>
+        <LayoutNavEnd>
+          <LayoutNavActions>
+            <LayoutNavCtaMenu><LandingNavCta /></LayoutNavCtaMenu>
+          </LayoutNavActions>
+          <LayoutNavMenuMobile><LandingNavMobile /></LayoutNavMenuMobile>
+        </LayoutNavEnd>
+      </LayoutContainer>
+    </LayoutHeader>
+  );
+}
+```
+
+Regras:
+- Se precisar de um wrapper com classe Tailwind, crie um componente nomeado em `layouts/` — nunca use `<div className="...">` inline em arquivos de assembly
+- Primitivos de layout aceitam `className` para overrides pontuais (ex: `<LayoutContainer className="flex-col">`)
+- Componentes de conteúdo do Layer 2 podem ter estrutura interna — a restrição se aplica apenas aos arquivos de assembly
+
+---
+
 Subpastas de domínio (`app/`, `admin/`, `auth/`, `landing/`) espelham a estrutura de `src/app/` — componentes de uma página ficam na subpasta correspondente à sua rota.
 
 Subpastas especiais:

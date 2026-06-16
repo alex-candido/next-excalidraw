@@ -7,8 +7,14 @@
   },
   "landing": {
     "home": {
-      "title": "Bem-vindo ao Next Excalidraw",
-      "description": "Crie apresentações incríveis com IA e Excalidraw."
+      "hero": {
+        "title": "Transforme ideias em apresentações Excalidraw",
+        "description": "Descreva o que quer apresentar. A IA gera a estrutura, os slides e os elementos visuais.",
+        "cta": {
+          "start": "Começar grátis",
+          "signIn": "Entrar"
+        }
+      }
     }
   }
 }

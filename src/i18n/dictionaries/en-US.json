@@ -7,8 +7,14 @@
   },
   "landing": {
     "home": {
-      "title": "Welcome to Next Excalidraw",
-      "description": "Build beautiful AI-powered presentations with Excalidraw."
+      "hero": {
+        "title": "Turn ideas into Excalidraw presentations",
+        "description": "Describe what you want to present. AI generates the structure, slides and visual elements.",
+        "cta": {
+          "start": "Get started free",
+          "signIn": "Sign in"
+        }
+      }
     }
   }
 }

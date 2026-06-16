@@ -72,10 +72,10 @@ outline API route
 
 ### Decisões abertas
 
-- [ ] **Editor: frames vs slides separados** — `inscribed` usa frames do Excalidraw (um canvas, N frames). Alternativa: um array de elements por slide no banco. Decidir antes de implementar o editor.
+- [x] **Editor: frames vs slides separados** — decidido: slides separados por entidade. Cada slide tem seu próprio `elements: jsonb` no banco. Canvas recarregado ao navegar. Ver ADR-004.
 - [ ] **Modelo dinâmico** — definir se a seleção é por workflow, por usuário ou por plano antes de implementar.
 - [ ] **slide-creator-prompt v2** — validar output da v2 em sandbox antes de substituir a v1 como definitiva.
-- [ ] **Regeneração de outline individual** — novo step dedicado no workflow ou reuso do `outlineWorkflow` com `slideCount=1` e tipo fixo. Decidir antes de implementar a rota de regeneração.
+- [x] **Regeneração de outline individual** — decidido: reuso do `multiOutlineWorkflow` com `slideCount=1` e tipo fixo. Já implementado em `multiOutlineService().regenerate()`.
 - [ ] **Colaboração em tempo real** — avaliar Y.js + WebSocket vs solução baseada em polling. Decidir antes do Ciclo 5.
 - [ ] **Single mode: workflow separado ou step condicional** — definir se Single terá seu próprio workflow ou usará o `slideWorkflow` com parâmetros diferenciados.
 
@@ -95,13 +95,15 @@ outline API route
 ## Active
 ---
 
-**Regeneração individual de outline**
-- [ ] `P1` Definir abordagem: novo step dedicado vs reuso do `outlineWorkflow` com slideCount=1 (ver decisões abertas)
-- [ ] `P2` Implementar rota `POST /api/v1/app/outlines/[id]/regenerate`
-- [ ] `P2` Botão de regenerar por outline card na página `/presentations/[id]/outline`
-
-**UI — Ciclo 2**
+**UI — Ciclo 2** *(UI funcional — identidade visual e estrutura de componentes serão revisadas em etapa futura de design)*
 - [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
+- [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
+- [ ] `P2` Página `/presentations/[id]/editor` — editor Excalidraw por slide
+- [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen
+
+**Regeneração individual de outline**
+- [x] `P1` Definir abordagem: reuso do `multiOutlineWorkflow` com `slideCount=1` — já implementado em `multiOutlineService().regenerate()`
+- [ ] `P2` Implementar rota `POST /api/v1/app/outlines/[id]/regenerate`
 
 ---
 
