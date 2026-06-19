@@ -6,13 +6,294 @@
     "returnHome": "Voltar ao início"
   },
   "landing": {
+    "footer": {
+      "brand": {
+        "description": "Transforme ideias em apresentações visuais com slides Excalidraw gerados por IA."
+      },
+      "copyright": "Todos os direitos reservados.",
+      "nav": {
+        "product": {
+          "label": "Produto",
+          "features": "Funcionalidades",
+          "pricing": "Preços",
+          "updates": "Novidades"
+        },
+        "resources": {
+          "label": "Recursos",
+          "blog": "Blog",
+          "about": "Sobre"
+        },
+        "legal": {
+          "label": "Legal",
+          "privacy": "Política de Privacidade",
+          "terms": "Termos de Uso"
+        }
+      }
+    },
+    "nav": {
+      "product": "Produto",
+      "features": "Funcionalidades",
+      "pricing": "Preços",
+      "whatsNew": "Novidades",
+      "products": {
+        "multi": {
+          "label": "Multi",
+          "description": "Apresentações completas geradas por IA com múltiplos slides"
+        },
+        "single": {
+          "label": "Single",
+          "description": "Diagramas, ilustrações e transformações visuais em uma única tela"
+        }
+      },
+      "language": "Idioma"
+    },
     "home": {
       "hero": {
         "title": "Transforme ideias em apresentações Excalidraw",
         "description": "Descreva o que quer apresentar. A IA gera a estrutura, os slides e os elementos visuais.",
+        "announcement": "Apresentando Next Excalidraw: Uma Nova Era de Colaboração Visual",
+        "announcementBadge": "Novo",
+        "socialProof": "14 dias de teste grátis",
+        "socialProofJoin": "Junte-se a mais de 50 organizações que ensinam com o nosso app",
         "cta": {
           "start": "Começar grátis",
+          "demo": "Ver demonstração",
           "signIn": "Entrar"
+        }
+      },
+      "features": {
+        "title": "Tudo que você precisa para apresentar melhor",
+        "description": "Feito para equipes que pensam visualmente e se movem rápido.",
+        "items": {
+          "ai": {
+            "title": "Geração com IA",
+            "description": "Descreva sua ideia e receba uma apresentação completa na hora."
+          },
+          "canvas": {
+            "title": "Canvas Excalidraw",
+            "description": "Edite cada slide em um canvas expressivo e de forma livre."
+          },
+          "multilang": {
+            "title": "Suporte a múltiplos idiomas",
+            "description": "Gere apresentações no idioma de sua preferência."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Preços simples e transparentes",
+        "description": "Comece grátis. Faça upgrade quando precisar de mais.",
+        "free": {
+          "title": "Grátis",
+          "description": "14 dias de teste, sem cartão de crédito.",
+          "cta": "Começar"
+        },
+        "pro": {
+          "title": "Pro",
+          "description": "Para equipes e organizações.",
+          "cta": "Começar"
+        }
+      },
+      "testimonials": {
+        "title": "Amado por equipes do mundo todo",
+        "items": {
+          "ana": {
+            "quote": "O Next Excalidraw mudou a forma como apresentamos ideias para stakeholders.",
+            "author": "Ana — Educadora"
+          },
+          "rafael": {
+            "quote": "Fui do quadro branco à apresentação em menos de 5 minutos.",
+            "author": "Rafael — Tech Lead"
+          },
+          "carla": {
+            "quote": "Nossa equipe finalmente tem uma forma consistente de comunicar a estratégia.",
+            "author": "Carla — Gerente de Produto"
+          }
+        }
+      },
+      "faq": {
+        "title": "Perguntas frequentes",
+        "description": "Tudo o que você precisa saber antes de começar.",
+        "items": {
+          "what": {
+            "question": "O que é o Next Excalidraw?",
+            "answer": "Uma plataforma SaaS que transforma prompts de texto em apresentações visuais usando diagramas no estilo Excalidraw com IA."
+          },
+          "design": {
+            "question": "Preciso ter habilidades de design?",
+            "answer": "Não. Basta descrever o que quer apresentar e a IA cuida da estrutura visual para você."
+          },
+          "edit": {
+            "question": "Posso editar os slides gerados?",
+            "answer": "Sim. Cada slide é totalmente editável no canvas Excalidraw após a geração."
+          },
+          "trial": {
+            "question": "Existe um período de teste gratuito?",
+            "answer": "Sim, 14 dias grátis sem necessidade de cartão de crédito."
+          }
+        }
+      },
+      "product": {
+        "title": "Veja em ação",
+        "description": "De um simples prompt a uma apresentação visual completa em segundos.",
+        "features": {
+          "slides": "Slides gerados por IA",
+          "canvas": "Canvas Excalidraw",
+          "export": "Edite e exporte"
+        }
+      },
+      "cta": {
+        "title": "Pronto para começar?",
+        "description": "Junte-se a milhares de equipes que já criam apresentações visuais com IA.",
+        "start": "Começar grátis",
+        "signIn": "Entrar"
+      }
+    },
+    "product": {
+      "multi": {
+        "hero": {
+          "badge": "Multi",
+          "title": "De um simples prompt a uma apresentação visual completa",
+          "description": "O Next Excalidraw combina geração por IA com um canvas Excalidraw expressivo. Descreva sua ideia, receba slides na hora, edite livremente.",
+          "start": "Começar grátis",
+          "demo": "Ver demonstração"
+        },
+        "howItWorks": {
+          "title": "Como funciona",
+          "description": "Quatro etapas da ideia à apresentação compartilhável.",
+          "steps": {
+            "describe": {
+              "step": "01",
+              "title": "Descreva sua ideia",
+              "description": "Escreva um prompt sobre o que quer apresentar. Adicione preferências de idioma, público e tema."
+            },
+            "outline": {
+              "step": "02",
+              "title": "A IA gera o roteiro",
+              "description": "A IA estrutura seu conteúdo em slides com títulos, descrições e dicas visuais."
+            },
+            "create": {
+              "step": "03",
+              "title": "Os slides são criados",
+              "description": "Cada item do roteiro vira um slide Excalidraw completo com diagramas, setas e elementos visuais."
+            },
+            "share": {
+              "step": "04",
+              "title": "Edite e compartilhe",
+              "description": "Refine qualquer slide no canvas Excalidraw. Apresente em tela cheia quando estiver pronto."
+            }
+          }
+        },
+        "modalities": {
+          "title": "Duas formas de criar",
+          "description": "Escolha entre uma apresentação completa ou um diagrama único e focado.",
+          "items": {
+            "multi": {
+              "label": "Multi",
+              "title": "Apresentação Completa",
+              "description": "Gere um deck de slides completo a partir de um único prompt. A IA cria um roteiro com múltiplos slides, cada um com sua própria estrutura visual.",
+              "tag": "Disponível agora"
+            },
+            "single": {
+              "label": "Single",
+              "title": "Diagrama Único",
+              "description": "Gere um diagrama Excalidraw focado a partir de um prompt. Ideal para diagramas técnicos, fluxogramas, mapas de arquitetura e ERDs.",
+              "tag": "Em breve"
+            }
+          }
+        },
+        "audience": {
+          "title": "Feito para pensadores visuais",
+          "description": "Seja para ensinar, construir ou liderar — o Next Excalidraw se adapta à forma como você se comunica.",
+          "profiles": {
+            "educators": {
+              "role": "Educadores",
+              "title": "Transforme aulas em experiências visuais",
+              "description": "Crie diagramas, fluxogramas e decks de slides para qualquer assunto. Sem necessidade de habilidades de design — apenas descreva o que quer ensinar."
+            },
+            "engineers": {
+              "role": "Engenheiros",
+              "title": "Documente arquitetura de forma visual",
+              "description": "Gere ERDs, diagramas de sistema e slides técnicos diretamente de uma descrição. Compartilhe com sua equipe em minutos."
+            },
+            "managers": {
+              "role": "Gestores",
+              "title": "Apresente estratégias sem um designer",
+              "description": "Comunique roadmaps, decisões e iniciativas visualmente. Slides de qualidade profissional gerados a partir de um único prompt."
+            }
+          }
+        },
+        "capabilities": {
+          "title": "Tudo que você precisa para apresentar",
+          "description": "Ajuste cada aspecto da sua apresentação antes de gerar.",
+          "items": {
+            "languages": {
+              "title": "Múltiplos idiomas",
+              "description": "Gere apresentações em inglês, português, espanhol e muito mais."
+            },
+            "ratios": {
+              "title": "Proporções de tela",
+              "description": "Escolha entre 16:9, 4:3 e outros formatos para combinar com sua tela ou projetor."
+            },
+            "themes": {
+              "title": "Temas",
+              "description": "Aplique temas visuais para controlar cores, tipografia e a aparência geral dos slides."
+            },
+            "audience": {
+              "title": "Segmentação de público",
+              "description": "Defina o público-alvo para que a IA ajuste o tom, a profundidade e o vocabulário."
+            },
+            "scenario": {
+              "title": "Contexto de cenário",
+              "description": "Especifique o cenário — aula, pitch, reunião — para moldar a narrativa."
+            },
+            "slideCount": {
+              "title": "Controle de quantidade de slides",
+              "description": "Defina exatamente quantos slides você quer, ou deixe a IA decidir automaticamente."
+            }
+          }
+        },
+        "cta": {
+          "title": "Comece a criar hoje",
+          "description": "14 dias de teste grátis. Sem cartão de crédito.",
+          "start": "Começar grátis",
+          "seeSingle": "Ver Single"
+        }
+      },
+      "single": {
+        "hero": {
+          "badge": "Single",
+          "title": "Transforme qualquer ideia em um canvas Excalidraw visual",
+          "description": "Descreva, esboce ou faça upload — e receba um diagrama Excalidraw polido na hora. Gere múltiplas versões, compare-as e mantenha um histórico completo.",
+          "start": "Começar grátis",
+          "seeMulti": "Ver Multi"
+        },
+        "inputs": {
+          "title": "Múltiplas formas de criar",
+          "description": "Comece por uma descrição, um esboço ou uma imagem existente — o Single se adapta à forma como você pensa.",
+          "items": {
+            "text": {
+              "title": "Prompt de texto",
+              "description": "Descreva o diagrama que você precisa. A IA gera o canvas Excalidraw a partir das suas palavras."
+            },
+            "image": {
+              "title": "Imagem para Excalidraw",
+              "description": "Faça upload de uma foto, quadro branco ou captura de tela e converta em um diagrama Excalidraw editável."
+            },
+            "idea": {
+              "title": "Ideia para ilustração",
+              "description": "Descreva um conceito e receba uma ilustração visual — gráficos, mapas mentais, fluxos e mais."
+            }
+          }
+        },
+        "versions": {
+          "title": "Gere, compare, itere",
+          "description": "Cada geração é salva. Navegue pelas versões, escolha a melhor e continue refinando."
+        },
+        "cta": {
+          "title": "Comece a criar hoje",
+          "description": "14 dias de teste grátis. Sem cartão de crédito.",
+          "start": "Começar grátis",
+          "seeMulti": "Ver Multi"
         }
       }
     }

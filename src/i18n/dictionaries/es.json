@@ -6,13 +6,294 @@
     "returnHome": "Volver al inicio"
   },
   "landing": {
+    "footer": {
+      "brand": {
+        "description": "Transforma ideas en presentaciones visuales con diapositivas Excalidraw generadas por IA."
+      },
+      "copyright": "Todos los derechos reservados.",
+      "nav": {
+        "product": {
+          "label": "Producto",
+          "features": "Funcionalidades",
+          "pricing": "Precios",
+          "updates": "Novedades"
+        },
+        "resources": {
+          "label": "Recursos",
+          "blog": "Blog",
+          "about": "Acerca de"
+        },
+        "legal": {
+          "label": "Legal",
+          "privacy": "Política de Privacidad",
+          "terms": "Términos de Uso"
+        }
+      }
+    },
+    "nav": {
+      "product": "Producto",
+      "features": "Funcionalidades",
+      "pricing": "Precios",
+      "whatsNew": "Novedades",
+      "products": {
+        "multi": {
+          "label": "Multi",
+          "description": "Presentaciones completas generadas por IA con múltiples diapositivas"
+        },
+        "single": {
+          "label": "Single",
+          "description": "Diagramas, ilustraciones y transformaciones visuales en un solo lienzo"
+        }
+      },
+      "language": "Idioma"
+    },
     "home": {
       "hero": {
         "title": "Transforma ideas en presentaciones Excalidraw",
         "description": "Describe lo que quieres presentar. La IA genera la estructura, las diapositivas y los elementos visuales.",
+        "announcement": "Presentando Next Excalidraw: Una Nueva Era de Colaboración Visual",
+        "announcementBadge": "Nuevo",
+        "socialProof": "14 días de prueba gratis",
+        "socialProofJoin": "Únete a más de 50 organizaciones que enseñan con nuestra app",
         "cta": {
           "start": "Empezar gratis",
+          "demo": "Ver demostración",
           "signIn": "Iniciar sesión"
+        }
+      },
+      "features": {
+        "title": "Todo lo que necesitas para presentar mejor",
+        "description": "Diseñado para equipos que piensan visualmente y se mueven rápido.",
+        "items": {
+          "ai": {
+            "title": "Generación con IA",
+            "description": "Describe tu idea y obtén una presentación completa al instante."
+          },
+          "canvas": {
+            "title": "Lienzo Excalidraw",
+            "description": "Edita cada diapositiva en un lienzo expresivo y de forma libre."
+          },
+          "multilang": {
+            "title": "Soporte multilingüe",
+            "description": "Genera presentaciones en el idioma de tu elección."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Precios simples y transparentes",
+        "description": "Empieza gratis. Actualiza cuando necesites más.",
+        "free": {
+          "title": "Gratis",
+          "description": "14 días de prueba, sin tarjeta de crédito.",
+          "cta": "Empezar"
+        },
+        "pro": {
+          "title": "Pro",
+          "description": "Para equipos y organizaciones.",
+          "cta": "Empezar"
+        }
+      },
+      "testimonials": {
+        "title": "Amado por equipos de todo el mundo",
+        "items": {
+          "ana": {
+            "quote": "Next Excalidraw cambió cómo presentamos ideas a los stakeholders.",
+            "author": "Ana — Educadora"
+          },
+          "rafael": {
+            "quote": "Pasé de la pizarra a la presentación en menos de 5 minutos.",
+            "author": "Rafael — Tech Lead"
+          },
+          "carla": {
+            "quote": "Nuestro equipo finalmente tiene una forma consistente de comunicar la estrategia.",
+            "author": "Carla — Product Manager"
+          }
+        }
+      },
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "description": "Todo lo que necesitas saber antes de empezar.",
+        "items": {
+          "what": {
+            "question": "¿Qué es Next Excalidraw?",
+            "answer": "Una plataforma SaaS que transforma prompts de texto en presentaciones visuales usando diagramas al estilo Excalidraw con IA."
+          },
+          "design": {
+            "question": "¿Necesito habilidades de diseño?",
+            "answer": "No. Solo describe lo que quieres presentar y la IA se encarga de la estructura visual por ti."
+          },
+          "edit": {
+            "question": "¿Puedo editar las diapositivas generadas?",
+            "answer": "Sí. Cada diapositiva es completamente editable en el lienzo Excalidraw tras la generación."
+          },
+          "trial": {
+            "question": "¿Hay prueba gratuita?",
+            "answer": "Sí, 14 días gratis sin tarjeta de crédito."
+          }
+        }
+      },
+      "product": {
+        "title": "Vélo en acción",
+        "description": "De un simple prompt a una presentación visual completa en segundos.",
+        "features": {
+          "slides": "Diapositivas generadas por IA",
+          "canvas": "Lienzo Excalidraw",
+          "export": "Edita y exporta"
+        }
+      },
+      "cta": {
+        "title": "¿Listo para empezar?",
+        "description": "Únete a miles de equipos que ya crean presentaciones visuales con IA.",
+        "start": "Empezar gratis",
+        "signIn": "Iniciar sesión"
+      }
+    },
+    "product": {
+      "multi": {
+        "hero": {
+          "badge": "Multi",
+          "title": "De un simple prompt a una presentación visual completa",
+          "description": "Next Excalidraw combina generación con IA y un expresivo lienzo Excalidraw. Describe tu idea, obtén diapositivas al instante, edita libremente.",
+          "start": "Empezar gratis",
+          "demo": "Ver demostración"
+        },
+        "howItWorks": {
+          "title": "Cómo funciona",
+          "description": "Cuatro pasos de la idea a la presentación compartible.",
+          "steps": {
+            "describe": {
+              "step": "01",
+              "title": "Describe tu idea",
+              "description": "Escribe un prompt sobre lo que quieres presentar. Añade preferencias de idioma, audiencia y tema."
+            },
+            "outline": {
+              "step": "02",
+              "title": "La IA genera el esquema",
+              "description": "La IA estructura tu contenido en diapositivas con títulos, descripciones y pistas visuales."
+            },
+            "create": {
+              "step": "03",
+              "title": "Se crean las diapositivas",
+              "description": "Cada elemento del esquema se convierte en una diapositiva Excalidraw completa con diagramas, flechas y elementos visuales."
+            },
+            "share": {
+              "step": "04",
+              "title": "Edita y comparte",
+              "description": "Refina cualquier diapositiva en el lienzo Excalidraw. Presenta en pantalla completa cuando estés listo."
+            }
+          }
+        },
+        "modalities": {
+          "title": "Dos formas de crear",
+          "description": "Elige entre una presentación completa o un diagrama único y enfocado.",
+          "items": {
+            "multi": {
+              "label": "Multi",
+              "title": "Presentación Completa",
+              "description": "Genera un conjunto de diapositivas completo desde un solo prompt. La IA crea un esquema con múltiples diapositivas, cada una con su propia estructura visual.",
+              "tag": "Disponible ahora"
+            },
+            "single": {
+              "label": "Single",
+              "title": "Diagrama Único",
+              "description": "Genera un diagrama Excalidraw enfocado desde un prompt. Ideal para diagramas técnicos, diagramas de flujo, mapas de arquitectura y ERDs.",
+              "tag": "Próximamente"
+            }
+          }
+        },
+        "audience": {
+          "title": "Hecho para pensadores visuales",
+          "description": "Ya sea que enseñes, construyas o lideres — Next Excalidraw se adapta a cómo te comunicas.",
+          "profiles": {
+            "educators": {
+              "role": "Educadores",
+              "title": "Convierte lecciones en experiencias visuales",
+              "description": "Crea diagramas, diagramas de flujo y conjuntos de diapositivas para cualquier materia. Sin habilidades de diseño — solo describe lo que quieres enseñar."
+            },
+            "engineers": {
+              "role": "Ingenieros",
+              "title": "Documenta la arquitectura de forma visual",
+              "description": "Genera ERDs, diagramas de sistema y diapositivas técnicas directamente desde una descripción. Comparte con tu equipo en minutos."
+            },
+            "managers": {
+              "role": "Gestores",
+              "title": "Presenta estrategias sin un diseñador",
+              "description": "Comunica hojas de ruta, decisiones e iniciativas visualmente. Diapositivas de calidad profesional generadas desde un solo prompt."
+            }
+          }
+        },
+        "capabilities": {
+          "title": "Todo lo que necesitas para presentar",
+          "description": "Ajusta cada aspecto de tu presentación antes de generar.",
+          "items": {
+            "languages": {
+              "title": "Múltiples idiomas",
+              "description": "Genera presentaciones en inglés, portugués, español y más."
+            },
+            "ratios": {
+              "title": "Relaciones de aspecto",
+              "description": "Elige entre 16:9, 4:3 y otros formatos para adaptarte a tu pantalla o proyector."
+            },
+            "themes": {
+              "title": "Temas",
+              "description": "Aplica temas visuales para controlar colores, tipografía y el aspecto general de tus diapositivas."
+            },
+            "audience": {
+              "title": "Segmentación de audiencia",
+              "description": "Define la audiencia objetivo para que la IA ajuste el tono, la profundidad y el vocabulario."
+            },
+            "scenario": {
+              "title": "Contexto de escenario",
+              "description": "Especifica el escenario — clase, pitch, reunión — para dar forma a la narrativa."
+            },
+            "slideCount": {
+              "title": "Control de cantidad de diapositivas",
+              "description": "Define exactamente cuántas diapositivas quieres, o deja que la IA decida automáticamente."
+            }
+          }
+        },
+        "cta": {
+          "title": "Empieza a crear hoy",
+          "description": "14 días de prueba gratis. Sin tarjeta de crédito.",
+          "start": "Empezar gratis",
+          "seeSingle": "Ver Single"
+        }
+      },
+      "single": {
+        "hero": {
+          "badge": "Single",
+          "title": "Transforma cualquier idea en un lienzo Excalidraw visual",
+          "description": "Describe, dibuja o sube — y obtén un diagrama Excalidraw pulido al instante. Genera múltiples versiones, compáralas y mantén un historial completo.",
+          "start": "Empezar gratis",
+          "seeMulti": "Ver Multi"
+        },
+        "inputs": {
+          "title": "Múltiples formas de crear",
+          "description": "Comienza desde una descripción, un boceto o una imagen existente — Single se adapta a cómo piensas.",
+          "items": {
+            "text": {
+              "title": "Prompt de texto",
+              "description": "Describe el diagrama que necesitas. La IA genera el lienzo Excalidraw desde tus palabras."
+            },
+            "image": {
+              "title": "Imagen a Excalidraw",
+              "description": "Sube una foto, pizarra o captura de pantalla y conviértela en un diagrama Excalidraw editable."
+            },
+            "idea": {
+              "title": "Idea a ilustración",
+              "description": "Describe un concepto y obtén una ilustración visual — gráficos, mapas mentales, flujos y más."
+            }
+          }
+        },
+        "versions": {
+          "title": "Genera, compara, itera",
+          "description": "Cada generación se guarda. Navega por versiones, elige la mejor y sigue refinando."
+        },
+        "cta": {
+          "title": "Empieza a crear hoy",
+          "description": "14 días de prueba gratis. Sin tarjeta de crédito.",
+          "start": "Empezar gratis",
+          "seeMulti": "Ver Multi"
         }
       }
     }
