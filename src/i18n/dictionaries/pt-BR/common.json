@@ -1,0 +1,8 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "tryAgain": "Tentar novamente",
+    "returnHome": "Voltar ao início"
+  }
+}

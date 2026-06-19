@@ -1,0 +1,70 @@
+{
+  "landing": {
+    "transparency": {
+      "privacyPolicy": {
+        "hero": {
+          "badge": "Legal",
+          "title": "Política de Privacidad",
+          "lastUpdated": "Última actualización: mayo de 2026"
+        },
+        "sections": {
+          "data": {
+            "title": "Datos recopilados",
+            "description": "Solo recopilamos los datos necesarios para el funcionamiento del producto: correo electrónico, nombre y el contenido de las presentaciones creadas."
+          },
+          "use": {
+            "title": "Uso de los datos",
+            "items": {
+              "auth": "Autenticación y acceso a la cuenta",
+              "storage": "Almacenamiento de tus presentaciones",
+              "comms": "Comunicaciones relacionadas con el producto"
+            }
+          },
+          "rights": {
+            "title": "Tus derechos",
+            "description": "Puedes solicitar la eliminación de tus datos en cualquier momento enviando un correo a privacy@nextexcalidraw.com."
+          },
+          "cookies": {
+            "title": "Cookies",
+            "description": "Usamos cookies esenciales para la autenticación. No utilizamos cookies de seguimiento de terceros."
+          }
+        }
+      },
+      "terms": {
+        "hero": {
+          "badge": "Legal",
+          "title": "Términos de Uso",
+          "lastUpdated": "Última actualización: mayo de 2026"
+        },
+        "sections": {
+          "acceptance": {
+            "title": "Aceptación de los términos",
+            "description": "Al usar Next Excalidraw, aceptas estos términos."
+          },
+          "permitted": {
+            "title": "Uso permitido",
+            "items": {
+              "create": "Crear y exportar presentaciones para uso personal o profesional",
+              "share": "Compartir presentaciones generadas por la plataforma"
+            }
+          },
+          "prohibited": {
+            "title": "Uso prohibido",
+            "items": {
+              "illegal": "Usar la plataforma para generar contenido ilegal u ofensivo",
+              "security": "Intentar comprometer la seguridad del sistema"
+            }
+          },
+          "ip": {
+            "title": "Propiedad intelectual",
+            "description": "El contenido de las presentaciones creadas por ti sigue siendo tu propiedad. El código y la plataforma son propiedad de Next Excalidraw."
+          },
+          "changes": {
+            "title": "Cambios",
+            "description": "Podemos actualizar estos términos en cualquier momento. Notificaremos a los usuarios por correo en caso de cambios relevantes."
+          }
+        }
+      }
+    }
+  }
+}

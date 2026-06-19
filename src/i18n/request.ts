@@ -6,8 +6,36 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = hasLocale(requested ?? "") ? requested! : routing.defaultLocale;
 
+  const [
+    common,
+    landingNav,
+    landingHome,
+    landingProduct,
+    landingResources,
+    landingInstitutional,
+    landingTransparency,
+  ] = await Promise.all([
+    import(`./dictionaries/${locale}/common.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-nav.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-home.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-product.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-resources.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-institutional.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/landing-transparency.json`).then((m) => m.default),
+  ]);
+
   return {
     locale,
-    messages: (await import(`./dictionaries/${locale}.json`)).default,
+    messages: {
+      ...common,
+      landing: {
+        ...landingNav.landing,
+        ...landingHome.landing,
+        ...landingProduct.landing,
+        ...landingResources.landing,
+        ...landingInstitutional.landing,
+        ...landingTransparency.landing,
+      },
+    },
   };
 });

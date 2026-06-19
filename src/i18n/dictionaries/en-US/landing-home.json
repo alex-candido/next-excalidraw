@@ -1,0 +1,105 @@
+{
+  "landing": {
+    "home": {
+      "hero": {
+        "title": "Transform your ideas into visual presentations",
+        "description": "Describe what you want to present. AI generates slides with diagrams and visual structure. Edit and share when ready.",
+        "announcement": "Introducing Next Excalidraw: A New Era of Visual Collaboration",
+        "announcementBadge": "New",
+        "socialProof": "14-day free trial",
+        "socialProofJoin": "Join more than 50 organizations teaching with our app",
+        "cta": {
+          "start": "Get Started for free",
+          "demo": "Watch Demo",
+          "signIn": "Sign in"
+        }
+      },
+      "features": {
+        "title": "Everything you need to present better",
+        "description": "Built for teams that think visually and move fast.",
+        "items": {
+          "ai": {
+            "title": "AI-powered generation",
+            "description": "Describe your idea and get a full presentation instantly."
+          },
+          "canvas": {
+            "title": "Excalidraw canvas",
+            "description": "Edit every slide on an expressive, freeform canvas."
+          },
+          "multilang": {
+            "title": "Multi-language support",
+            "description": "Generate presentations in your language of choice."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Simple, transparent pricing",
+        "description": "Start for free. Upgrade when you need more.",
+        "free": {
+          "title": "Free",
+          "description": "14-day trial, no credit card required.",
+          "cta": "Get started"
+        },
+        "pro": {
+          "title": "Pro",
+          "description": "For teams and organizations.",
+          "cta": "Get started"
+        }
+      },
+      "testimonials": {
+        "title": "Loved by teams worldwide",
+        "items": {
+          "ana": {
+            "quote": "Next Excalidraw changed how we present ideas to stakeholders.",
+            "author": "Ana — Educator"
+          },
+          "rafael": {
+            "quote": "I went from whiteboard to presentation in under 5 minutes.",
+            "author": "Rafael — Tech Lead"
+          },
+          "carla": {
+            "quote": "Our team finally has a consistent way to communicate strategy.",
+            "author": "Carla — Product Manager"
+          }
+        }
+      },
+      "faq": {
+        "title": "Frequently asked questions",
+        "description": "Everything you need to know before getting started.",
+        "items": {
+          "what": {
+            "question": "What is Next Excalidraw?",
+            "answer": "A SaaS platform that transforms text prompts into visual presentations using Excalidraw-style diagrams powered by AI."
+          },
+          "design": {
+            "question": "Do I need design skills?",
+            "answer": "No. Just describe what you want to present and the AI handles the visual structure for you."
+          },
+          "edit": {
+            "question": "Can I edit the generated slides?",
+            "answer": "Yes. Every slide is fully editable on the Excalidraw canvas after generation."
+          },
+          "trial": {
+            "question": "Is there a free trial?",
+            "answer": "Yes, 14 days free with no credit card required."
+          }
+        }
+      },
+      "product": {
+        "title": "See it in action",
+        "description": "From a simple prompt to a complete visual presentation in seconds.",
+        "features": {
+          "slides": "AI-generated slides",
+          "canvas": "Excalidraw canvas",
+          "export": "Edit and export"
+        }
+      },
+      "cta": {
+        "title": "Ready to get started?",
+        "description": "Join thousands of teams already creating visual presentations with AI.",
+        "start": "Get Started for free",
+        "signIn": "Sign In"
+      }
+    }
+  }
+}

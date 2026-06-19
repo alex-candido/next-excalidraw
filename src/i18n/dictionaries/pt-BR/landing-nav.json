@@ -1,0 +1,46 @@
+{
+  "landing": {
+    "footer": {
+      "brand": {
+        "description": "Transforme ideias em apresentações visuais com slides Excalidraw gerados por IA."
+      },
+      "copyright": "Todos os direitos reservados.",
+      "nav": {
+        "product": {
+          "label": "Produto",
+          "multi": "Multi",
+          "single": "Single",
+          "features": "Funcionalidades",
+          "pricing": "Preços"
+        },
+        "resources": {
+          "label": "Recursos",
+          "blog": "Blog",
+          "about": "Sobre"
+        },
+        "legal": {
+          "label": "Legal",
+          "privacy": "Política de Privacidade",
+          "terms": "Termos de Uso"
+        }
+      }
+    },
+    "nav": {
+      "product": "Produto",
+      "features": "Funcionalidades",
+      "pricing": "Preços",
+      "whatsNew": "Novidades",
+      "products": {
+        "multi": {
+          "label": "Multi",
+          "description": "Apresentações completas geradas por IA com múltiplos slides"
+        },
+        "single": {
+          "label": "Single",
+          "description": "Diagramas, ilustrações e transformações visuais em uma única tela"
+        }
+      },
+      "language": "Idioma"
+    }
+  }
+}

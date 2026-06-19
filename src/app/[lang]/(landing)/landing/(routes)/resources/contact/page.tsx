@@ -1,5 +1,5 @@
 export default async function ContactPage() {
-  const { default: Content } = await import("@/content/landing/support/contact.mdx");
+  const { default: Content } = await import("@/content/landing/resources/contact.mdx");
 
   return (
     <div className="landing-resources-contact-page">

@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server";
-import { Separator } from "@/components/ui/separator";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,6 +6,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { Separator } from "@/components/ui/separator";
+import { getTranslations } from "next-intl/server";
 
 export async function LandingNavMenu() {
   const t = await getTranslations("landing.nav");
@@ -28,7 +28,7 @@ export async function LandingNavMenu() {
   const links = [
     { label: t("features"), href: "/landing/home#features" },
     { label: t("pricing"), href: "/landing/home#pricing" },
-    { label: t("whatsNew"), href: "/landing/product/updates" },
+    { label: t("whatsNew"), href: "/landing/resources/blog" },
   ] as const;
 
   return (

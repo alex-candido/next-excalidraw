@@ -1,0 +1,23 @@
+{
+  "landing": {
+    "institutional": {
+      "about": {
+        "hero": {
+          "badge": "Acerca de",
+          "title": "Creamos herramientas para pensadores visuales",
+          "description": "Next Excalidraw nació de la necesidad de crear presentaciones más rápido y de forma más visual."
+        },
+        "mission": {
+          "label": "Nuestra misión",
+          "title": "Democratizar las presentaciones profesionales",
+          "description": "Poner el poder de la comunicación visual generada por IA en manos de cualquier persona — educador, ingeniero o ejecutivo."
+        },
+        "story": {
+          "label": "El producto",
+          "title": "Construido sobre Excalidraw",
+          "description": "Combinamos la herramienta de diagramación más expresiva de la web con IA para generar contenido visual automáticamente — para que te concentres en las ideas, no en las diapositivas."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "landing": {
+    "home": {
+      "hero": {
+        "title": "Transforma ideas en presentaciones Excalidraw",
+        "description": "Describe lo que quieres presentar. La IA genera la estructura, las diapositivas y los elementos visuales.",
+        "announcement": "Presentando Next Excalidraw: Una Nueva Era de Colaboración Visual",
+        "announcementBadge": "Nuevo",
+        "socialProof": "14 días de prueba gratis",
+        "socialProofJoin": "Únete a más de 50 organizaciones que enseñan con nuestra app",
+        "cta": {
+          "start": "Empezar gratis",
+          "demo": "Ver demostración",
+          "signIn": "Iniciar sesión"
+        }
+      },
+      "features": {
+        "title": "Todo lo que necesitas para presentar mejor",
+        "description": "Diseñado para equipos que piensan visualmente y se mueven rápido.",
+        "items": {
+          "ai": {
+            "title": "Generación con IA",
+            "description": "Describe tu idea y obtén una presentación completa al instante."
+          },
+          "canvas": {
+            "title": "Lienzo Excalidraw",
+            "description": "Edita cada diapositiva en un lienzo expresivo y de forma libre."
+          },
+          "multilang": {
+            "title": "Soporte multilingüe",
+            "description": "Genera presentaciones en el idioma de tu elección."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Precios simples y transparentes",
+        "description": "Empieza gratis. Actualiza cuando necesites más.",
+        "free": {
+          "title": "Gratis",
+          "description": "14 días de prueba, sin tarjeta de crédito.",
+          "cta": "Empezar"
+        },
+        "pro": {
+          "title": "Pro",
+          "description": "Para equipos y organizaciones.",
+          "cta": "Empezar"
+        }
+      },
+      "testimonials": {
+        "title": "Amado por equipos de todo el mundo",
+        "items": {
+          "ana": {
+            "quote": "Next Excalidraw cambió cómo presentamos ideas a los stakeholders.",
+            "author": "Ana — Educadora"
+          },
+          "rafael": {
+            "quote": "Pasé de la pizarra a la presentación en menos de 5 minutos.",
+            "author": "Rafael — Tech Lead"
+          },
+          "carla": {
+            "quote": "Nuestro equipo finalmente tiene una forma consistente de comunicar la estrategia.",
+            "author": "Carla — Product Manager"
+          }
+        }
+      },
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "description": "Todo lo que necesitas saber antes de empezar.",
+        "items": {
+          "what": {
+            "question": "¿Qué es Next Excalidraw?",
+            "answer": "Una plataforma SaaS que transforma prompts de texto en presentaciones visuales usando diagramas al estilo Excalidraw con IA."
+          },
+          "design": {
+            "question": "¿Necesito habilidades de diseño?",
+            "answer": "No. Solo describe lo que quieres presentar y la IA se encarga de la estructura visual por ti."
+          },
+          "edit": {
+            "question": "¿Puedo editar las diapositivas generadas?",
+            "answer": "Sí. Cada diapositiva es completamente editable en el lienzo Excalidraw tras la generación."
+          },
+          "trial": {
+            "question": "¿Hay prueba gratuita?",
+            "answer": "Sí, 14 días gratis sin tarjeta de crédito."
+          }
+        }
+      },
+      "product": {
+        "title": "Vélo en acción",
+        "description": "De un simple prompt a una presentación visual completa en segundos.",
+        "features": {
+          "slides": "Diapositivas generadas por IA",
+          "canvas": "Lienzo Excalidraw",
+          "export": "Edita y exporta"
+        }
+      },
+      "cta": {
+        "title": "¿Listo para empezar?",
+        "description": "Únete a miles de equipos que ya crean presentaciones visuales con IA.",
+        "start": "Empezar gratis",
+        "signIn": "Iniciar sesión"
+      }
+    }
+  }
+}

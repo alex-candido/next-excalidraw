@@ -1,0 +1,105 @@
+{
+  "landing": {
+    "home": {
+      "hero": {
+        "title": "Transforme ideias em apresentações Excalidraw",
+        "description": "Descreva o que quer apresentar. A IA gera a estrutura, os slides e os elementos visuais.",
+        "announcement": "Apresentando Next Excalidraw: Uma Nova Era de Colaboração Visual",
+        "announcementBadge": "Novo",
+        "socialProof": "14 dias de teste grátis",
+        "socialProofJoin": "Junte-se a mais de 50 organizações que ensinam com o nosso app",
+        "cta": {
+          "start": "Começar grátis",
+          "demo": "Ver demonstração",
+          "signIn": "Entrar"
+        }
+      },
+      "features": {
+        "title": "Tudo que você precisa para apresentar melhor",
+        "description": "Feito para equipes que pensam visualmente e se movem rápido.",
+        "items": {
+          "ai": {
+            "title": "Geração com IA",
+            "description": "Descreva sua ideia e receba uma apresentação completa na hora."
+          },
+          "canvas": {
+            "title": "Canvas Excalidraw",
+            "description": "Edite cada slide em um canvas expressivo e de forma livre."
+          },
+          "multilang": {
+            "title": "Suporte a múltiplos idiomas",
+            "description": "Gere apresentações no idioma de sua preferência."
+          }
+        }
+      },
+      "pricing": {
+        "title": "Preços simples e transparentes",
+        "description": "Comece grátis. Faça upgrade quando precisar de mais.",
+        "free": {
+          "title": "Grátis",
+          "description": "14 dias de teste, sem cartão de crédito.",
+          "cta": "Começar"
+        },
+        "pro": {
+          "title": "Pro",
+          "description": "Para equipes e organizações.",
+          "cta": "Começar"
+        }
+      },
+      "testimonials": {
+        "title": "Amado por equipes do mundo todo",
+        "items": {
+          "ana": {
+            "quote": "O Next Excalidraw mudou a forma como apresentamos ideias para stakeholders.",
+            "author": "Ana — Educadora"
+          },
+          "rafael": {
+            "quote": "Fui do quadro branco à apresentação em menos de 5 minutos.",
+            "author": "Rafael — Tech Lead"
+          },
+          "carla": {
+            "quote": "Nossa equipe finalmente tem uma forma consistente de comunicar a estratégia.",
+            "author": "Carla — Gerente de Produto"
+          }
+        }
+      },
+      "faq": {
+        "title": "Perguntas frequentes",
+        "description": "Tudo o que você precisa saber antes de começar.",
+        "items": {
+          "what": {
+            "question": "O que é o Next Excalidraw?",
+            "answer": "Uma plataforma SaaS que transforma prompts de texto em apresentações visuais usando diagramas no estilo Excalidraw com IA."
+          },
+          "design": {
+            "question": "Preciso ter habilidades de design?",
+            "answer": "Não. Basta descrever o que quer apresentar e a IA cuida da estrutura visual para você."
+          },
+          "edit": {
+            "question": "Posso editar os slides gerados?",
+            "answer": "Sim. Cada slide é totalmente editável no canvas Excalidraw após a geração."
+          },
+          "trial": {
+            "question": "Existe um período de teste gratuito?",
+            "answer": "Sim, 14 dias grátis sem necessidade de cartão de crédito."
+          }
+        }
+      },
+      "product": {
+        "title": "Veja em ação",
+        "description": "De um simples prompt a uma apresentação visual completa em segundos.",
+        "features": {
+          "slides": "Slides gerados por IA",
+          "canvas": "Canvas Excalidraw",
+          "export": "Edite e exporte"
+        }
+      },
+      "cta": {
+        "title": "Pronto para começar?",
+        "description": "Junte-se a milhares de equipes que já criam apresentações visuais com IA.",
+        "start": "Começar grátis",
+        "signIn": "Entrar"
+      }
+    }
+  }
+}

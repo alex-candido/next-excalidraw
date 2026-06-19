@@ -1,0 +1,46 @@
+{
+  "landing": {
+    "footer": {
+      "brand": {
+        "description": "Transform ideas into visual presentations with AI-powered Excalidraw slides."
+      },
+      "copyright": "All rights reserved.",
+      "nav": {
+        "product": {
+          "label": "Product",
+          "multi": "Multi",
+          "single": "Single",
+          "features": "Features",
+          "pricing": "Pricing"
+        },
+        "resources": {
+          "label": "Resources",
+          "blog": "Blog",
+          "about": "About"
+        },
+        "legal": {
+          "label": "Legal",
+          "privacy": "Privacy Policy",
+          "terms": "Terms of Use"
+        }
+      }
+    },
+    "nav": {
+      "product": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "whatsNew": "What's new",
+      "products": {
+        "multi": {
+          "label": "Multi",
+          "description": "Full AI-generated presentations with multiple slides"
+        },
+        "single": {
+          "label": "Single",
+          "description": "Diagrams, illustrations and visual transforms on a single canvas"
+        }
+      },
+      "language": "Language"
+    }
+  }
+}

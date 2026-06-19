@@ -1,0 +1,23 @@
+{
+  "landing": {
+    "institutional": {
+      "about": {
+        "hero": {
+          "badge": "About",
+          "title": "We build tools for visual thinkers",
+          "description": "Next Excalidraw was born from the need to create presentations faster and more visually."
+        },
+        "mission": {
+          "label": "Our mission",
+          "title": "Democratize professional presentations",
+          "description": "To put the power of AI-generated visual communication in the hands of anyone — educator, engineer, or executive."
+        },
+        "story": {
+          "label": "The product",
+          "title": "Built on Excalidraw",
+          "description": "We combined the most expressive diagramming tool on the web with AI to automatically generate visual content — so you can focus on ideas, not slides."
+        }
+      }
+    }
+  }
+}

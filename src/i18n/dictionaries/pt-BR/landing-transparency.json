@@ -1,0 +1,70 @@
+{
+  "landing": {
+    "transparency": {
+      "privacyPolicy": {
+        "hero": {
+          "badge": "Legal",
+          "title": "Política de Privacidade",
+          "lastUpdated": "Última atualização: maio de 2026"
+        },
+        "sections": {
+          "data": {
+            "title": "Dados coletados",
+            "description": "Coletamos apenas os dados necessários para o funcionamento do produto: e-mail, nome e o conteúdo das apresentações criadas."
+          },
+          "use": {
+            "title": "Uso dos dados",
+            "items": {
+              "auth": "Autenticação e acesso à conta",
+              "storage": "Armazenamento das suas apresentações",
+              "comms": "Comunicações relacionadas ao produto"
+            }
+          },
+          "rights": {
+            "title": "Seus direitos",
+            "description": "Você pode solicitar a exclusão dos seus dados a qualquer momento enviando um e-mail para privacy@nextexcalidraw.com."
+          },
+          "cookies": {
+            "title": "Cookies",
+            "description": "Usamos cookies essenciais para autenticação. Não utilizamos cookies de rastreamento de terceiros."
+          }
+        }
+      },
+      "terms": {
+        "hero": {
+          "badge": "Legal",
+          "title": "Termos de Uso",
+          "lastUpdated": "Última atualização: maio de 2026"
+        },
+        "sections": {
+          "acceptance": {
+            "title": "Aceitação dos termos",
+            "description": "Ao usar o Next Excalidraw, você concorda com estes termos."
+          },
+          "permitted": {
+            "title": "Uso permitido",
+            "items": {
+              "create": "Criar e exportar apresentações para uso pessoal ou profissional",
+              "share": "Compartilhar apresentações geradas pela plataforma"
+            }
+          },
+          "prohibited": {
+            "title": "Uso proibido",
+            "items": {
+              "illegal": "Usar a plataforma para gerar conteúdo ilegal ou ofensivo",
+              "security": "Tentar comprometer a segurança do sistema"
+            }
+          },
+          "ip": {
+            "title": "Propriedade intelectual",
+            "description": "O conteúdo das apresentações criadas por você permanece de sua propriedade. O código e a plataforma são propriedade do Next Excalidraw."
+          },
+          "changes": {
+            "title": "Alterações",
+            "description": "Podemos atualizar estes termos a qualquer momento. Notificaremos os usuários por e-mail em caso de mudanças relevantes."
+          }
+        }
+      }
+    }
+  }
+}

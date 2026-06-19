@@ -1,12 +1,12 @@
 import { getTranslations } from "next-intl/server";
 
+import { LandingFooterBrand } from "@/components/landing/landing-footer-brand";
+import { LandingFooterCopyright } from "@/components/landing/landing-footer-copyright";
+import { LandingFooterNav } from "@/components/landing/landing-footer-nav";
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutFooter } from "@/components/layouts/layout-footer";
 import { LayoutFooterBottom } from "@/components/layouts/layout-footer-bottom";
 import { LayoutFooterColumns } from "@/components/layouts/layout-footer-columns";
-import { LandingFooterBrand } from "@/components/landing/landing-footer-brand";
-import { LandingFooterCopyright } from "@/components/landing/landing-footer-copyright";
-import { LandingFooterNav } from "@/components/landing/landing-footer-nav";
 
 export async function LandingLayoutFooter() {
   const t = await getTranslations("landing.footer.nav");
@@ -15,9 +15,10 @@ export async function LandingLayoutFooter() {
     {
       label: t("product.label"),
       links: [
+        { label: t("product.multi"), href: "/landing/product/multi" },
+        { label: t("product.single"), href: "/landing/product/single" },
         { label: t("product.features"), href: "/landing/home#features" },
         { label: t("product.pricing"), href: "/landing/home#pricing" },
-        { label: t("product.updates"), href: "/landing/product/updates" },
       ],
     },
     {
@@ -30,8 +31,8 @@ export async function LandingLayoutFooter() {
     {
       label: t("legal.label"),
       links: [
-        { label: t("legal.privacy"), href: "/landing/transparency/privacy-policy" },
-        { label: t("legal.terms"), href: "/landing/transparency/terms" },
+        { label: t("legal.privacy"), href: "/landing/transparency/legal/privacy-policy" },
+        { label: t("legal.terms"), href: "/landing/transparency/legal/terms" },
       ],
     },
   ];
