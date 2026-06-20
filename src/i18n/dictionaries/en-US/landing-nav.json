@@ -40,7 +40,11 @@
           "description": "Diagrams, illustrations and visual transforms on a single canvas"
         }
       },
-      "language": "Language"
+      "language": "Language",
+      "cta": {
+        "signIn": "Sign in",
+        "getStarted": "Get started"
+      }
     }
   }
 }

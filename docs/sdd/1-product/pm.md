@@ -95,6 +95,14 @@ outline API route
 ## Active
 ---
 
+**Mapeamento de components — módulos UI**
+*(Ordem: landing ✅ → auth → app → admin)*
+
+- [x] `P1` Landing module — mapeamento completo
+- [ ] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
+- [ ] `P2` App module — dashboard, presentations/new, outline, editor, present
+- [ ] `P3` Admin module — dashboard, users, logs, settings
+
 **UI — Ciclo 2** *(UI funcional — identidade visual e estrutura de componentes serão revisadas em etapa futura de design)*
 - [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
@@ -206,6 +214,18 @@ outline API route
 ## Done
 ---
 
+- [x] **Landing module — mapeamento de components completo** (pages, organisms, molecules, atoms · i18n em pt-BR / en-US / es)
+  - `landing/home`: Hero · Product · Features · Pricing · Testimonials · Cta · Faq
+  - `landing/product/[slug]`: multi (Hero · HowItWorks · Modalities · Audience · Capabilities · Cta) · single (Hero · Inputs · Versions · Cta)
+  - `landing/institutional/about`: Hero · Mission · Story
+  - `landing/resources/blog`: Hero · Feed (empty state por categoria)
+  - `landing/resources/blog/[slug]`: Hero · Content (empty state) · Suggestions (empty state)
+  - `landing/resources/contact`: Hero · Info
+  - `landing/transparency/legal/privacy-policy`: Hero · Content
+  - `landing/transparency/legal/terms`: Hero · Content
+  - Layout: Header (NavBrand · NavMenu · NavLanguageSwitcher · NavCta · NavMobile) · Footer (FooterBrand · FooterNav · FooterCopyright)
+- [x] **i18n** — dicionários separados por domínio (`common`, `landing-nav`, `landing-home`, `landing-product`, `landing-resources`, `landing-institutional`, `landing-transparency`), carregamento paralelo via `Promise.all` em `request.ts`
+- [x] **Navegação landing** — paths legais corrigidos, `whatsNew` → blog, footer produto atualizado com `multi` e `single`
 - [x] Scaffold completo — auth, i18n, DB schema, rotas, providers
 - [x] `outlineWorkflow` funcional com tool call estruturada
 - [x] `slideWorkflow` funcional com prompt dinâmico por tipo/representação

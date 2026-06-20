@@ -8,6 +8,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   const [
     common,
+    auth,
     landingNav,
     landingHome,
     landingProduct,
@@ -16,6 +17,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     landingTransparency,
   ] = await Promise.all([
     import(`./dictionaries/${locale}/common.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/auth.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-nav.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-home.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-product.json`).then((m) => m.default),
@@ -28,6 +30,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale,
     messages: {
       ...common,
+      ...auth,
       landing: {
         ...landingNav.landing,
         ...landingHome.landing,

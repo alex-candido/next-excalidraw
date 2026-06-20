@@ -16,6 +16,24 @@
         "empty": {
           "title": "Aún no hay publicaciones",
           "description": "Estamos escribiendo — vuelve pronto."
+        },
+        "post": {
+          "back": "Volver al Blog",
+          "readTime": "{minutes} min de lectura",
+          "content": {
+            "empty": {
+              "title": "Contenido próximamente",
+              "description": "Esta publicación está siendo escrita — vuelve pronto."
+            }
+          },
+          "suggestions": {
+            "title": "Seguir leyendo",
+            "description": "Más publicaciones que te pueden gustar.",
+            "empty": {
+              "title": "Sin sugerencias aún",
+              "description": "Más publicaciones próximamente."
+            }
+          }
         }
       },
       "contact": {

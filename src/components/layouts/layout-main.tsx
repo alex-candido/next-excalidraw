@@ -8,7 +8,7 @@ export function LayoutMain({
   return (
     <main
       className={cn(
-        "layout-main flex-1 min-h-[calc(100vh-4rem)]",
+        "layout-main flex flex-col flex-1 min-h-[calc(100vh-4rem)]",
         className,
       )}
       {...props}

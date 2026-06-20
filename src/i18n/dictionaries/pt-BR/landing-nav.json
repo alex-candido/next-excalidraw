@@ -40,7 +40,11 @@
           "description": "Diagramas, ilustrações e transformações visuais em uma única tela"
         }
       },
-      "language": "Idioma"
+      "language": "Idioma",
+      "cta": {
+        "signIn": "Entrar",
+        "getStarted": "Começar grátis"
+      }
     }
   }
 }

@@ -40,7 +40,11 @@
           "description": "Diagramas, ilustraciones y transformaciones visuales en un solo lienzo"
         }
       },
-      "language": "Idioma"
+      "language": "Idioma",
+      "cta": {
+        "signIn": "Iniciar sesión",
+        "getStarted": "Comenzar gratis"
+      }
     }
   }
 }

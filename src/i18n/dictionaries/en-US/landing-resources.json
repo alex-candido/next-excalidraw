@@ -16,6 +16,24 @@
         "empty": {
           "title": "No posts yet",
           "description": "We're writing — check back soon."
+        },
+        "post": {
+          "back": "Back to Blog",
+          "readTime": "{minutes} min read",
+          "content": {
+            "empty": {
+              "title": "Content coming soon",
+              "description": "This post is being written — check back soon."
+            }
+          },
+          "suggestions": {
+            "title": "Continue reading",
+            "description": "More posts you might enjoy.",
+            "empty": {
+              "title": "No suggestions yet",
+              "description": "More posts coming soon."
+            }
+          }
         }
       },
       "contact": {
