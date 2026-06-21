@@ -17,7 +17,7 @@ const locales: { code: string; abbr: string; label: string }[] = [
   { code: "es",    abbr: "ES", label: "Español" },
 ];
 
-export function LandingNavLanguageSwitcher() {
+export function LanguageSwitcher() {
   const locale = useLocale();
   const t = useTranslations("landing.nav");
   const router = useRouter();

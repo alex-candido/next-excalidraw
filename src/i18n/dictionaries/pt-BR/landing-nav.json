@@ -15,8 +15,13 @@
         },
         "resources": {
           "label": "Recursos",
-          "blog": "Blog",
-          "about": "Sobre"
+          "blog": "Blog"
+        },
+        "institutional": {
+          "label": "Empresa",
+          "about": "Sobre",
+          "team": "Equipe",
+          "contact": "Contato"
         },
         "legal": {
           "label": "Legal",

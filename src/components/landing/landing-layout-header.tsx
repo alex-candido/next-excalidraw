@@ -12,7 +12,7 @@ import { LandingNavBrand } from "@/components/landing/landing-nav-brand";
 import { LandingNavCta } from "@/components/landing/landing-nav-cta";
 import { LandingNavMenu } from "@/components/landing/landing-nav-menu";
 import { LandingNavMobile } from "@/components/landing/landing-nav-mobile";
-import { LandingNavLanguageSwitcher } from "./landing-nav-language-switcher";
+import { LanguageSwitcher } from "../ui/language-switcher";
 
 export function LandingLayoutHeader() {
   return (
@@ -28,7 +28,7 @@ export function LandingLayoutHeader() {
         </LayoutNavStart>
         <LayoutNavEnd>
           <LayoutNavActions>
-            <LandingNavLanguageSwitcher />
+            <LanguageSwitcher />
             <LayoutNavCtaMenu>
               <LandingNavCta />
             </LayoutNavCtaMenu>

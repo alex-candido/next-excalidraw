@@ -53,9 +53,10 @@ Primeira impressão do produto. Objetivo: converter visitante em usuário cadast
 /landing/product/multi                           → detalhe da modalidade Multi
 /landing/product/single                          → detalhe da modalidade Single
 /landing/institutional/about                     → sobre o produto e o time
+/landing/institutional/team                      → equipe do projeto
+/landing/institutional/contact                   → contato e suporte
 /landing/resources/blog                          → listagem de posts
 /landing/resources/blog/[slug]                   → detalhe do post
-/landing/resources/contact                       → contato e suporte
 /landing/transparency/legal/privacy-policy       → política de privacidade
 /landing/transparency/legal/terms                → termos de uso
 ```

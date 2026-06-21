@@ -1,0 +1,12 @@
+{
+  "app": {
+    "brand": {
+      "subtitle": "Criador de apresentações com IA"
+    },
+    "nav": {
+      "home": "Início",
+      "presentations": "Apresentações",
+      "settings": "Configurações"
+    }
+  }
+}

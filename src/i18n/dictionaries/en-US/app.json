@@ -1,0 +1,12 @@
+{
+  "app": {
+    "brand": {
+      "subtitle": "AI-powered presentation builder"
+    },
+    "nav": {
+      "home": "Home",
+      "presentations": "Presentations",
+      "settings": "Settings"
+    }
+  }
+}

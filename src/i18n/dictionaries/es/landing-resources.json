@@ -35,28 +35,6 @@
             }
           }
         }
-      },
-      "contact": {
-        "hero": {
-          "badge": "Contacto",
-          "title": "Contáctanos",
-          "description": "¿Tienes una pregunta, sugerencia o problema? Estamos aquí para ayudarte."
-        },
-        "channels": {
-          "title": "Canales de soporte",
-          "email": {
-            "label": "Correo",
-            "value": "support@nextexcalidraw.com"
-          },
-          "response": {
-            "label": "Tiempo de respuesta",
-            "value": "hasta 48 horas hábiles"
-          }
-        },
-        "report": {
-          "title": "Reportar un problema",
-          "description": "Describe el problema con el mayor detalle posible, incluyendo los pasos para reproducirlo."
-        }
       }
     }
   }

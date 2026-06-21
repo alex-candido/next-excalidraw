@@ -25,7 +25,14 @@ export async function LandingLayoutFooter() {
       label: t("resources.label"),
       links: [
         { label: t("resources.blog"), href: "/landing/resources/blog" },
-        { label: t("resources.about"), href: "/landing/institutional/about" },
+      ],
+    },
+    {
+      label: t("institutional.label"),
+      links: [
+        { label: t("institutional.about"), href: "/landing/institutional/about" },
+        { label: t("institutional.team"), href: "/landing/institutional/team" },
+        { label: t("institutional.contact"), href: "/landing/institutional/contact" },
       ],
     },
     {

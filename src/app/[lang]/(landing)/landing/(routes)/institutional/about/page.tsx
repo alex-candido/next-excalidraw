@@ -1,9 +1,13 @@
-export default async function AboutPage() {
-  const { default: Content } = await import("@/content/landing/institutional/about.mdx");
+import { LandingInstitutionalAboutHero } from "@/components/landing/institutional/about/landing-institutional-about-hero";
+import { LandingInstitutionalAboutMission } from "@/components/landing/institutional/about/landing-institutional-about-mission";
+import { LandingInstitutionalAboutStory } from "@/components/landing/institutional/about/landing-institutional-about-story";
 
+export default function AboutPage() {
   return (
     <div className="landing-institutional-about-page">
-      <Content />
+      <LandingInstitutionalAboutHero />
+      <LandingInstitutionalAboutMission />
+      <LandingInstitutionalAboutStory />
     </div>
   );
 }

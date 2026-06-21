@@ -6,18 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { H1, Lead } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-export async function LandingResourcesContactHero({
+export async function LandingInstitutionalContactHero({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const t = await getTranslations("landing.resources.contact.hero");
+  const t = await getTranslations("landing.institutional.contact.hero");
 
   return (
     <LayoutSection>
       <LayoutContainer className="justify-center">
         <div
           className={cn(
-            "landing-resources-contact-hero w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-4",
+            "landing-institutional-contact-hero w-full max-w-3xl mx-auto flex flex-col items-center text-center gap-4",
             className,
           )}
           {...props}
@@ -25,10 +25,10 @@ export async function LandingResourcesContactHero({
           <Badge variant="secondary" className="rounded-full">
             {t("badge")}
           </Badge>
-          <H1 className="landing-resources-contact-hero-title max-w-2xl">
+          <H1 className="landing-institutional-contact-hero-title max-w-2xl">
             {t("title")}
           </H1>
-          <Lead className="landing-resources-contact-hero-description max-w-xl">
+          <Lead className="landing-institutional-contact-hero-description max-w-xl">
             {t("description")}
           </Lead>
         </div>

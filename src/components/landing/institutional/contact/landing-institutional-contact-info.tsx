@@ -6,23 +6,23 @@ import { LayoutSection } from "@/components/layouts/layout-section";
 import { H3, Muted, P } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-export async function LandingResourcesContactInfo({
+export async function LandingInstitutionalContactInfo({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const t = await getTranslations("landing.resources.contact");
+  const t = await getTranslations("landing.institutional.contact");
 
   return (
     <LayoutSection>
       <LayoutContainer className="justify-center">
         <div
           className={cn(
-            "landing-resources-contact-info w-full max-w-3xl mx-auto flex flex-col gap-10",
+            "landing-institutional-contact-info w-full max-w-3xl mx-auto flex flex-col gap-10",
             className,
           )}
           {...props}
         >
-          <div className="landing-resources-contact-channels flex flex-col gap-4">
+          <div className="landing-institutional-contact-channels flex flex-col gap-4">
             <H3>{t("channels.title")}</H3>
             <div className="flex flex-col gap-3 rounded-lg border p-6">
               <div className="flex items-center gap-3">
@@ -47,7 +47,7 @@ export async function LandingResourcesContactInfo({
             </div>
           </div>
 
-          <div className="landing-resources-contact-report flex flex-col gap-3">
+          <div className="landing-institutional-contact-report flex flex-col gap-3">
             <H3>{t("report.title")}</H3>
             <P className="text-muted-foreground">{t("report.description")}</P>
           </div>

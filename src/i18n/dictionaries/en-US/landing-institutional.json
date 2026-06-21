@@ -17,6 +17,38 @@
           "title": "Built on Excalidraw",
           "description": "We combined the most expressive diagramming tool on the web with AI to automatically generate visual content — so you can focus on ideas, not slides."
         }
+      },
+      "team": {
+        "hero": {
+          "badge": "Team",
+          "title": "Built by one, designed for many",
+          "description": "Next Excalidraw is an indie project — one engineer building the tools they wish existed, one commit at a time."
+        },
+        "members": {
+          "label": "Who's behind this"
+        }
+      },
+      "contact": {
+        "hero": {
+          "badge": "Contact",
+          "title": "Get in touch",
+          "description": "Have a question, suggestion, or issue? We're here to help."
+        },
+        "channels": {
+          "title": "Support channels",
+          "email": {
+            "label": "Email",
+            "value": "support@nextexcalidraw.com"
+          },
+          "response": {
+            "label": "Response time",
+            "value": "up to 48 business hours"
+          }
+        },
+        "report": {
+          "title": "Report a problem",
+          "description": "Describe the issue with as much detail as possible, including the steps to reproduce it."
+        }
       }
     }
   }

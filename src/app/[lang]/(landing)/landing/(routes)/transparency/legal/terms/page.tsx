@@ -1,9 +1,11 @@
-export default async function TermsPage() {
-  const { default: Content } = await import("@/content/landing/transparency/legal/terms.mdx");
+import { LandingTransparencyTermsContent } from "@/components/landing/transparency/terms/landing-transparency-terms-content";
+import { LandingTransparencyTermsHero } from "@/components/landing/transparency/terms/landing-transparency-terms-hero";
 
+export default function TermsPage() {
   return (
     <div className="landing-transparency-legal-terms-page">
-      <Content />
+      <LandingTransparencyTermsHero />
+      <LandingTransparencyTermsContent />
     </div>
   );
 }
