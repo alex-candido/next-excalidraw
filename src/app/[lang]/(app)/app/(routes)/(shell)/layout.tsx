@@ -1,3 +1,4 @@
+import { AppLayoutFooter } from "@/components/app/app-layout-footer";
 import { AppLayoutHeader } from "@/components/app/app-layout-header";
 import { AppLayoutRail } from "@/components/app/app-layout-rail";
 import { AppLayoutShell } from "@/components/app/app-layout-shell";
@@ -10,7 +11,6 @@ export default async function AppShellLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <LayoutWrapper>
       <AppLayoutHeader />
@@ -18,9 +18,9 @@ export default async function AppShellLayout({
         <AppLayoutRail>
           <AppNavRail />
         </AppLayoutRail>
-        <LayoutMain>{children}</LayoutMain>
+        <LayoutMain className="pb-20 md:pb-0">{children}</LayoutMain>
       </AppLayoutShell>
+      <AppLayoutFooter />
     </LayoutWrapper>
   );
 }
-

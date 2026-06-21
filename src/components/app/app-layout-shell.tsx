@@ -6,7 +6,7 @@ export function AppLayoutShell({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("app-layout-shell relative flex flex-1 overflow-hidden", className)} {...props}>
+    <div className={cn("app-layout-shell flex flex-1 overflow-hidden", className)} {...props}>
       {children}
     </div>
   );

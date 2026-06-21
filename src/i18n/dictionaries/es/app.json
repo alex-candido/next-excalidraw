@@ -7,6 +7,67 @@
       "home": "Inicio",
       "presentations": "Presentaciones",
       "settings": "Configuración"
+    },
+    "dashboard": {
+      "hero": {
+        "tagline": "Del prompt al visual",
+        "title": "Transforma ideas en presentaciones visuales",
+        "description": "Describe lo que quieres comunicar. El resto — estructura, diseño y elementos visuales — se genera automáticamente.",
+        "features": {
+          "languages": "10 idiomas",
+          "ratios": "6 proporciones",
+          "audiences": "5 públicos",
+          "themes": "Temas personalizados"
+        }
+      },
+      "form": {
+        "placeholder": "Describe el flujo, estructura o diagrama que quieres crear...",
+        "send": "Crear",
+        "upload": "Subir imagen",
+        "hint": "Enter para crear · Shift + Enter para nueva línea",
+        "engine": {
+          "label": "Motor",
+          "name": "Excalidraw"
+        },
+        "options": {
+          "multi": "Presentación",
+          "single": "Diagrama"
+        },
+        "controls": {
+          "slideCount": { "label": "Slides", "items": ["Auto", "5", "8", "10", "15", "20"] },
+          "language": { "label": "Idioma", "items": ["Portugués", "Inglés", "Español", "Francés", "Alemán", "Italiano", "Japonés", "Chino", "Árabe", "Hindi"] },
+          "aspectRatio": { "label": "Proporción", "items": ["16:9", "4:3", "1:1", "9:16", "A4", "Carta"] },
+          "amount": { "label": "Detalle", "items": ["Automático", "Mínimo", "Conciso", "Detallado", "Extenso"] },
+          "audience": { "label": "Público", "items": ["General", "Empresarial", "Inversores", "Profesores", "Estudiantes"] },
+          "scenario": { "label": "Escenario", "items": ["Automático", "Promocional", "Educativo", "Analítico", "Informe"] }
+        }
+      },
+      "suggestions": {
+        "title": "Ejemplos para comenzar",
+        "description": "Elige un ejemplo o describe tu idea en el formulario de arriba.",
+        "shuffle": "Mezclar",
+        "types": {
+          "multi": "Presentación",
+          "single": "Diagrama"
+        },
+        "items": [
+          { "label": "Crea un flujo de autenticación con login social y recuperación de contraseña", "type": "multi" },
+          { "label": "Diagrama de arquitectura de microservicios con API gateway", "type": "single" },
+          { "label": "Roadmap de producto con épicos e hitos para el próximo trimestre", "type": "multi" },
+          { "label": "Flujo de onboarding de nuevos usuarios desde el registro hasta la activación", "type": "multi" }
+        ]
+      },
+      "recents": {
+        "title": "Recientes",
+        "description": "Tus presentaciones y diagramas más recientes.",
+        "viewAll": "Ver todas",
+        "empty": "Aún no hay presentaciones. Crea la primera arriba."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Next Excalidraw. Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "terms": "Términos"
     }
   }
 }

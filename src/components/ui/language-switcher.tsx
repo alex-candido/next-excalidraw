@@ -1,6 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +30,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={buttonVariants({ variant: "ghost", size: "sm", className: "landing-nav-language-trigger px-2" })}
-        aria-label={t("language")}
+        render={<Button variant="outline" size="icon" aria-label={t("language")} />}
       >
         <Globe className="size-4" />
         <span className="sr-only">{t("language")}</span>

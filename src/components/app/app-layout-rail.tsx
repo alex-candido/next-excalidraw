@@ -7,7 +7,12 @@ export function AppLayoutRail({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <aside
-      className={cn("app-layout-rail absolute left-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center", className)}
+      className={cn(
+          "app-layout-rail z-20 flex items-center",
+          "fixed bottom-4 left-1/2 -translate-x-1/2",
+          "md:translate-x-0 md:left-4 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:flex-col",
+          className
+        )}
       {...props}
     >
       {children}
