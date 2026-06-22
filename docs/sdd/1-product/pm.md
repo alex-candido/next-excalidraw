@@ -35,7 +35,7 @@ Ciclo 1 — Pipeline AI (concluído)
 Ciclo 2 — Integração & UI Base (atual)
   Fase 2a — Mapeamento de components (em andamento): landing ✅ · auth · app · admin
   Nota: não há rota /presentations/new — o form de criação está no /app/dashboard
-  Fase 2b — Páginas funcionais: API routes + .http, persistência no banco, páginas essenciais (new, outline, editor, present)
+  Fase 2b — Páginas funcionais: API routes + .http, persistência no banco, páginas essenciais (new, outline, studio, present)
 
 Ciclo 3 — Qualidade & Features
   Parallelism, retry, custo de tokens, modelo dinâmico, editor/present, agent chat, templates
@@ -68,7 +68,7 @@ outline API route
        └─ slide API route
             └─ persistir slides no banco
                  └─ /presentations/[id]/outline (UI)
-                      └─ /presentations/[id]/editor (UI)
+                      └─ /presentations/[id]/studio (UI)
                            └─ /presentations/[id]/present (UI)
 ```
 
@@ -105,8 +105,10 @@ outline API route
 - [x] `P2` App module — dashboard ✅ (inclui form de criação: engine · options · input · controls · actions)
 - [ ] `P2` App module — criação manual (+) — AppNewPresentationModal (title · engine · type · features · actions) · trigger no AppNavMenu · trigger no AppDashboardRecents header
 - [ ] `P2` App module — presentations (list) — AppPresentationsHero · AppPresentationsGrid · AppPresentationsCard · AppPresentationsEmpty
+- [ ] `P3` App module — app/templates — AppTemplatesHero · AppTemplatesGrid · AppTemplatesCard
+- [ ] `P3` App module — app/community — AppCommunityHero · AppCommunityGrid · AppCommunityCard · AppCommunityFilters
 - [ ] `P2` App module — presentations/[id]/outline — AppOutlineHero · AppOutlineList · AppOutlineCard (regenerate) · AppOutlineActions
-- [ ] `P2` App module — presentations/[id]/editor — AppEditorCanvas · AppEditorSlideList · AppEditorToolbar · AppEditorActions
+- [ ] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
 - [ ] `P2` App module — presentations/[id]/present — AppPresentSlide · AppPresentNav · AppPresentControls
 - [ ] `P3` App module — settings/profile, settings/billing, settings/team
 - [ ] `P3` Admin module — dashboard, users, logs, settings
@@ -114,7 +116,7 @@ outline API route
 **UI — Ciclo 2** *(UI funcional — identidade visual e estrutura de componentes serão revisadas em etapa futura de design)*
 - [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
-- [ ] `P2` Página `/presentations/[id]/editor` — editor Excalidraw por slide
+- [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen
 
 **Regeneração individual de outline**
@@ -141,7 +143,7 @@ outline API route
 
 **UI — Ciclo 2**
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem e edição dos outlines; botão de regenerar item individual (P2)
-- [ ] `P2` Página `/presentations/[id]/editor` — editor Excalidraw por slide (ref: `inscribed/Canvas.tsx`)
+- [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide (ref: `inscribed/Canvas.tsx`)
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen com `exportToImageUrls` (ref: `inscribed/PresentationMode.tsx`)
 - [ ] `P2` Loading states durante geração (outline e slides)
 
@@ -166,6 +168,13 @@ outline API route
 - [ ] `P3` `parseSkeletons` — suporte a output com múltiplos blocos JSON separados; melhorar JSON repair: detectar padrão `["key":value]` → inserir `{`, trim trailing comma, fallback para `jsonrepair` npm (ref: `smart-excalidraw-next/lib/json-repair.js`)
 - [ ] `P3` `optimizeArrows` — algoritmo `determineEdges()` production-grade: seleciona aresta ótima (left/right/top/bottom) por quadrante + distância; fixa bug Excalidraw `width=0 → width=1` (ref: `smart-excalidraw-next/lib/optimizeArrows.js`)
 - [x] `P3` `lib/excalidraw/math/sizing.ts` — `calcTextWidth(text, language)` com +15% para pt/es/fr/de/it, `calcContainerHeight(lines, fontSize, padding)`, `snapToGrid(value, gridSize=20)` — injetáveis como contexto no prompt
+
+**Templates & Community — Ciclo 3**
+- [ ] `P3` Página `/app/app/templates` — galeria de templates curados pelo produto (admin-only); vitrine também no dashboard
+- [ ] `P3` Página `/app/app/community` — galeria de presentations públicas (`visibility: public`) com filtro por tags e duplicar
+- [ ] `P3` Dashboard section de templates — vitrine curada com N templates em destaque (dinâmico, via DB)
+- [ ] `P3` Suporte a `visibility: public` na presentation — campo no schema + lógica de publicação
+- [ ] `P3` AppNavMenu — adicionar Templates e Community como sub-items de Presentations
 
 **Chat de Edição (Agent) — Ciclo 3**
 - [ ] `P2` Definir tools do agent de edição — baseado no modelo do `presentation-ai` (ref: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`) — 8 tools: `edit_slide_properties`, `replace_image`, `change_theme`, `regenerate_slide`, `create_slide`, `delete_slide`, `webSearch`, `respond_to_user`

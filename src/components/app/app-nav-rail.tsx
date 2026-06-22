@@ -1,6 +1,6 @@
 "use client";
 
-import { GalleryVerticalEnd, Home, Plus, Settings } from "lucide-react";
+import { GalleryVerticalEnd, Globe, Home, LayoutTemplate, Plus, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -13,6 +13,8 @@ import { AppDashboardNewModal } from "@/components/app/dashboard/new/app-dashboa
 const NAV_ITEMS = [
   { key: "home", icon: Home, href: "/app/dashboard" },
   { key: "presentations", icon: GalleryVerticalEnd, href: "/app/presentations" },
+  { key: "templates", icon: LayoutTemplate, href: "/app/templates" },
+  { key: "community", icon: Globe, href: "/app/community" },
   { key: "settings", icon: Settings, href: "/app/settings" },
 ] as const;
 

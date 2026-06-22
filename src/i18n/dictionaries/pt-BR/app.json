@@ -6,6 +6,8 @@
     "nav": {
       "home": "Início",
       "presentations": "Apresentações",
+      "templates": "Modelos",
+      "community": "Comunidade",
       "settings": "Configurações"
     },
     "dashboard": {
@@ -65,6 +67,26 @@
         "description": "Suas apresentações e diagramas mais recentes.",
         "viewAll": "Ver todas",
         "empty": "Nenhuma apresentação ainda. Crie a sua primeira acima.",
+        "types": {
+          "multi": "Apresentação",
+          "single": "Diagrama"
+        }
+      },
+      "templates": {
+        "title": "Modelos",
+        "description": "Apresentações prontas para usar como ponto de partida.",
+        "viewAll": "Ver todos",
+        "empty": "Nenhum modelo disponível no momento.",
+        "types": {
+          "multi": "Apresentação",
+          "single": "Diagrama"
+        }
+      },
+      "community": {
+        "title": "Comunidade",
+        "description": "Apresentações públicas criadas pela comunidade.",
+        "viewAll": "Ver comunidade",
+        "empty": "Nenhuma apresentação pública ainda.",
         "types": {
           "multi": "Apresentação",
           "single": "Diagrama"

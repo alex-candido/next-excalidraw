@@ -6,6 +6,8 @@
     "nav": {
       "home": "Home",
       "presentations": "Presentations",
+      "templates": "Templates",
+      "community": "Community",
       "settings": "Settings"
     },
     "dashboard": {
@@ -65,6 +67,26 @@
         "description": "Your most recent presentations and diagrams.",
         "viewAll": "View all",
         "empty": "No presentations yet. Create your first one above.",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        }
+      },
+      "templates": {
+        "title": "Templates",
+        "description": "Ready-made presentations to use as a starting point.",
+        "viewAll": "View all",
+        "empty": "No templates available at the moment.",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        }
+      },
+      "community": {
+        "title": "Community",
+        "description": "Public presentations created by the community.",
+        "viewAll": "View community",
+        "empty": "No public presentations yet.",
         "types": {
           "multi": "Presentation",
           "single": "Diagram"

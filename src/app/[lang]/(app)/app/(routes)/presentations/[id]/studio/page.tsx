@@ -1,6 +1,6 @@
 import { ExcalidrawEditor } from "@/components/excalidraw/excalidraw-editor";
 
-export default async function EditorPage({
+export default async function StudioPage({
   params,
 }: {
   params: Promise<{ id: string }>;

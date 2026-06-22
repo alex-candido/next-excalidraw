@@ -47,7 +47,7 @@ export async function AppDashboardRecents({
   const t = await getTranslations("app.dashboard.recents");
 
   return (
-    <LayoutSection className="first:pt-10 md:first:pt-14">
+    <LayoutSection className="first:pt-10 md:first:pt-14 md:pb-16">
       <LayoutContainer className="justify-center">
         <div
           className={cn(
@@ -72,7 +72,7 @@ export async function AppDashboardRecents({
                   language={item.language}
                   slideCount={item.slideCount}
                   typeLabel={t(`types.${TYPE_KEY[item.type]}`)}
-                  href={`/app/presentations/${item.id}/editor`}
+                  href={`/app/presentations/${item.id}/studio`}
                 />
               ))}
             </div>
