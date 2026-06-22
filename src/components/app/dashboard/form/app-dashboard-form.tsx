@@ -5,11 +5,11 @@ import { LayoutSection } from "@/components/layouts/layout-section";
 import { Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-import { AppDashboardFormActions } from "@/components/app/dashboard/app-dashboard-form-actions";
-import { AppDashboardFormControls } from "@/components/app/dashboard/app-dashboard-form-controls";
-import { AppDashboardFormEngine } from "@/components/app/dashboard/app-dashboard-form-engine";
-import { AppDashboardFormInput } from "@/components/app/dashboard/app-dashboard-form-input";
-import { AppDashboardFormOptions } from "@/components/app/dashboard/app-dashboard-form-options";
+import { AppDashboardFormActions } from "@/components/app/dashboard/form/app-dashboard-form-actions";
+import { AppDashboardFormControls } from "@/components/app/dashboard/form/app-dashboard-form-controls";
+import { AppDashboardFormEngine } from "@/components/app/dashboard/form/app-dashboard-form-engine";
+import { AppDashboardFormInput } from "@/components/app/dashboard/form/app-dashboard-form-input";
+import { AppDashboardFormOptions } from "@/components/app/dashboard/form/app-dashboard-form-options";
 
 export async function AppDashboardForm({
   className,
@@ -18,11 +18,11 @@ export async function AppDashboardForm({
   const t = await getTranslations("app.dashboard.form");
 
   return (
-    <LayoutSection className="pb-8 first:pt-10 md:pb-10 md:first:pt-14">
+    <LayoutSection className="first:pt-10 md:pb-16 md:first:pt-14">
       <LayoutContainer className="justify-center">
         <div
           className={cn(
-            "app-dashboard-form w-full max-w-3xl flex flex-col rounded-xl border bg-card shadow-sm overflow-hidden",
+            "app-dashboard-form w-full max-w-4xl flex flex-col rounded-xl border bg-card shadow-sm overflow-hidden",
             className,
           )}
           {...props}
@@ -31,17 +31,17 @@ export async function AppDashboardForm({
             <AppDashboardFormEngine />
             <AppDashboardFormOptions />
           </div>
-          <div className="app-dashboard-form-body p-3">
+          <div className="app-dashboard-form-body flex flex-col p-3">
             <AppDashboardFormInput />
-            <Muted className="app-dashboard-form-hint mt-2 px-1 text-xs">
-              {t("hint")}
-            </Muted>
+            <div className="app-dashboard-form-body-footer mt-2 flex items-center justify-between px-1">
+              <Muted className="app-dashboard-form-hint text-xs">
+                {t("hint")}
+              </Muted>
+              <AppDashboardFormActions />
+            </div>
           </div>
           <div className="app-dashboard-form-controls-bar border-t px-3 py-2">
             <AppDashboardFormControls />
-          </div>
-          <div className="app-dashboard-form-footer flex items-center justify-end border-t px-3 py-2">
-            <AppDashboardFormActions />
           </div>
         </div>
       </LayoutContainer>

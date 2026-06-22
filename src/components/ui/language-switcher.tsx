@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -36,16 +37,14 @@ export function LanguageSwitcher() {
         <span className="sr-only">{t("language")}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="landing-nav-language-menu w-44">
-        {locales.map(({ code, abbr, label }) => (
-          <DropdownMenuItem
-            key={code}
-            onClick={() => handleLocaleChange(code)}
-            className={locale === code ? "font-medium" : ""}
-          >
-            <span className="w-7 shrink-0 text-xs font-mono text-muted-foreground">{abbr}</span>
-            {label}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuRadioGroup value={locale} onValueChange={handleLocaleChange}>
+          {locales.map(({ code, abbr, label }) => (
+            <DropdownMenuRadioItem key={code} value={code}>
+              <span className="shrink-0 text-xs font-mono text-muted-foreground">{abbr}</span>
+              {label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

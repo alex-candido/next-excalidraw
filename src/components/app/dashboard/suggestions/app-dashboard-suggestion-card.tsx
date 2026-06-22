@@ -27,18 +27,20 @@ export function AppDashboardSuggestionCard({
       )}
       {...props}
     >
-      <div className="app-dashboard-suggestion-card-icon size-8 rounded-md bg-muted flex items-center justify-center">
-        <Icon className="size-4 text-muted-foreground" />
+      <div className="app-dashboard-suggestion-card-header flex items-start justify-between gap-2">
+        <div className="app-dashboard-suggestion-card-icon size-8 rounded-md bg-muted flex items-center justify-center">
+          <Icon className="size-4 text-muted-foreground" />
+        </div>
+        <Badge
+          variant={type === "multi" ? "secondary" : "outline"}
+          className="app-dashboard-suggestion-card-type rounded-full text-xs"
+        >
+          {typeLabel}
+        </Badge>
       </div>
       <p className="app-dashboard-suggestion-card-label text-sm text-muted-foreground leading-relaxed">
         {label}
       </p>
-      <Badge
-        variant={type === "multi" ? "secondary" : "outline"}
-        className="app-dashboard-suggestion-card-type self-start rounded-full text-xs"
-      >
-        {typeLabel}
-      </Badge>
     </Card>
   );
 }

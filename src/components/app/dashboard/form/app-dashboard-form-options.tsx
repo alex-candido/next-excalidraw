@@ -12,11 +12,11 @@ export function AppDashboardFormOptions() {
     <div className="app-dashboard-form-options flex items-center gap-1.5">
       <Button variant="outline" size="sm" className="gap-1.5">
         <GalleryVerticalEnd className="size-3.5" />
-        {t("multi")}
+        <span className="hidden sm:inline">{t("multi")}</span>
       </Button>
       <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
         <PenLine className="size-3.5" />
-        {t("single")}
+        <span className="hidden sm:inline">{t("single")}</span>
       </Button>
     </div>
   );

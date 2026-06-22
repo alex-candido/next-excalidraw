@@ -9,7 +9,7 @@ export async function AppDashboardFormEngine() {
 
   return (
     <div className="app-dashboard-form-engine flex items-center gap-2">
-      <Muted className="text-xs">{t("label")}</Muted>
+      <Muted className="hidden text-xs sm:block">{t("label")}</Muted>
       <Badge variant="secondary" className="app-dashboard-form-engine-badge gap-1.5 rounded-full">
         <PenLine className="size-3" />
         {t("name")}

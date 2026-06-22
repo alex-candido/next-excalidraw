@@ -17,7 +17,10 @@
           "languages": "10 idiomas",
           "ratios": "6 proporciones",
           "audiences": "5 públicos",
-          "themes": "Temas personalizados"
+          "themes": "10 temas",
+          "amounts": "5 niveles de detalle",
+          "scenarios": "5 escenarios",
+          "slideCount": "Hasta 20 slides"
         }
       },
       "form": {
@@ -61,7 +64,44 @@
         "title": "Recientes",
         "description": "Tus presentaciones y diagramas más recientes.",
         "viewAll": "Ver todas",
-        "empty": "Aún no hay presentaciones. Crea la primera arriba."
+        "empty": "Aún no hay presentaciones. Crea la primera arriba.",
+        "types": {
+          "multi": "Presentación",
+          "single": "Diagrama"
+        }
+      }
+    },
+    "new": {
+      "trigger": "Nueva presentación",
+      "title": "Nueva presentación",
+      "fields": {
+        "title": {
+          "label": "Título",
+          "placeholder": "Sin título"
+        }
+      },
+      "engine": {
+        "label": "Motor",
+        "name": "Excalidraw"
+      },
+      "type": {
+        "label": "Tipo",
+        "multi": "Presentación",
+        "multiDescription": "Múltiples slides conectados por narrativa",
+        "single": "Diagrama",
+        "singleDescription": "Un canvas único para diagramas y esquemas"
+      },
+      "features": {
+        "label": "Excalidraw",
+        "items": [
+          "An AI-powered all-in-one diagram platform",
+          "A polished whiteboard tool with a clean, intuitive hand-drawn style",
+          "Free-form drawing with shapes, arrows, text, and more"
+        ]
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "create": "Crear"
       }
     },
     "footer": {

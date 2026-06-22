@@ -1,11 +1,16 @@
 # Feature: Presentation Creation
 
-Cobre o ciclo completo de criação de uma apresentação — da submissão do formulário até o editor. Os detalhes dos workflows AI estão documentados em `pipeline/outline-generation.pipeline.md` e `pipeline/slide-generation.pipeline.md`.
+Existem dois caminhos de criação:
+
+- **AI-generated** (este documento) — prompt → outline → slides → editor
+- **Manual** — modal com title + type → editor vazio. Ver `manual-creation.feature.md`
+
+Cobre o ciclo completo do caminho AI — da submissão do formulário até o editor. Os detalhes dos workflows AI estão documentados em `pipeline/outline-generation.pipeline.md` e `pipeline/slide-generation.pipeline.md`.
 
 ## Visão geral
 
 ```
-/presentations/[type]/new (form)
+/app/dashboard (form)
         │
         ▼
 POST /api/v1/app/presentations                               → cria Presentation (draft)

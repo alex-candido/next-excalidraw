@@ -1,11 +1,14 @@
 "use client";
 
-import { GalleryVerticalEnd, Home, Settings } from "lucide-react";
+import { GalleryVerticalEnd, Home, Plus, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+
+import { AppDashboardNewModal } from "@/components/app/dashboard/new/app-dashboard-new-modal";
 
 const NAV_ITEMS = [
   { key: "home", icon: Home, href: "/app/dashboard" },
@@ -16,34 +19,58 @@ const NAV_ITEMS = [
 export function AppNavRail() {
   const pathname = usePathname();
   const t = useTranslations("app.nav");
+  const tNew = useTranslations("app.new");
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <TooltipProvider delay={300}>
-      <nav className="app-nav-rail flex flex-row gap-1 rounded-2xl border bg-card p-1.5 shadow-sm md:flex-col">
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-
-          return (
-            <Tooltip key={item.key}>
-              <TooltipTrigger render={
-                <Link
-                  href={item.href}
-                  aria-label={t(item.key)}
-                  className={cn(
-                    "flex items-center justify-center rounded-xl p-2.5 h-10 w-10 transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
+    <>
+      <TooltipProvider delay={300}>
+        <nav className="app-nav-rail flex flex-row gap-1 rounded-2xl border bg-card p-1.5 shadow-sm md:flex-col">
+                    <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  aria-label={tNew("trigger")}
+                  onClick={() => setModalOpen(true)}
+                  className="app-nav-rail-new flex items-center justify-center rounded-xl p-2.5 h-10 w-10 transition-colors bg-primary text-primary-foreground hover:opacity-90"
                 />
-              }>
-                <item.icon className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="hidden md:flex">{t(item.key)}</TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </nav>
-    </TooltipProvider>
+              }
+            >
+              <Plus className="size-4" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="hidden md:flex">
+              {tNew("trigger")}
+            </TooltipContent>
+          </Tooltip>
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+
+            return (
+              <Tooltip key={item.key}>
+                <TooltipTrigger render={
+                  <Link
+                    href={item.href}
+                    aria-label={t(item.key)}
+                    className={cn(
+                      "flex items-center justify-center rounded-xl p-2.5 h-10 w-10 transition-colors",
+                      isActive
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  />
+                }>
+                  <item.icon className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="hidden md:flex">{t(item.key)}</TooltipContent>
+              </Tooltip>
+            );
+          })}
+
+
+        </nav>
+      </TooltipProvider>
+
+      <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+    </>
   );
 }

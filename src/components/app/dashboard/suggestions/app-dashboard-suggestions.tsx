@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-import { AppDashboardSuggestionCard } from "@/components/app/dashboard/app-dashboard-suggestion-card";
+import { AppDashboardSuggestionCard } from "@/components/app/dashboard/suggestions/app-dashboard-suggestion-card";
 
 type SuggestionItem = { label: string; type: "multi" | "single" };
 
@@ -21,28 +21,28 @@ export async function AppDashboardSuggestions({
   const items = t.raw("items") as SuggestionItem[];
 
   return (
-    <LayoutSection className="pb-8 first:pt-10 md:pb-10 md:first:pt-14">
+    <LayoutSection className="first:pt-10 md:pb-16 md:first:pt-14">
       <LayoutContainer className="justify-center">
         <div
           className={cn(
-            "app-dashboard-suggestions w-full max-w-3xl flex flex-col gap-4",
+            "app-dashboard-suggestions w-full max-w-4xl flex flex-col gap-4",
             className,
           )}
           {...props}
         >
           <div className="app-dashboard-suggestions-header flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="app-dashboard-suggestions-header-text flex flex-col gap-1">
+              <span className="app-dashboard-suggestions-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t("title")}
               </span>
-              <Muted className="text-sm">{t("description")}</Muted>
+              <Muted className="app-dashboard-suggestions-description text-sm">{t("description")}</Muted>
             </div>
-            <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-xs">
+            <Button variant="outline" size="sm" className="shrink-0 gap-1.5 text-xs">
               <Shuffle className="size-3.5" />
               {t("shuffle")}
             </Button>
           </div>
-          <div className="app-dashboard-suggestions-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="app-dashboard-suggestions-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item, i) => (
               <AppDashboardSuggestionCard
                 key={i}

@@ -33,7 +33,9 @@ Ciclo 1 — Pipeline AI (concluído)
   Scaffold, outlineWorkflow, slideWorkflow, schemas, lib/excalidraw
 
 Ciclo 2 — Integração & UI Base (atual)
-  API routes + .http, persistência no banco, páginas essenciais (new, outline, editor, present)
+  Fase 2a — Mapeamento de components (em andamento): landing ✅ · auth · app · admin
+  Nota: não há rota /presentations/new — o form de criação está no /app/dashboard
+  Fase 2b — Páginas funcionais: API routes + .http, persistência no banco, páginas essenciais (new, outline, editor, present)
 
 Ciclo 3 — Qualidade & Features
   Parallelism, retry, custo de tokens, modelo dinâmico, editor/present, agent chat, templates
@@ -100,7 +102,13 @@ outline API route
 
 - [x] `P1` Landing module — mapeamento completo
 - [ ] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
-- [ ] `P2` App module — dashboard, presentations/new, outline, editor, present
+- [x] `P2` App module — dashboard ✅ (inclui form de criação: engine · options · input · controls · actions)
+- [ ] `P2` App module — criação manual (+) — AppNewPresentationModal (title · engine · type · features · actions) · trigger no AppNavMenu · trigger no AppDashboardRecents header
+- [ ] `P2` App module — presentations (list) — AppPresentationsHero · AppPresentationsGrid · AppPresentationsCard · AppPresentationsEmpty
+- [ ] `P2` App module — presentations/[id]/outline — AppOutlineHero · AppOutlineList · AppOutlineCard (regenerate) · AppOutlineActions
+- [ ] `P2` App module — presentations/[id]/editor — AppEditorCanvas · AppEditorSlideList · AppEditorToolbar · AppEditorActions
+- [ ] `P2` App module — presentations/[id]/present — AppPresentSlide · AppPresentNav · AppPresentControls
+- [ ] `P3` App module — settings/profile, settings/billing, settings/team
 - [ ] `P3` Admin module — dashboard, users, logs, settings
 
 **UI — Ciclo 2** *(UI funcional — identidade visual e estrutura de componentes serão revisadas em etapa futura de design)*
@@ -214,6 +222,13 @@ outline API route
 ## Done
 ---
 
+- [x] **App module — dashboard — mapeamento de components completo** (organisms · i18n em pt-BR / en-US / es)
+  - `app/dashboard/hero/`: Hero (tagline com Sparkles · grid de features)
+  - `app/dashboard/form/`: Form com engine-bar (Engine · Options responsivos) · body (Input · hint · Actions com Paperclip inline) · controls-bar (slideCount · language · aspectRatio)
+  - `app/dashboard/suggestions/`: Suggestions (header com shuffle · grid 3 colunas) · SuggestionCard (ícone + badge na mesma linha · label)
+  - `app/dashboard/recents/`: Recents (header com view-all button · grid 3 colunas · empty state) · RecentCard (full-bleed · badges flutuantes · overlay com título + seta)
+  - Shell: Header · NavRail responsivo (bottom fixo mobile · lateral desktop · tooltips) · Footer · `next.config.ts` com redirects para todos os route groups · redirect server-side em `presentations/[id]/` → `/editor`
+  - Nota: form de criação está no dashboard — não existe rota `/presentations/new`
 - [x] **Landing module — mapeamento de components completo** (pages, organisms, molecules, atoms · i18n em pt-BR / en-US / es)
   - `landing/home`: Hero · Product · Features · Pricing · Testimonials · Cta · Faq
   - `landing/product/[slug]`: multi (Hero · HowItWorks · Modalities · Audience · Capabilities · Cta) · single (Hero · Inputs · Versions · Cta)

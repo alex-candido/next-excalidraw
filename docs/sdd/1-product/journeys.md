@@ -11,7 +11,7 @@ Jornadas de uso por persona. Cada jornada descreve o contexto, o caminho percorr
 **Gatilho:** Precisa preparar slides para a aula de "Padrões de Arquitetura" de amanhã
 
 ```
-1. Acessa /presentations/new
+1. Acessa /app/dashboard
    → Digita: "Padrões de arquitetura de software: MVC, Clean Architecture e Hexagonal"
    → Seleciona idioma: Português, slideCount: 8, aspectRatio: 16:9
 
@@ -41,7 +41,7 @@ Jornadas de uso por persona. Cada jornada descreve o contexto, o caminho percorr
 **Gatilho:** Após uma aula, fotografou o quadro branco com um diagrama de estados que quer usar no material
 
 ```
-1. Acessa /single/new
+1. Acessa /app/dashboard (seleciona modalidade Single)
    → Seleciona subtipo: "Foto com anotações"
    → Faz upload da foto do quadro branco
    → Idioma: Português
@@ -67,7 +67,7 @@ Jornadas de uso por persona. Cada jornada descreve o contexto, o caminho percorr
 **Gatilho:** Acabou de definir a arquitetura de um novo serviço de notificações e precisa documentar
 
 ```
-1. Acessa /single/new
+1. Acessa /app/dashboard (seleciona modalidade Single)
    → Seleciona subtipo: "Diagrama por prompt"
    → Representação: "architecture"
    → Digita: "Serviço de notificações: API Gateway → Notification Service → 
@@ -94,7 +94,7 @@ Jornadas de uso por persona. Cada jornada descreve o contexto, o caminho percorr
 **Gatilho:** Precisa apresentar uma proposta de migração de monolito para microsserviços
 
 ```
-1. Acessa /presentations/new
+1. Acessa /app/dashboard
    → Digita: "Proposta de migração gradual do monolito para microsserviços: 
       contexto, problemas atuais, estratégia strangler fig, fases e riscos"
    → slideCount: 7, idioma: Inglês
@@ -122,7 +122,7 @@ Jornadas de uso por persona. Cada jornada descreve o contexto, o caminho percorr
 **Gatilho:** Quarterly review com o C-level em 2 dias
 
 ```
-1. Acessa /presentations/new
+1. Acessa /app/dashboard
    → Digita: "Q3 Product Review: métricas de crescimento, principais entregas, 
       obstáculos e roadmap Q4"
    → slideCount: 10, idioma: Português
