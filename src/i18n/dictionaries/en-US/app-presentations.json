@@ -1,0 +1,64 @@
+{
+  "app": {
+    "presentations": {
+      "hero": {
+        "title": "Your presentations",
+        "description": "Manage and access all your presentations and diagrams."
+      },
+      "header": {
+        "title": "All",
+        "trash": "Trash",
+        "back": "Back"
+      },
+      "toolbar": {
+        "search": "Search presentations...",
+        "searchTrigger": "Search",
+        "searchEmpty": "No results found.",
+        "filters": {
+          "all": "All",
+          "recent": "Recently viewed",
+          "mine": "Created by you",
+          "favorites": "Favorites"
+        }
+      },
+      "card": {
+        "meta": {
+          "created": "Created on {date} · by {author}"
+        },
+        "actions": {
+          "menu": "More options",
+          "share": "Share",
+          "rename": "Rename",
+          "favorite": "Add to favorites",
+          "unfavorite": "Remove from favorites",
+          "duplicate": "Duplicate",
+          "copyLink": "Copy link",
+          "trash": "Move to trash",
+          "restore": "Restore",
+          "deletePermanently": "Delete permanently"
+        }
+      },
+      "trash": {
+        "modal": {
+          "title": "Move to trash?",
+          "description": "You can restore this presentation from the trash at any time.",
+          "confirm": "Move to trash"
+        },
+        "toolbar": {
+          "restoreAll": "Restore all",
+          "empty": "Empty trash"
+        },
+        "empty": {
+          "label": "The trash is empty."
+        }
+      },
+      "empty": {
+        "label": "No presentations yet."
+      },
+      "types": {
+        "multi": "Presentation",
+        "single": "Diagram"
+      }
+    }
+  }
+}

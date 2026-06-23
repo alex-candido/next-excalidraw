@@ -12,6 +12,7 @@ import {
   AppPresentationCardActions,
   type PresentationActionKey,
 } from "@/components/app/app-presentation-card-actions";
+import { AppPresentationCardFavorite } from "@/components/app/app-presentation-card-favorite";
 
 const LANGUAGE_CODE: Record<number, string> = {
   [PresentationLanguage.en]: "EN",
@@ -35,6 +36,8 @@ type AppPresentationCardProps = {
   createdAtLabel: string;
   createdBy: string;
   actions?: PresentationActionKey[];
+  isFavorited?: boolean;
+  onTrashConfirm?: () => void;
   className?: string;
 } & (
   | { href: string; onSelect?: never }
@@ -50,6 +53,8 @@ export function AppPresentationCard({
   createdAtLabel,
   createdBy,
   actions,
+  isFavorited,
+  onTrashConfirm,
   className,
   ...rest
 }: AppPresentationCardProps) {
@@ -96,9 +101,12 @@ export function AppPresentationCard({
 
       <div className="app-presentation-card-overlay absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
         <div className="app-presentation-card-info flex min-w-0 flex-col gap-0.5">
-          <span className="app-presentation-card-title truncate text-sm font-medium leading-snug text-white">
-            {title}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {isFavorited && <AppPresentationCardFavorite />}
+            <span className="app-presentation-card-title truncate text-sm font-medium leading-snug text-white">
+              {title}
+            </span>
+          </div>
           <span className="app-presentation-card-meta text-xs text-white/60">
             {type === PresentationType.multi && slideCount && slideCount > 0
               ? `${slideCount} slides · ${createdAtLabel}`
@@ -116,6 +124,8 @@ export function AppPresentationCard({
           createdAtLabel={createdAtLabel}
           createdBy={createdBy}
           actions={actions}
+          isFavorited={isFavorited}
+          onTrashConfirm={onTrashConfirm}
         />
       </div>
     </div>

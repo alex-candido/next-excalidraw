@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Clock, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -18,13 +18,18 @@ export function AppDashboardRecentsHeader() {
   return (
     <>
       <div className="app-dashboard-recents-header flex items-start justify-between gap-4">
-        <div className="app-dashboard-recents-header-text flex flex-col gap-1">
-          <span className="app-dashboard-recents-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {t("title")}
-          </span>
-          <Muted className="app-dashboard-recents-description text-sm">
-            {t("description")}
-          </Muted>
+        <div className="app-dashboard-recents-header-text flex items-start gap-3">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted">
+            <Clock className="size-3.5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="app-dashboard-recents-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("title")}
+            </span>
+            <Muted className="app-dashboard-recents-description text-sm">
+              {t("description")}
+            </Muted>
+          </div>
         </div>
         <div className="app-dashboard-recents-header-actions flex items-center gap-1.5">
           <Button

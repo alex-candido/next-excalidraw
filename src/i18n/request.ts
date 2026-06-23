@@ -9,7 +9,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const [
     common,
     auth,
-    app,
+    appNav,
+    appDashboard,
+    appPresentations,
+    appTemplates,
+    appCommunity,
+    appNew,
     landingNav,
     landingHome,
     landingProduct,
@@ -19,7 +24,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   ] = await Promise.all([
     import(`./dictionaries/${locale}/common.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/auth.json`).then((m) => m.default),
-    import(`./dictionaries/${locale}/app.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-nav.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-dashboard.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-presentations.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-templates.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-community.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-new.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-nav.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-home.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-product.json`).then((m) => m.default),
@@ -33,7 +43,14 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messages: {
       ...common,
       ...auth,
-      ...app,
+      app: {
+        ...appNav.app,
+        ...appDashboard.app,
+        ...appPresentations.app,
+        ...appTemplates.app,
+        ...appCommunity.app,
+        ...appNew.app,
+      },
       landing: {
         ...landingNav.landing,
         ...landingHome.landing,

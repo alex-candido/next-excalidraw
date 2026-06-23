@@ -1,4 +1,7 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutSection } from "@/components/layouts/layout-section";
@@ -8,10 +11,16 @@ import {
 } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
 
-import { AppPresentationCard } from "@/components/app/app-presentation-card";
+import {
+  AppPresentationCard,
+} from "@/components/app/app-presentation-card";
+import {
+  TRASH_VIEW_ACTIONS,
+} from "@/components/app/app-presentation-card-actions";
 import { AppPresentationsEmpty } from "@/components/app/presentations/app-presentations-empty";
 import { AppPresentationsHeader } from "@/components/app/presentations/app-presentations-header";
 import { AppPresentationsToolbar } from "@/components/app/presentations/app-presentations-toolbar";
+import { AppPresentationsTrashToolbar } from "@/components/app/presentations/app-presentations-trash-toolbar";
 
 const TYPE_KEY = Object.fromEntries(
   Object.entries(PresentationType).map(([k, v]) => [v, k]),
@@ -26,6 +35,7 @@ const ITEMS = [
     slideCount: 8,
     createdAtLabel: "há 2 dias",
     createdBy: "Alex C.",
+    isFavorited: true,
   },
   {
     id: "2",
@@ -35,6 +45,7 @@ const ITEMS = [
     slideCount: 1,
     createdAtLabel: "há 5 dias",
     createdBy: "Alex C.",
+    isFavorited: false,
   },
   {
     id: "3",
@@ -44,14 +55,40 @@ const ITEMS = [
     slideCount: 12,
     createdAtLabel: "há 1 semana",
     createdBy: "Alex C.",
+    isFavorited: false,
   },
 ];
 
-export async function AppPresentations({
+const TRASH_ITEMS = [
+  {
+    id: "t1",
+    title: "Apresentação antiga de onboarding",
+    type: PresentationType.multi,
+    language: PresentationLanguage.ptBR,
+    slideCount: 5,
+    createdAtLabel: "há 3 semanas",
+    createdBy: "Alex C.",
+  },
+  {
+    id: "t2",
+    title: "Demo descontinuada — v0.1",
+    type: PresentationType.single,
+    language: PresentationLanguage.en,
+    slideCount: 1,
+    createdAtLabel: "há 1 mês",
+    createdBy: "Alex C.",
+  },
+];
+
+export function AppPresentations({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const t = await getTranslations("app.presentations");
+  const t = useTranslations("app.presentations");
+  const [isTrashView, setIsTrashView] = useState(false);
+
+  const visibleItems = isTrashView ? TRASH_ITEMS : ITEMS;
+  const trashCount = TRASH_ITEMS.length;
 
   return (
     <LayoutSection className="md:pb-16">
@@ -63,14 +100,23 @@ export async function AppPresentations({
           )}
           {...props}
         >
-          <AppPresentationsHeader />
-          <AppPresentationsToolbar />
+          <AppPresentationsHeader
+            trashCount={trashCount}
+            isTrashView={isTrashView}
+            onTrashToggle={() => setIsTrashView((v) => !v)}
+          />
 
-          {ITEMS.length === 0 ? (
+          {isTrashView ? (
+            <AppPresentationsTrashToolbar />
+          ) : (
+            <AppPresentationsToolbar />
+          )}
+
+          {visibleItems.length === 0 ? (
             <AppPresentationsEmpty />
           ) : (
             <div className="app-presentations-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ITEMS.map((item) => (
+              {visibleItems.map((item) => (
                 <AppPresentationCard
                   key={item.id}
                   title={item.title}
@@ -78,9 +124,11 @@ export async function AppPresentations({
                   language={item.language}
                   slideCount={item.slideCount}
                   typeLabel={t(`types.${TYPE_KEY[item.type]}`)}
-                  href={`/app/presentations/${item.id}/studio`}
+                  href={isTrashView ? "#" : `/app/presentations/${item.id}/studio`}
                   createdAtLabel={item.createdAtLabel}
                   createdBy={item.createdBy}
+                  isFavorited={"isFavorited" in item ? item.isFavorited : false}
+                  actions={isTrashView ? TRASH_VIEW_ACTIONS : undefined}
                 />
               ))}
             </div>

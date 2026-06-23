@@ -1,0 +1,30 @@
+{
+  "app": {
+    "templates": {
+      "hero": {
+        "title": "Modelos",
+        "description": "Comece mais rápido com modelos prontos criados pela equipe e pela comunidade."
+      },
+      "header": {
+        "title": "Explorar"
+      },
+      "toolbar": {
+        "search": "Buscar modelos...",
+        "searchTrigger": "Buscar",
+        "searchEmpty": "Nenhum resultado encontrado.",
+        "filters": {
+          "all": "Todos",
+          "official": "Oficiais",
+          "recent": "Recentes"
+        }
+      },
+      "empty": {
+        "label": "Nenhum modelo disponível."
+      },
+      "types": {
+        "multi": "Apresentação",
+        "single": "Diagrama"
+      }
+    }
+  }
+}

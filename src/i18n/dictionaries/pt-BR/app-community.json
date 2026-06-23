@@ -1,0 +1,52 @@
+{
+  "app": {
+    "community": {
+      "hero": {
+        "title": "Comunidade",
+        "description": "Explore apresentações criadas e compartilhadas por outros usuários."
+      },
+      "header": {
+        "title": "Explorar"
+      },
+      "toolbar": {
+        "search": "Buscar na comunidade...",
+        "searchTrigger": "Buscar",
+        "searchEmpty": "Nenhum resultado encontrado.",
+        "filters": {
+          "all": "Todos",
+          "recent": "Recentes",
+          "popular": "Populares",
+          "following": "Seguindo"
+        },
+        "tags": [
+          "Todos",
+          "CI/CD",
+          "Design System",
+          "Arquitetura",
+          "Produto",
+          "Onboarding",
+          "Frontend",
+          "Backend",
+          "DevOps",
+          "Dados"
+        ]
+      },
+      "modal": {
+        "duplicate": "Duplicar para minha coleção",
+        "view": "Visualizar",
+        "back": "Voltar",
+        "close": "Fechar",
+        "author": {
+          "presentations": "Apresentações públicas"
+        }
+      },
+      "empty": {
+        "label": "Nenhuma publicação ainda."
+      },
+      "types": {
+        "multi": "Apresentação",
+        "single": "Diagrama"
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "app": {
+    "presentations": {
+      "hero": {
+        "title": "Suas apresentações",
+        "description": "Gerencie e acesse todas as suas apresentações e diagramas."
+      },
+      "header": {
+        "title": "Todas",
+        "trash": "Lixeira",
+        "back": "Voltar"
+      },
+      "toolbar": {
+        "search": "Buscar apresentações...",
+        "searchTrigger": "Buscar",
+        "searchEmpty": "Nenhum resultado encontrado.",
+        "filters": {
+          "all": "Todos",
+          "recent": "Vistos recentemente",
+          "mine": "Criados por você",
+          "favorites": "Favoritos"
+        }
+      },
+      "card": {
+        "meta": {
+          "created": "Criado em {date} · por {author}"
+        },
+        "actions": {
+          "menu": "Mais opções",
+          "share": "Compartilhar",
+          "rename": "Renomear",
+          "favorite": "Adicionar aos favoritos",
+          "unfavorite": "Remover dos favoritos",
+          "duplicate": "Duplicar",
+          "copyLink": "Copiar link",
+          "trash": "Mover para lixeira",
+          "restore": "Restaurar",
+          "deletePermanently": "Excluir permanentemente"
+        }
+      },
+      "trash": {
+        "modal": {
+          "title": "Mover para a lixeira?",
+          "description": "Você pode restaurar esta apresentação da lixeira a qualquer momento.",
+          "confirm": "Mover para lixeira"
+        },
+        "toolbar": {
+          "restoreAll": "Restaurar todas",
+          "empty": "Esvaziar lixeira"
+        },
+        "empty": {
+          "label": "A lixeira está vazia."
+        }
+      },
+      "empty": {
+        "label": "Nenhuma apresentação ainda."
+      },
+      "types": {
+        "multi": "Apresentação",
+        "single": "Diagrama"
+      }
+    }
+  }
+}

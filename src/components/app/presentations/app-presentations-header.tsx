@@ -1,19 +1,29 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
 import { AppPresentationsSearch } from "@/components/app/app-presentations-search";
 
+interface AppPresentationsHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  trashCount?: number;
+  isTrashView?: boolean;
+  onTrashToggle?: () => void;
+}
+
 export function AppPresentationsHeader({
+  trashCount = 0,
+  isTrashView = false,
+  onTrashToggle,
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: AppPresentationsHeaderProps) {
   const t = useTranslations("app.presentations.header");
   const tNew = useTranslations("app.new");
   const [modalOpen, setModalOpen] = useState(false);
@@ -27,24 +37,61 @@ export function AppPresentationsHeader({
         )}
         {...props}
       >
-        <span className="app-presentations-header-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("title")}
-        </span>
-        <div className="app-presentations-header-actions flex items-center gap-1.5">
-          <AppPresentationsSearch />
-          <Button
-            size="sm"
-            variant="outline"
-            className="app-presentations-header-new shrink-0 gap-1.5 text-xs"
-            onClick={() => setModalOpen(true)}
-          >
-            <Plus className="size-3.5" />
-            <span className="hidden sm:inline">{tNew("trigger")}</span>
-          </Button>
-        </div>
+        {isTrashView ? (
+          <div className="app-presentations-header-trash-nav flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="app-presentations-header-back -ml-2 gap-1.5 text-xs"
+              onClick={onTrashToggle}
+            >
+              <ArrowLeft className="size-3.5" />
+              {t("back")}
+            </Button>
+            <span className="app-presentations-header-trash-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("trash")}
+            </span>
+          </div>
+        ) : (
+          <>
+            <span className="app-presentations-header-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("title")}
+            </span>
+            <div className="app-presentations-header-actions flex items-center gap-1.5">
+              <AppPresentationsSearch />
+              {trashCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="app-presentations-header-trash shrink-0 gap-1.5 text-xs text-muted-foreground"
+                  onClick={onTrashToggle}
+                >
+                  <Trash2 className="size-3.5" />
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full px-1.5 py-0 text-xs"
+                  >
+                    {trashCount}
+                  </Badge>
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="app-presentations-header-new shrink-0 gap-1.5 text-xs"
+                onClick={() => setModalOpen(true)}
+              >
+                <Plus className="size-3.5" />
+                <span className="hidden sm:inline">{tNew("trigger")}</span>
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
-      <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+      {!isTrashView && (
+        <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+      )}
     </>
   );
 }

@@ -1,0 +1,19 @@
+{
+  "app": {
+    "brand": {
+      "subtitle": "Criador de apresentações com IA"
+    },
+    "nav": {
+      "home": "Início",
+      "presentations": "Apresentações",
+      "templates": "Modelos",
+      "community": "Comunidade",
+      "settings": "Configurações"
+    },
+    "footer": {
+      "copyright": "© 2025 Next Excalidraw. Todos os direitos reservados.",
+      "privacy": "Privacidade",
+      "terms": "Termos"
+    }
+  }
+}

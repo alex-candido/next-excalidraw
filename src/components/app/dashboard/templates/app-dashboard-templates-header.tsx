@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LayoutTemplate } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,18 @@ export function AppDashboardTemplatesHeader() {
 
   return (
     <div className="app-dashboard-templates-header flex items-start justify-between gap-4">
-      <div className="app-dashboard-templates-header-text flex flex-col gap-1">
-        <span className="app-dashboard-templates-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("title")}
-        </span>
-        <Muted className="app-dashboard-templates-description text-sm">
-          {t("description")}
-        </Muted>
+      <div className="app-dashboard-templates-header-text flex items-start gap-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted">
+          <LayoutTemplate className="size-3.5 text-muted-foreground" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="app-dashboard-templates-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("title")}
+          </span>
+          <Muted className="app-dashboard-templates-description text-sm">
+            {t("description")}
+          </Muted>
+        </div>
       </div>
       <Button
         variant="outline"

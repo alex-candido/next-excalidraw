@@ -1,0 +1,52 @@
+{
+  "app": {
+    "community": {
+      "hero": {
+        "title": "Community",
+        "description": "Explore presentations created and shared by other users."
+      },
+      "header": {
+        "title": "Explore"
+      },
+      "toolbar": {
+        "search": "Search community...",
+        "searchTrigger": "Search",
+        "searchEmpty": "No results found.",
+        "filters": {
+          "all": "All",
+          "recent": "Recent",
+          "popular": "Popular",
+          "following": "Following"
+        },
+        "tags": [
+          "All",
+          "CI/CD",
+          "Design System",
+          "Architecture",
+          "Product",
+          "Onboarding",
+          "Frontend",
+          "Backend",
+          "DevOps",
+          "Data"
+        ]
+      },
+      "modal": {
+        "duplicate": "Duplicate to my collection",
+        "view": "View",
+        "back": "Back",
+        "close": "Close",
+        "author": {
+          "presentations": "Public presentations"
+        }
+      },
+      "empty": {
+        "label": "No posts yet."
+      },
+      "types": {
+        "multi": "Presentation",
+        "single": "Diagram"
+      }
+    }
+  }
+}

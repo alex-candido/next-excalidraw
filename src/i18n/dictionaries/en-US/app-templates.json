@@ -1,0 +1,30 @@
+{
+  "app": {
+    "templates": {
+      "hero": {
+        "title": "Templates",
+        "description": "Start faster with ready-made templates created by the team and the community."
+      },
+      "header": {
+        "title": "Explore"
+      },
+      "toolbar": {
+        "search": "Search templates...",
+        "searchTrigger": "Search",
+        "searchEmpty": "No results found.",
+        "filters": {
+          "all": "All",
+          "official": "Official",
+          "recent": "Recent"
+        }
+      },
+      "empty": {
+        "label": "No templates available."
+      },
+      "types": {
+        "multi": "Presentation",
+        "single": "Diagram"
+      }
+    }
+  }
+}

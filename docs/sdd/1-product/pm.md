@@ -104,9 +104,9 @@ outline API route
 - [ ] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
 - [x] `P2` App module — dashboard ✅ (inclui form de criação: engine · options · input · controls · actions)
 - [ ] `P2` App module — criação manual (+) — AppNewPresentationModal (title · engine · type · features · actions) · trigger no AppNavMenu · trigger no AppDashboardRecents header
-- [ ] `P2` App module — presentations (list) — AppPresentationsHero · AppPresentationsGrid · AppPresentationsCard · AppPresentationsEmpty
-- [ ] `P3` App module — app/templates — AppTemplatesHero · AppTemplatesGrid · AppTemplatesCard
-- [ ] `P3` App module — app/community — AppCommunityHero · AppCommunityGrid · AppCommunityCard · AppCommunityFilters
+- [x] `P2` App module — presentations (list) — AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationCard (isFavorited · actions) · AppPresentationCardFavorite · AppPresentationTrashModal · AppPresentationsEmpty
+- [x] `P3` App module — app/templates — AppTemplatesHeader · AppTemplatesToolbar · AppTemplateCard · AppTemplateCardActions · modals (preview, duplicate)
+- [x] `P3` App module — app/community — AppCommunityHeader · AppCommunityToolbar · AppCommunityModal (duplicate view ↔ author view navigation) · AppCommunityModalDuplicateView · AppCommunityModalAuthorView
 - [ ] `P2` App module — presentations/[id]/outline — AppOutlineHero · AppOutlineList · AppOutlineCard (regenerate) · AppOutlineActions
 - [ ] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
 - [ ] `P2` App module — presentations/[id]/present — AppPresentSlide · AppPresentNav · AppPresentControls
