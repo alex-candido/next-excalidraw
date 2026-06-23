@@ -12,10 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { PresentationType } from "@/lib/drizzle/schema/presentation";
 
-import { AppDashboardNewModalActions } from "@/components/app/dashboard/new/app-dashboard-new-modal-actions";
-import { AppDashboardNewModalEngine } from "@/components/app/dashboard/new/app-dashboard-new-modal-engine";
-import { AppDashboardNewModalFeatures } from "@/components/app/dashboard/new/app-dashboard-new-modal-features";
-import { AppDashboardNewModalType } from "@/components/app/dashboard/new/app-dashboard-new-modal-type";
+import { AppDashboardNewModalActions } from "@/components/app/dashboard/app-dashboard-new-modal-actions";
+import { AppDashboardNewModalEngine } from "@/components/app/dashboard/app-dashboard-new-modal-engine";
+import { AppDashboardNewModalFeatures } from "@/components/app/dashboard/app-dashboard-new-modal-features";
+import { AppDashboardNewModalType } from "@/components/app/dashboard/app-dashboard-new-modal-type";
 
 type PresentationTypeValue =
   (typeof PresentationType)[keyof typeof PresentationType];

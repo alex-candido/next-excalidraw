@@ -18,7 +18,7 @@ export async function AppDashboardForm({
   const t = await getTranslations("app.dashboard.form");
 
   return (
-    <LayoutSection className="first:pt-10 md:pb-16 md:first:pt-14">
+    <LayoutSection className="first:pt-6 md:pb-16 md:first:pt-8">
       <LayoutContainer className="justify-center">
         <div
           className={cn(

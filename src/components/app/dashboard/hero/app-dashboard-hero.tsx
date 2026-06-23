@@ -27,7 +27,7 @@ export async function AppDashboardHero({
   ] as const;
 
   return (
-    <LayoutSection>
+    <LayoutSection className="first:pt-6 md:first:pt-8">
       <LayoutContainer className="justify-center">
         <div
           className={cn(

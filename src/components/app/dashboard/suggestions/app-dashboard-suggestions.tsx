@@ -21,7 +21,7 @@ export async function AppDashboardSuggestions({
   const items = t.raw("items") as SuggestionItem[];
 
   return (
-    <LayoutSection className="first:pt-10 md:pb-16 md:first:pt-14">
+    <LayoutSection className="first:pt-6 md:pb-16 md:first:pt-8">
       <LayoutContainer className="justify-center">
         <div
           className={cn(

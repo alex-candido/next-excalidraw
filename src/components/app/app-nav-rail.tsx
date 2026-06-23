@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-import { AppDashboardNewModal } from "@/components/app/dashboard/new/app-dashboard-new-modal";
+import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
 
 const NAV_ITEMS = [
   { key: "home", icon: Home, href: "/app/dashboard" },

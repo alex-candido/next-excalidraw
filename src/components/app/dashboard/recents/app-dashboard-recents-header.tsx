@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/ui/typography";
 import { Link } from "@/i18n/navigation";
 
-import { AppDashboardNewModal } from "@/components/app/dashboard/new/app-dashboard-new-modal";
+import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
 
 export function AppDashboardRecentsHeader() {
   const t = useTranslations("app.dashboard.recents");

@@ -80,6 +80,9 @@
         "types": {
           "multi": "Presentación",
           "single": "Diagrama"
+        },
+        "modal": {
+          "use": "Usar esta plantilla"
         }
       },
       "community": {
@@ -90,7 +93,52 @@
         "types": {
           "multi": "Presentación",
           "single": "Diagrama"
+        },
+        "modal": {
+          "duplicate": "Duplicar a mi colección",
+          "view": "Visualizar"
         }
+      }
+    },
+    "presentations": {
+      "hero": {
+        "title": "Tus presentaciones",
+        "description": "Gestiona y accede a todas tus presentaciones y diagramas."
+      },
+      "header": {
+        "title": "Todas"
+      },
+      "toolbar": {
+        "search": "Buscar presentaciones...",
+        "searchTrigger": "Buscar",
+        "searchEmpty": "No se encontraron resultados.",
+        "filters": {
+          "all": "Todos",
+          "recent": "Vistos recientemente",
+          "mine": "Creados por ti",
+          "favorites": "Favoritos"
+        }
+      },
+      "card": {
+        "meta": {
+          "created": "Creado el {date} · por {author}"
+        },
+        "actions": {
+          "menu": "Más opciones",
+          "share": "Compartir",
+          "rename": "Renombrar",
+          "favorite": "Agregar a favoritos",
+          "duplicate": "Duplicar",
+          "copyLink": "Copiar enlace",
+          "trash": "Mover a la papelera"
+        }
+      },
+      "empty": {
+        "label": "Aún no hay presentaciones."
+      },
+      "types": {
+        "multi": "Presentación",
+        "single": "Diagrama"
       }
     },
     "new": {

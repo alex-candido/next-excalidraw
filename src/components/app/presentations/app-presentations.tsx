@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutSection } from "@/components/layouts/layout-section";
-import { Muted } from "@/components/ui/typography";
 import {
   PresentationLanguage,
   PresentationType,
@@ -10,7 +9,9 @@ import {
 import { cn } from "@/lib/utils";
 
 import { AppPresentationCard } from "@/components/app/app-presentation-card";
-import { AppDashboardRecentsHeader } from "@/components/app/dashboard/recents/app-dashboard-recents-header";
+import { AppPresentationsEmpty } from "@/components/app/presentations/app-presentations-empty";
+import { AppPresentationsHeader } from "@/components/app/presentations/app-presentations-header";
+import { AppPresentationsToolbar } from "@/components/app/presentations/app-presentations-toolbar";
 
 const TYPE_KEY = Object.fromEntries(
   Object.entries(PresentationType).map(([k, v]) => [v, k]),
@@ -46,30 +47,29 @@ const ITEMS = [
   },
 ];
 
-export async function AppDashboardRecents({
+export async function AppPresentations({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const t = await getTranslations("app.dashboard.recents");
+  const t = await getTranslations("app.presentations");
 
   return (
-    <LayoutSection className="first:pt-6 md:first:pt-8 md:pb-16">
+    <LayoutSection className="md:pb-16">
       <LayoutContainer className="justify-center">
         <div
           className={cn(
-            "app-dashboard-recents w-full max-w-4xl flex flex-col gap-4",
+            "app-presentations w-full max-w-4xl flex flex-col gap-4",
             className,
           )}
           {...props}
         >
-          <AppDashboardRecentsHeader />
+          <AppPresentationsHeader />
+          <AppPresentationsToolbar />
 
           {ITEMS.length === 0 ? (
-            <div className="app-dashboard-recents-empty">
-              <Muted className="text-sm">{t("empty")}</Muted>
-            </div>
+            <AppPresentationsEmpty />
           ) : (
-            <div className="app-dashboard-recents-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="app-presentations-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {ITEMS.map((item) => (
                 <AppPresentationCard
                   key={item.id}

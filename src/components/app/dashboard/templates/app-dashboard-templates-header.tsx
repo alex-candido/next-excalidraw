@@ -1,12 +1,14 @@
+"use client";
+
 import { ArrowRight } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/ui/typography";
 import { Link } from "@/i18n/navigation";
 
-export async function AppDashboardTemplatesHeader() {
-  const t = await getTranslations("app.dashboard.templates");
+export function AppDashboardTemplatesHeader() {
+  const t = useTranslations("app.dashboard.templates");
 
   return (
     <div className="app-dashboard-templates-header flex items-start justify-between gap-4">

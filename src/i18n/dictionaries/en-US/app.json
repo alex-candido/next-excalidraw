@@ -80,6 +80,9 @@
         "types": {
           "multi": "Presentation",
           "single": "Diagram"
+        },
+        "modal": {
+          "use": "Use this template"
         }
       },
       "community": {
@@ -90,7 +93,52 @@
         "types": {
           "multi": "Presentation",
           "single": "Diagram"
+        },
+        "modal": {
+          "duplicate": "Duplicate to my collection",
+          "view": "View"
         }
+      }
+    },
+    "presentations": {
+      "hero": {
+        "title": "Your presentations",
+        "description": "Manage and access all your presentations and diagrams."
+      },
+      "header": {
+        "title": "All"
+      },
+      "toolbar": {
+        "search": "Search presentations...",
+        "searchTrigger": "Search",
+        "searchEmpty": "No results found.",
+        "filters": {
+          "all": "All",
+          "recent": "Recently viewed",
+          "mine": "Created by you",
+          "favorites": "Favorites"
+        }
+      },
+      "card": {
+        "meta": {
+          "created": "Created on {date} · by {author}"
+        },
+        "actions": {
+          "menu": "More options",
+          "share": "Share",
+          "rename": "Rename",
+          "favorite": "Add to favorites",
+          "duplicate": "Duplicate",
+          "copyLink": "Copy link",
+          "trash": "Move to trash"
+        }
+      },
+      "empty": {
+        "label": "No presentations yet."
+      },
+      "types": {
+        "multi": "Presentation",
+        "single": "Diagram"
       }
     },
     "new": {
