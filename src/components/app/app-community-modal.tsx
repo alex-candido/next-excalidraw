@@ -103,7 +103,6 @@ export function AppCommunityModal({
             authorName={view.authorName}
             authorAvatar={view.authorAvatar}
             onPresentationSelect={handlePresentationSelect}
-            onClose={handleClose}
           />
         )}
       </DialogContent>

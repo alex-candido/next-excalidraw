@@ -1,3 +1,5 @@
+import { AppPresentationsOutline } from "@/components/app/presentations/outline/app-presentations-outline";
+
 export default async function OutlinePage({
   params,
 }: {
@@ -5,5 +7,5 @@ export default async function OutlinePage({
 }) {
   const { id } = await params;
 
-  return <div>Outline — {id}</div>;
+  return <AppPresentationsOutline presentationId={id} />;
 }

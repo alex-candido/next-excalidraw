@@ -1,0 +1,56 @@
+{
+  "app": {
+    "outline": {
+      "hero": {
+        "back": "Volver",
+        "generate": "Generar Diapositivas",
+        "generating": "Generando...",
+        "subtitle": "{count} secciones · revise y ajuste antes de continuar"
+      },
+      "card": {
+        "types": {
+          "cover": "Portada",
+          "content": "Contenido",
+          "closing": "Cierre"
+        },
+        "fields": {
+          "title": "Título",
+          "description": "Descripción",
+          "representation": "Visualización",
+          "concepts": "Conceptos"
+        },
+        "groups": {
+          "general": "General",
+          "flow": "Flujo",
+          "structure": "Estructura",
+          "data": "Datos",
+          "technical": "Técnico"
+        },
+        "representations": {
+          "auto": "Automático",
+          "flowchart": "Diagrama de flujo",
+          "mindmap": "Mapa mental",
+          "orgchart": "Organigrama",
+          "sequence": "Secuencia",
+          "class": "Diagrama de clases",
+          "er": "Entidad-Relación",
+          "gantt": "Gantt",
+          "timeline": "Línea de tiempo",
+          "tree": "Árbol",
+          "network": "Red",
+          "architecture": "Arquitectura",
+          "dataflow": "Flujo de datos",
+          "state": "Estados",
+          "swimlane": "Swimlane",
+          "fishbone": "Causa y efecto",
+          "pyramid": "Pirámide",
+          "venn": "Diagrama de Venn",
+          "matrix": "Matriz",
+          "funnel": "Embudo",
+          "infographic": "Infografía"
+        },
+        "regenerate": "Regenerar"
+      }
+    }
+  }
+}

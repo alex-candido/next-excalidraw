@@ -98,12 +98,12 @@ outline API route
 ---
 
 **Mapeamento de components — módulos UI**
-*(Ordem: landing ✅ → auth → app → admin)*
+*(Ordem: landing ✅ → auth ✅ → app ✅ (shell) → app (detail pages) → admin)*
 
 - [x] `P1` Landing module — mapeamento completo
-- [ ] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
+- [x] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
 - [x] `P2` App module — dashboard ✅ (inclui form de criação: engine · options · input · controls · actions)
-- [ ] `P2` App module — criação manual (+) — AppNewPresentationModal (title · engine · type · features · actions) · trigger no AppNavMenu · trigger no AppDashboardRecents header
+- [x] `P2` App module — criação manual (+) — AppDashboardNewModal (engine · type · features · actions · título) · trigger no AppNavRail · trigger no AppDashboardRecentsHeader · trigger no AppPresentationsHeader
 - [x] `P2` App module — presentations (list) — AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationCard (isFavorited · actions) · AppPresentationCardFavorite · AppPresentationTrashModal · AppPresentationsEmpty
 - [x] `P3` App module — app/templates — AppTemplatesHeader · AppTemplatesToolbar · AppTemplateCard · AppTemplateCardActions · modals (preview, duplicate)
 - [x] `P3` App module — app/community — AppCommunityHeader · AppCommunityToolbar · AppCommunityModal (duplicate view ↔ author view navigation) · AppCommunityModalDuplicateView · AppCommunityModalAuthorView
@@ -231,6 +231,11 @@ outline API route
 ## Done
 ---
 
+- [x] **App module — app/(shell) — mapeamento de components completo** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
+  - `presentations/`: AppPresentationsHero · AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationsEmpty · AppPresentationCard (isFavorited · href|onSelect · overlay pointer-events-none) · AppPresentationCardFavorite · AppPresentationCardActions (DEFAULT + TRASH_VIEW_ACTIONS · favorite toggle · trash confirm) · AppPresentationTrashModal
+  - `templates/`: AppTemplatesHero · AppTemplatesHeader · AppTemplatesToolbar · AppTemplatesFilters · AppTemplates (grid · empty · AppTemplateUseModal)
+  - `community/`: AppCommunityHero · AppCommunityHeader · AppCommunityToolbar · AppCommunityFilters · AppCommunityTags · AppCommunity (grid · empty) · AppCommunityModal (view state: duplicate ↔ author) · AppCommunityModalDuplicateView (carousel · pagination · meta · footer) · AppCommunityModalAuthorView (identity · scroll grid · footer autônomo)
+  - `criação manual`: AppDashboardNewModal wired em AppNavRail · AppDashboardRecentsHeader · AppPresentationsHeader
 - [x] **App module — dashboard — mapeamento de components completo** (organisms · i18n em pt-BR / en-US / es)
   - `app/dashboard/hero/`: Hero (tagline com Sparkles · grid de features)
   - `app/dashboard/form/`: Form com engine-bar (Engine · Options responsivos) · body (Input · hint · Actions com Paperclip inline) · controls-bar (slideCount · language · aspectRatio)

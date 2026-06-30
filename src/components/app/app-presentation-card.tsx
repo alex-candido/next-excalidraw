@@ -99,7 +99,7 @@ export function AppPresentationCard({
         )}
       </div>
 
-      <div className="app-presentation-card-overlay absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
+      <div className="app-presentation-card-overlay pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
         <div className="app-presentation-card-info flex min-w-0 flex-col gap-0.5">
           <div className="flex items-center gap-1.5">
             {isFavorited && <AppPresentationCardFavorite />}

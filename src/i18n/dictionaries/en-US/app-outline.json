@@ -1,0 +1,56 @@
+{
+  "app": {
+    "outline": {
+      "hero": {
+        "back": "Back",
+        "generate": "Generate Slides",
+        "generating": "Generating...",
+        "subtitle": "{count} sections · review and adjust before continuing"
+      },
+      "card": {
+        "types": {
+          "cover": "Cover",
+          "content": "Content",
+          "closing": "Closing"
+        },
+        "fields": {
+          "title": "Title",
+          "description": "Description",
+          "representation": "Visualization",
+          "concepts": "Concepts"
+        },
+        "groups": {
+          "general": "General",
+          "flow": "Flow",
+          "structure": "Structure",
+          "data": "Data",
+          "technical": "Technical"
+        },
+        "representations": {
+          "auto": "Automatic",
+          "flowchart": "Flowchart",
+          "mindmap": "Mind map",
+          "orgchart": "Org chart",
+          "sequence": "Sequence",
+          "class": "Class diagram",
+          "er": "Entity-Relationship",
+          "gantt": "Gantt",
+          "timeline": "Timeline",
+          "tree": "Tree",
+          "network": "Network",
+          "architecture": "Architecture",
+          "dataflow": "Data flow",
+          "state": "State diagram",
+          "swimlane": "Swimlane",
+          "fishbone": "Fishbone",
+          "pyramid": "Pyramid",
+          "venn": "Venn diagram",
+          "matrix": "Matrix",
+          "funnel": "Funnel",
+          "infographic": "Infographic"
+        },
+        "regenerate": "Regenerate"
+      }
+    }
+  }
+}

@@ -37,7 +37,8 @@
         "back": "Voltar",
         "close": "Fechar",
         "author": {
-          "presentations": "Apresentações públicas"
+          "presentations": "Apresentações públicas",
+          "viewProfile": "Ver perfil"
         }
       },
       "empty": {

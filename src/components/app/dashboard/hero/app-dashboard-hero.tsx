@@ -1,4 +1,4 @@
-import { Globe, LayoutTemplate, Layers, Palette, SlidersHorizontal, Sparkles, SquareStack, Users } from "lucide-react";
+import { Globe, Layers, LayoutTemplate, Palette, SlidersHorizontal, Sparkles, SquareStack, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
@@ -27,7 +27,7 @@ export async function AppDashboardHero({
   ] as const;
 
   return (
-    <LayoutSection className="first:pt-6 md:first:pt-8">
+    <LayoutSection className="pb-20! first:pt-6 md:first:pt-16">
       <LayoutContainer className="justify-center">
         <div
           className={cn(

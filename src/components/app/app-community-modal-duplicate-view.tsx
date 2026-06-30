@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ export function AppCommunityModalDuplicateView({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="justify-start!">
           <DialogClose
             render={
               <Button

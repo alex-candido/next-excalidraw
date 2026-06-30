@@ -12,7 +12,7 @@ export async function AppPresentationsHero({
   const t = await getTranslations("app.presentations.hero");
 
   return (
-    <LayoutSection className="first:pt-6 md:first:pt-8">
+    <LayoutSection className="pb-16! first:pt-6 md:first:pt-16">
       <LayoutContainer className="justify-center">
         <div
           className={cn(

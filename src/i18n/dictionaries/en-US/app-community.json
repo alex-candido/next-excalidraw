@@ -37,7 +37,8 @@
         "back": "Back",
         "close": "Close",
         "author": {
-          "presentations": "Public presentations"
+          "presentations": "Public presentations",
+          "viewProfile": "View profile"
         }
       },
       "empty": {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutSection } from "@/components/layouts/layout-section";
@@ -127,7 +127,7 @@ export function AppPresentations({
                   href={isTrashView ? "#" : `/app/presentations/${item.id}/studio`}
                   createdAtLabel={item.createdAtLabel}
                   createdBy={item.createdBy}
-                  isFavorited={"isFavorited" in item ? item.isFavorited : false}
+                  isFavorited={Boolean((item as any).isFavorited)}
                   actions={isTrashView ? TRASH_VIEW_ACTIONS : undefined}
                 />
               ))}

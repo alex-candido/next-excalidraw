@@ -1,5 +1,3 @@
-import { ExcalidrawEditor } from "@/components/excalidraw/excalidraw-editor";
-
 export default async function StudioPage({
   params,
 }: {
@@ -7,9 +5,5 @@ export default async function StudioPage({
 }) {
   const { id } = await params;
 
-  return (
-    <div className="h-screen w-full" data-presentation-id={id}>
-      <ExcalidrawEditor />
-    </div>
-  );
+  return <div>Studio — {id}</div>;
 }
