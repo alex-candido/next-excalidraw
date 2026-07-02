@@ -6,7 +6,8 @@
         "description": "Start faster with ready-made templates created by the team and the community."
       },
       "header": {
-        "title": "Explore"
+        "title": "Explore",
+        "back": "Dashboard"
       },
       "toolbar": {
         "search": "Search templates...",

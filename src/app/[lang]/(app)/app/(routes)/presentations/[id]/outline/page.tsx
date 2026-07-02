@@ -1,11 +1,13 @@
-import { AppPresentationsOutline } from "@/components/app/presentations/outline/app-presentations-outline";
+import { AppPresentationsOutlineBody } from "@/components/app/presentations/outline/app-presentations-outline-body";
+import { AppPresentationsOutlineBottomBar } from "@/components/app/presentations/outline/app-presentations-outline-bottom-bar";
+import { AppPresentationsOutlineHero } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero";
 
-export default async function OutlinePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-
-  return <AppPresentationsOutline presentationId={id} />;
+export default function OutlinePage() {
+  return (
+    <div className="app-presentations-outline-page">
+      <AppPresentationsOutlineHero />
+      <AppPresentationsOutlineBody />
+      <AppPresentationsOutlineBottomBar />
+    </div>
+  );
 }

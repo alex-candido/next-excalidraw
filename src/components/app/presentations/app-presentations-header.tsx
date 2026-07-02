@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 
 import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
 import { AppPresentationsSearch } from "@/components/app/app-presentations-search";
@@ -54,9 +55,21 @@ export function AppPresentationsHeader({
           </div>
         ) : (
           <>
-            <span className="app-presentations-header-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {t("title")}
-            </span>
+            <div className="app-presentations-header-nav flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                render={<Link href="/app/dashboard" />}
+                nativeButton={false}
+                className="app-presentations-header-back -ml-2 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="size-3.5" />
+                {t("backToDashboard")}
+              </Button>
+              <span className="app-presentations-header-title text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("title")}
+              </span>
+            </div>
             <div className="app-presentations-header-actions flex items-center gap-1.5">
               <AppPresentationsSearch />
               {trashCount > 0 && (

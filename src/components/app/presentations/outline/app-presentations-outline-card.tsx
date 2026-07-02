@@ -1,6 +1,8 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, RefreshCw, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
@@ -102,6 +104,9 @@ interface AppPresentationsOutlineCardProps {
   onTitleChange: (id: string, value: string) => void;
   onDescriptionChange: (id: string, value: string) => void;
   onRepresentationChange: (id: string, value: number) => void;
+  onRegenerate: (id: string) => void;
+  onDelete: (id: string) => void;
+  isRegenerating?: boolean;
 }
 
 export function AppPresentationsOutlineCard({
@@ -109,7 +114,10 @@ export function AppPresentationsOutlineCard({
   onTitleChange,
   onDescriptionChange,
   onRepresentationChange,
-}: AppOutlineCardProps) {
+  onRegenerate,
+  onDelete,
+  isRegenerating = false,
+}: AppPresentationsOutlineCardProps) {
   const t = useTranslations("app.outline.card");
   const config = TYPE_CONFIG[item.type as keyof typeof TYPE_CONFIG];
   const isRestricted = item.type === OutlineType.cover || item.type === OutlineType.closing;
@@ -117,14 +125,31 @@ export function AppPresentationsOutlineCard({
     ? ALL_GROUPS.filter((g) => g.key === "general")
     : ALL_GROUPS;
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+
   return (
     <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
         "app-outline-card relative flex rounded-lg border border-l-4 bg-card shadow-sm",
         config.border,
+        isDragging && "z-10 opacity-70 shadow-lg",
       )}
     >
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label={t("dragHandle")}
+        className="app-outline-card-drag-handle flex w-8 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+      >
+        <GripVertical className="size-4" />
+      </button>
+
+      <div className="flex flex-1 flex-col gap-4 p-5 pl-0">
         {/* Header */}
         <div className="app-outline-card-header flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -140,14 +165,27 @@ export function AppPresentationsOutlineCard({
               {t(`types.${config.key}`)}
             </Badge>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="app-outline-card-regenerate h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <RefreshCw className="size-3" />
-            {t("regenerate")}
-          </Button>
+          <div className="app-outline-card-header-actions flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRegenerate(item.id)}
+              disabled={isRegenerating}
+              className="app-outline-card-regenerate h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className={cn("size-3", isRegenerating && "animate-spin")} />
+              {isRegenerating ? t("regenerating") : t("regenerate")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onDelete(item.id)}
+              aria-label={t("delete")}
+              className="app-outline-card-delete text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
         </div>
 
         {/* Body */}

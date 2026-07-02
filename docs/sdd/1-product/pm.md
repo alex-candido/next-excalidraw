@@ -146,6 +146,7 @@ outline API route
 - [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide (ref: `inscribed/Canvas.tsx`)
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen com `exportToImageUrls` (ref: `inscribed/PresentationMode.tsx`)
 - [ ] `P2` Loading states durante geração (outline e slides)
+- [ ] `P2` `AppPresentationsOutlineProvider` — substituir mock state por fetch real (`GET` presentation + outlines) e mutations (reorder/delete/add/regenerate) via API, na Fase 2b de integração dinâmica
 
 **Pipeline AI — melhorias**
 - [ ] `P2` Controle de densidade de elementos por slide — suporte a níveis light / medium / rich no prompt; expor como parâmetro no form

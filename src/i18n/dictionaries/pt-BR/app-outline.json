@@ -5,7 +5,69 @@
         "back": "Voltar",
         "generate": "Gerar Slides",
         "generating": "Gerando...",
-        "subtitle": "{count} seções · revise e ajuste antes de continuar"
+        "regenerate": "Regenerar",
+        "regenerating": "Regenerando...",
+        "subtitle": "{count} seções · revise e ajuste antes de continuar",
+        "prompt": {
+          "label": "Prompt",
+          "placeholder": "Descreva o que essa apresentação deve conter..."
+        },
+        "tags": {
+          "slideCount": "{count} slides",
+          "slideCountAuto": "Slides automático"
+        },
+        "controls": {
+          "slideCount": {
+            "label": "Slides",
+            "auto": "Automático"
+          },
+          "language": {
+            "label": "Idioma",
+            "items": {
+              "en": "Inglês",
+              "es": "Espanhol",
+              "fr": "Francês",
+              "de": "Alemão",
+              "it": "Italiano",
+              "ptBR": "Português",
+              "ru": "Russo",
+              "zh": "Chinês",
+              "ja": "Japonês",
+              "ko": "Coreano"
+            }
+          },
+          "aspectRatio": {
+            "label": "Proporção",
+            "items": {
+              "16:9": "16:9",
+              "4:3": "4:3",
+              "9:16": "9:16",
+              "1:1": "1:1",
+              "A4": "A4",
+              "custom": "Personalizado"
+            }
+          },
+          "audience": {
+            "label": "Público",
+            "items": {
+              "general": "Geral",
+              "business": "Negócios",
+              "investor": "Investidores",
+              "teacher": "Professor",
+              "student": "Estudante"
+            }
+          },
+          "scenario": {
+            "label": "Cenário",
+            "items": {
+              "auto": "Automático",
+              "promotional": "Promocional",
+              "teaching": "Didático",
+              "analytical": "Analítico",
+              "report": "Relatório"
+            }
+          }
+        }
       },
       "card": {
         "types": {
@@ -49,7 +111,46 @@
           "funnel": "Funil",
           "infographic": "Infográfico"
         },
-        "regenerate": "Regenerar"
+        "regenerate": "Regenerar",
+        "regenerating": "Regenerando...",
+        "delete": "Remover outline",
+        "dragHandle": "Arrastar para reordenar"
+      },
+      "list": {
+        "summary": "{count} outlines",
+        "breakdown": "{cover} capa · {content} conteúdo · {closing} encerramento",
+        "add": "Adicionar outline"
+      },
+      "parameters": {
+        "title": "Parâmetros da apresentação",
+        "description": "Esses ajustes influenciam o tema visual e a densidade de conteúdo dos slides gerados.",
+        "theme": {
+          "label": "Tema visual",
+          "items": {
+            "daktilo": "Daktilo",
+            "noir": "Noir",
+            "cornflower": "Cornflower",
+            "indigo": "Indigo",
+            "orbit": "Orbit",
+            "cosmos": "Cosmos",
+            "sunset": "Sunset",
+            "forest": "Forest",
+            "piano": "Piano",
+            "ebony": "Ebony"
+          }
+        },
+        "amount": {
+          "label": "Densidade de conteúdo",
+          "items": {
+            "auto": "Automático",
+            "minimal": "Mínimo",
+            "concise": "Conciso",
+            "detailed": "Detalhado",
+            "extensive": "Extenso"
+          },
+          "range": "{min}–{max} elementos por slide",
+          "autoRange": "Ajuste automático de elementos"
+        }
       }
     }
   }

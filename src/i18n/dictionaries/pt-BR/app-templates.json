@@ -6,7 +6,8 @@
         "description": "Comece mais rápido com modelos prontos criados pela equipe e pela comunidade."
       },
       "header": {
-        "title": "Explorar"
+        "title": "Explorar",
+        "back": "Dashboard"
       },
       "toolbar": {
         "search": "Buscar modelos...",

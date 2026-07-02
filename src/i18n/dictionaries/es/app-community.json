@@ -6,7 +6,8 @@
         "description": "Explora presentaciones creadas y compartidas por otros usuarios."
       },
       "header": {
-        "title": "Explorar"
+        "title": "Explorar",
+        "back": "Dashboard"
       },
       "toolbar": {
         "search": "Buscar en la comunidad...",

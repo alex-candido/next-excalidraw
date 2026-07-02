@@ -6,7 +6,8 @@
         "description": "Empieza más rápido con plantillas listas creadas por el equipo y la comunidad."
       },
       "header": {
-        "title": "Explorar"
+        "title": "Explorar",
+        "back": "Dashboard"
       },
       "toolbar": {
         "search": "Buscar plantillas...",

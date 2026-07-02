@@ -5,7 +5,69 @@
         "back": "Volver",
         "generate": "Generar Diapositivas",
         "generating": "Generando...",
-        "subtitle": "{count} secciones · revise y ajuste antes de continuar"
+        "regenerate": "Regenerar",
+        "regenerating": "Regenerando...",
+        "subtitle": "{count} secciones · revise y ajuste antes de continuar",
+        "prompt": {
+          "label": "Prompt",
+          "placeholder": "Describe lo que esta presentación debe incluir..."
+        },
+        "tags": {
+          "slideCount": "{count} diapositivas",
+          "slideCountAuto": "Diapositivas automático"
+        },
+        "controls": {
+          "slideCount": {
+            "label": "Diapositivas",
+            "auto": "Automático"
+          },
+          "language": {
+            "label": "Idioma",
+            "items": {
+              "en": "Inglés",
+              "es": "Español",
+              "fr": "Francés",
+              "de": "Alemán",
+              "it": "Italiano",
+              "ptBR": "Portugués",
+              "ru": "Ruso",
+              "zh": "Chino",
+              "ja": "Japonés",
+              "ko": "Coreano"
+            }
+          },
+          "aspectRatio": {
+            "label": "Proporción",
+            "items": {
+              "16:9": "16:9",
+              "4:3": "4:3",
+              "9:16": "9:16",
+              "1:1": "1:1",
+              "A4": "A4",
+              "custom": "Personalizado"
+            }
+          },
+          "audience": {
+            "label": "Público",
+            "items": {
+              "general": "General",
+              "business": "Negocios",
+              "investor": "Inversores",
+              "teacher": "Profesor",
+              "student": "Estudiante"
+            }
+          },
+          "scenario": {
+            "label": "Escenario",
+            "items": {
+              "auto": "Automático",
+              "promotional": "Promocional",
+              "teaching": "Didáctico",
+              "analytical": "Analítico",
+              "report": "Informe"
+            }
+          }
+        }
       },
       "card": {
         "types": {
@@ -49,7 +111,46 @@
           "funnel": "Embudo",
           "infographic": "Infografía"
         },
-        "regenerate": "Regenerar"
+        "regenerate": "Regenerar",
+        "regenerating": "Regenerando...",
+        "delete": "Eliminar outline",
+        "dragHandle": "Arrastrar para reordenar"
+      },
+      "list": {
+        "summary": "{count} outlines",
+        "breakdown": "{cover} portada · {content} contenido · {closing} cierre",
+        "add": "Añadir outline"
+      },
+      "parameters": {
+        "title": "Parámetros de la presentación",
+        "description": "Estos ajustes influyen en el tema visual y la densidad de contenido de las diapositivas generadas.",
+        "theme": {
+          "label": "Tema visual",
+          "items": {
+            "daktilo": "Daktilo",
+            "noir": "Noir",
+            "cornflower": "Cornflower",
+            "indigo": "Indigo",
+            "orbit": "Orbit",
+            "cosmos": "Cosmos",
+            "sunset": "Sunset",
+            "forest": "Forest",
+            "piano": "Piano",
+            "ebony": "Ebony"
+          }
+        },
+        "amount": {
+          "label": "Densidad de contenido",
+          "items": {
+            "auto": "Automático",
+            "minimal": "Mínimo",
+            "concise": "Conciso",
+            "detailed": "Detallado",
+            "extensive": "Extenso"
+          },
+          "range": "{min}–{max} elementos por diapositiva",
+          "autoRange": "Ajuste automático de elementos"
+        }
       }
     }
   }

@@ -378,13 +378,67 @@ Regras:
 
 ## src/providers/
 
-Context providers organizados por escopo de rota. O `index.tsx` raiz é o provider global que envolve toda a aplicação — compõe os providers de `next/` (query, theme) e demais providers globais.
+Context providers organizados por módulo. Todo contexto fica disponível em qualquer parte da aplicação — não há composição por route group.
 
-Convenções:
-- `next/` — providers de libs externas (react-query, next-themes)
-- `app/` — providers exclusivos da área logada
-- `admin/` — providers exclusivos do painel admin
-- Providers de escopo mais restrito são compostos dentro do `layout.tsx` do route group correspondente, não no provider raiz
+```
+providers/
+  next/       providers de libs externas (react-query, next-themes)
+  app/        providers do módulo app (área logada)
+    app-provider.tsx                         provider genérico do módulo
+    app-presentations-outline-provider.tsx   provider de uma feature específica
+    index.tsx                                agrega os dois acima em AppProviders
+  admin/      providers do módulo admin (painel)
+    admin-provider.tsx
+    index.tsx
+  index.tsx   agrega app/ + admin/ + next/ em Providers — usado uma única vez em src/app/layout.tsx
+```
+
+### Criando um novo provider de contexto
+
+Cada arquivo de provider (`[nome]-provider.tsx`) segue sempre o mesmo formato:
+
+```tsx
+"use client";
+
+import { createContext, ReactNode, useContext } from "react";
+
+type XxxContextProps = {
+  // shape do contexto — usar `object` como placeholder se ainda não há estado definido
+};
+
+const XxxContext = createContext<XxxContextProps | undefined>(undefined);
+
+export const XxxProvider = ({ children }: { children: ReactNode }) => {
+  const value: XxxContextProps = {
+    // state e funções
+  };
+
+  return <XxxContext.Provider value={value}>{children}</XxxContext.Provider>;
+};
+
+export const useXxx = () => {
+  const context = useContext(XxxContext);
+  if (context === undefined) {
+    throw new Error("useXxx must be used within an XxxProvider");
+  }
+  return context;
+};
+```
+
+Regras:
+- Sempre `createContext<T | undefined>(undefined)` — nunca `null` como valor default
+- O hook de acesso lança erro explícito (`context === undefined`) se usado fora do provider — nunca retorna um valor parcial/undefined silenciosamente
+- Nome do hook é sempre `use` + nome do provider sem o sufixo `Provider` (`AppProvider` → `useApp`, `AppPresentationsOutlineProvider` → `useAppPresentationsOutline`)
+- Provider e hook são `const` com arrow function — não `function` declarada
+- Cada provider fica em seu próprio arquivo dentro da pasta do módulo (`app/`, `admin/`, etc.) — nunca inline no `index.tsx` do módulo
+
+### Registrando o provider
+
+1. Crie `providers/[módulo]/[nome]-provider.tsx` seguindo o formato acima
+2. Importe e componha dentro de `providers/[módulo]/index.tsx` (import relativo, ex: `import { XxxProvider } from "./xxx-provider"`), aninhando dentro do(s) provider(s) já existentes do módulo
+3. Não é necessário tocar em `providers/index.tsx` nem em nenhum `layout.tsx` — o módulo (`AppProviders`, `AdminProviders`) já está registrado na raiz uma única vez
+
+Providers específicos de uma feature (ex: estado de uma página) também entram no `index.tsx` do módulo ao qual pertencem — mesmo que usados por uma única rota, eles não recebem props vindas de route params (a rota lê o próprio contexto via hook, sem precisar repassar dados pela árvore de layouts).
 
 ## src/styles/
 

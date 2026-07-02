@@ -6,7 +6,8 @@
         "description": "Explore presentations created and shared by other users."
       },
       "header": {
-        "title": "Explore"
+        "title": "Explore",
+        "back": "Dashboard"
       },
       "toolbar": {
         "search": "Search community...",

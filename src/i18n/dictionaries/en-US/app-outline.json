@@ -5,7 +5,69 @@
         "back": "Back",
         "generate": "Generate Slides",
         "generating": "Generating...",
-        "subtitle": "{count} sections · review and adjust before continuing"
+        "regenerate": "Regenerate",
+        "regenerating": "Regenerating...",
+        "subtitle": "{count} sections · review and adjust before continuing",
+        "prompt": {
+          "label": "Prompt",
+          "placeholder": "Describe what this presentation should cover..."
+        },
+        "tags": {
+          "slideCount": "{count} slides",
+          "slideCountAuto": "Auto slide count"
+        },
+        "controls": {
+          "slideCount": {
+            "label": "Slides",
+            "auto": "Auto"
+          },
+          "language": {
+            "label": "Language",
+            "items": {
+              "en": "English",
+              "es": "Spanish",
+              "fr": "French",
+              "de": "German",
+              "it": "Italian",
+              "ptBR": "Portuguese",
+              "ru": "Russian",
+              "zh": "Chinese",
+              "ja": "Japanese",
+              "ko": "Korean"
+            }
+          },
+          "aspectRatio": {
+            "label": "Aspect ratio",
+            "items": {
+              "16:9": "16:9",
+              "4:3": "4:3",
+              "9:16": "9:16",
+              "1:1": "1:1",
+              "A4": "A4",
+              "custom": "Custom"
+            }
+          },
+          "audience": {
+            "label": "Audience",
+            "items": {
+              "general": "General",
+              "business": "Business",
+              "investor": "Investors",
+              "teacher": "Teacher",
+              "student": "Student"
+            }
+          },
+          "scenario": {
+            "label": "Scenario",
+            "items": {
+              "auto": "Auto",
+              "promotional": "Promotional",
+              "teaching": "Teaching",
+              "analytical": "Analytical",
+              "report": "Report"
+            }
+          }
+        }
       },
       "card": {
         "types": {
@@ -49,7 +111,46 @@
           "funnel": "Funnel",
           "infographic": "Infographic"
         },
-        "regenerate": "Regenerate"
+        "regenerate": "Regenerate",
+        "regenerating": "Regenerating...",
+        "delete": "Remove outline",
+        "dragHandle": "Drag to reorder"
+      },
+      "list": {
+        "summary": "{count} outlines",
+        "breakdown": "{cover} cover · {content} content · {closing} closing",
+        "add": "Add outline"
+      },
+      "parameters": {
+        "title": "Presentation parameters",
+        "description": "These settings influence the visual theme and content density of the generated slides.",
+        "theme": {
+          "label": "Visual theme",
+          "items": {
+            "daktilo": "Daktilo",
+            "noir": "Noir",
+            "cornflower": "Cornflower",
+            "indigo": "Indigo",
+            "orbit": "Orbit",
+            "cosmos": "Cosmos",
+            "sunset": "Sunset",
+            "forest": "Forest",
+            "piano": "Piano",
+            "ebony": "Ebony"
+          }
+        },
+        "amount": {
+          "label": "Content density",
+          "items": {
+            "auto": "Auto",
+            "minimal": "Minimal",
+            "concise": "Concise",
+            "detailed": "Detailed",
+            "extensive": "Extensive"
+          },
+          "range": "{min}–{max} elements per slide",
+          "autoRange": "Automatically adjusted elements"
+        }
       }
     }
   }
