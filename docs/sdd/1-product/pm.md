@@ -98,7 +98,7 @@ outline API route
 ---
 
 **Mapeamento de components — módulos UI**
-*(Ordem: landing ✅ → auth ✅ → app ✅ (shell) → app (detail pages) → admin)*
+*(Ordem: landing ✅ → auth ✅ → app ✅ (shell) → app (detail pages, outline ✅ · studio ✅) → admin)*
 
 - [x] `P1` Landing module — mapeamento completo
 - [x] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
@@ -107,8 +107,8 @@ outline API route
 - [x] `P2` App module — presentations (list) — AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationCard (isFavorited · actions) · AppPresentationCardFavorite · AppPresentationTrashModal · AppPresentationsEmpty
 - [x] `P3` App module — app/templates — AppTemplatesHeader · AppTemplatesToolbar · AppTemplateCard · AppTemplateCardActions · modals (preview, duplicate)
 - [x] `P3` App module — app/community — AppCommunityHeader · AppCommunityToolbar · AppCommunityModal (duplicate view ↔ author view navigation) · AppCommunityModalDuplicateView · AppCommunityModalAuthorView
-- [ ] `P2` App module — presentations/[id]/outline — AppOutlineHero · AppOutlineList · AppOutlineCard (regenerate) · AppOutlineActions
-- [ ] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
+- [x] `P2` App module — presentations/[id]/outline — AppPresentationsOutlineHero (colapsa em prompt + controls-bar) · AppPresentationsOutlineList (drag reorder · delete · add manual) · AppPresentationsOutlineCard (regenerate) · AppPresentationsOutlineParameters (theme/amount em cards) · AppPresentationsOutlineBottomBar
+- [x] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
 - [ ] `P2` App module — presentations/[id]/present — AppPresentSlide · AppPresentNav · AppPresentControls
 - [ ] `P3` App module — settings/profile, settings/billing, settings/team
 - [ ] `P3` Admin module — dashboard, users, logs, settings
@@ -232,6 +232,20 @@ outline API route
 ## Done
 ---
 
+- [x] **App module — presentations/[id]/studio — mapeamento de components completo** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
+  - `AppPresentationsStudioToolbar` (voltar · título · ações) · `AppPresentationsStudioActions` (save · present)
+  - `AppPresentationsStudioSlideList` (sidebar scrollável) · `AppPresentationsStudioSlideListItem` (thumbnail placeholder mapeando `slide.thumbnail` · badge de ordem via `SelectableCard` + `Badge`)
+  - `AppPresentationsStudioCanvas` — encapsula `ExcalidrawEditor` existente, remonta via `key={activeSlide.id}` (ADR-004: slides separados, sem frames) · `scrollToContent({ fitToViewport: true })` ao trocar de slide
+  - `AppPresentationsStudioProvider` — mock de slides, captura elementos ativos via `excalidrawAPI.getSceneElements()` ao trocar/salvar · `title` é mock local (schema real deriva de `outline.title` via `outline_id`, relação 1:1)
+  - Fix: import de `skeletonSerializer` (`@excalidraw/excalidraw`) adiado para `useEffect` client-only — provider é global (montado em `providers/index.tsx`) e o pacote toca `window` na avaliação do módulo, quebrando SSR de qualquer rota
+  - Novo dicionário `app-studio.json` (pt-BR/en-US/es), registrado em `i18n/request.ts`
+- [x] **App module — presentations/[id]/outline — mapeamento de components completo** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
+  - `hero/`: AppPresentationsOutlineHero (colapsa título → textarea de prompt editável + controls-bar de idioma/aspectRatio/slideCount/audience/scenario) · AppPresentationsOutlineHeroTags (badges dos parâmetros no estado colapsado) · AppPresentationsOutlineHeroControls · AppPresentationsOutlineHeroPrompt
+  - `outline/`: AppPresentationsOutlineList (drag reorder via `@dnd-kit` · delete · add manual · summary) · AppPresentationsOutlineCard (regenerate individual · title/description/representation editáveis) · AppPresentationsOutlineBody · AppPresentationsOutlineBottomBar (ação "Gerar", separada do "Regenerar" do Hero)
+  - `parameters/`: AppPresentationsOutlineParameters · AppPresentationsOutlineThemePicker/Card · AppPresentationsOutlineAmountPicker/Card (cards seletáveis para `theme`/`amount`, em vez de select dropdown)
+  - Estado compartilhado extraído para `AppPresentationsOutlineProvider` (Context, `src/providers/app/`) — `page.tsx` só compõe as sections, sem prop-drilling
+  - `src/providers/` reorganizado por módulo: `app/index.tsx` e `admin/index.tsx` agregam os providers de cada módulo (um arquivo por provider), registrados uma única vez em `src/app/layout.tsx`
+  - Novo primitivo `SelectableCard` em `components/ui/blocks/`
 - [x] **App module — app/(shell) — mapeamento de components completo** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
   - `presentations/`: AppPresentationsHero · AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationsEmpty · AppPresentationCard (isFavorited · href|onSelect · overlay pointer-events-none) · AppPresentationCardFavorite · AppPresentationCardActions (DEFAULT + TRASH_VIEW_ACTIONS · favorite toggle · trash confirm) · AppPresentationTrashModal
   - `templates/`: AppTemplatesHero · AppTemplatesHeader · AppTemplatesToolbar · AppTemplatesFilters · AppTemplates (grid · empty · AppTemplateUseModal)

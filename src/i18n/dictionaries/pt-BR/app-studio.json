@@ -1,0 +1,29 @@
+{
+  "app": {
+    "studio": {
+      "header": {
+        "back": "Voltar",
+        "moreActions": "Mais ações",
+        "export": "Exportar",
+        "exportPng": "Exportar como PNG",
+        "exportSvg": "Exportar como SVG",
+        "exportJson": "Exportar como JSON",
+        "slideConfig": "Configurações",
+        "source": "Source",
+        "save": "Salvar",
+        "saving": "Salvando...",
+        "versionHistory": "Histórico",
+        "present": "Apresentar"
+      },
+      "slideList": {
+        "engine": "Excalidraw",
+        "editName": "Editar nome da apresentação",
+        "add": "Novo slide",
+        "item": {
+          "duplicate": "Duplicar slide",
+          "delete": "Remover slide"
+        }
+      }
+    }
+  }
+}

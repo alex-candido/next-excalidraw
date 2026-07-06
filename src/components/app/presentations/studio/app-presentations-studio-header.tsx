@@ -1,30 +1,21 @@
+import { AppNavBrand } from "@/components/app/app-nav-brand";
+import { AppPresentationsStudioActions } from "@/components/app/presentations/studio/app-presentations-studio-actions";
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutHeader } from "@/components/layouts/layout-header";
 import { LayoutNavActions } from "@/components/layouts/layout-nav-actions";
 import { LayoutNavBrand } from "@/components/layouts/layout-nav-brand";
 import { LayoutNavEnd } from "@/components/layouts/layout-nav-end";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
-import { AppNavBrand } from "@/components/app/app-nav-brand";
-import { LayoutNavStart } from "@/components/layouts/layout-nav-start";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
-
-
-export function AppPresentationsStudioHeader({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function AppPresentationsStudioHeader() {
   return (
     <LayoutHeader>
-      <LayoutContainer>
+      <LayoutContainer className="md:max-w-full!">
         <LayoutNavBrand>
           <AppNavBrand />
         </LayoutNavBrand>
-        <LayoutNavStart />
         <LayoutNavEnd>
           <LayoutNavActions>
-            <ThemeToggle />
-            <LanguageSwitcher />
+            <AppPresentationsStudioActions />
           </LayoutNavActions>
         </LayoutNavEnd>
       </LayoutContainer>

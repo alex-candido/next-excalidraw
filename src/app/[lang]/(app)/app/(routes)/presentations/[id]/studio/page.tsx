@@ -1,9 +1,11 @@
-export default async function StudioPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+import { AppPresentationsStudioCanvas } from "@/components/app/presentations/studio/app-presentations-studio-canvas";
+import { AppPresentationsStudioSlideList } from "@/components/app/presentations/studio/app-presentations-studio-slide-list";
 
-  return <div>Studio — {id}</div>;
+export default function StudioPage() {
+  return (
+    <div className="app-presentations-studio-page flex gap-3 overflow-hidden bg-muted p-3">
+      <AppPresentationsStudioSlideList />
+      <AppPresentationsStudioCanvas />
+    </div>
+  );
 }
