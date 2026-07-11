@@ -4,10 +4,19 @@
       "header": {
         "back": "Back",
         "moreActions": "More actions",
+        "meta": {
+          "created": "Created on {date} · by {author}"
+        },
         "export": "Export",
         "exportPng": "Export as PNG",
         "exportSvg": "Export as SVG",
         "exportJson": "Export as JSON",
+        "share": "Share",
+        "rename": "Rename",
+        "favorite": "Add to favorites",
+        "unfavorite": "Remove from favorites",
+        "copyLink": "Copy link",
+        "trash": "Move to trash",
         "slideConfig": "Settings",
         "source": "Source",
         "save": "Save",
@@ -20,8 +29,34 @@
         "editName": "Edit presentation name",
         "add": "New slide",
         "item": {
-          "duplicate": "Duplicate slide",
-          "delete": "Delete slide"
+          "dragHandle": "Reorder slide",
+          "hiddenBadge": "Hidden",
+          "actions": {
+            "menu": "More options",
+            "duplicate": "Duplicate slide",
+            "hide": "Hide slide",
+            "show": "Show slide",
+            "copyLink": "Copy link",
+            "outlineDetails": "View outline details",
+            "delete": "Delete slide"
+          }
+        }
+      },
+      "panel": {
+        "close": "Close panel",
+        "titles": {
+          "settings": "Settings",
+          "source": "Source",
+          "history": "History"
+        },
+        "settings": {
+          "comingSoon": "Presentation settings coming soon."
+        },
+        "source": {
+          "comingSoon": "Source view coming soon."
+        },
+        "history": {
+          "comingSoon": "Version history coming soon."
         }
       }
     }

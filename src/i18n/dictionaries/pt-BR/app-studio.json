@@ -4,10 +4,19 @@
       "header": {
         "back": "Voltar",
         "moreActions": "Mais ações",
+        "meta": {
+          "created": "Criado em {date} · por {author}"
+        },
         "export": "Exportar",
         "exportPng": "Exportar como PNG",
         "exportSvg": "Exportar como SVG",
         "exportJson": "Exportar como JSON",
+        "share": "Compartilhar",
+        "rename": "Renomear",
+        "favorite": "Adicionar aos favoritos",
+        "unfavorite": "Remover dos favoritos",
+        "copyLink": "Copiar link",
+        "trash": "Mover para lixeira",
         "slideConfig": "Configurações",
         "source": "Source",
         "save": "Salvar",
@@ -20,8 +29,34 @@
         "editName": "Editar nome da apresentação",
         "add": "Novo slide",
         "item": {
-          "duplicate": "Duplicar slide",
-          "delete": "Remover slide"
+          "dragHandle": "Reordenar slide",
+          "hiddenBadge": "Oculto",
+          "actions": {
+            "menu": "Mais opções",
+            "duplicate": "Duplicar slide",
+            "hide": "Ocultar slide",
+            "show": "Exibir slide",
+            "copyLink": "Copiar link",
+            "outlineDetails": "Ver detalhes do outline",
+            "delete": "Remover slide"
+          }
+        }
+      },
+      "panel": {
+        "close": "Fechar painel",
+        "titles": {
+          "settings": "Configurações",
+          "source": "Source",
+          "history": "Histórico"
+        },
+        "settings": {
+          "comingSoon": "Configurações da apresentação em breve."
+        },
+        "source": {
+          "comingSoon": "Visualização do source em breve."
+        },
+        "history": {
+          "comingSoon": "Histórico de versões em breve."
         }
       }
     }

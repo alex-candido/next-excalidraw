@@ -2,6 +2,7 @@
 
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { arrayMove } from "@dnd-kit/sortable";
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 export interface AppPresentationsStudioScene {
@@ -20,10 +21,17 @@ export interface AppPresentationsStudioSlide {
   title: string;
   /** Mapeia `slide.thumbnail` — undefined até a geração automática existir (Ciclo 4) */
   thumbnail?: string;
+  /** Mock local — reflete o futuro `slide.status = inactive` (persistência real na Fase 2b) */
+  isHidden?: boolean;
   scene: AppPresentationsStudioScene;
 }
 
+export type StudioPanelKey = "settings" | "source" | "history";
+
 const MOCK_TITLE = "Microsserviços na Nuvem";
+const MOCK_CREATED_AT_LABEL = "há 2 dias";
+const MOCK_CREATED_BY = "Alex C.";
+const MOCK_IS_FAVORITED = false;
 
 function buildEmptyScene(): AppPresentationsStudioScene {
   return {
@@ -53,16 +61,24 @@ const MOCK_SLIDES: AppPresentationsStudioSlide[] = MOCK_SLIDE_TITLES.map((title,
 
 type AppPresentationsStudioContextProps = {
   title: string;
+  createdAtLabel: string;
+  createdBy: string;
+  isFavorited: boolean;
   slides: AppPresentationsStudioSlide[];
   activeSlideId: string;
   activeSlide: AppPresentationsStudioSlide;
   onSelectSlide: (id: string) => void;
   onAddSlide: () => void;
+  onReorderSlides: (activeId: string, overId: string) => void;
   onDuplicateSlide: (id: string) => void;
+  onToggleHiddenSlide: (id: string) => void;
   onDeleteSlide: (id: string) => void;
   registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
   isSaving: boolean;
   onSave: () => void;
+  activePanel: StudioPanelKey | null;
+  onOpenPanel: (panel: StudioPanelKey) => void;
+  onClosePanel: () => void;
 };
 
 const AppPresentationsStudioContext = createContext<AppPresentationsStudioContextProps | undefined>(undefined);
@@ -79,6 +95,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
   const [slides, setSlides] = useState<AppPresentationsStudioSlide[]>(MOCK_SLIDES);
   const [activeSlideId, setActiveSlideId] = useState(MOCK_SLIDES[0].id);
   const [isSaving, setIsSaving] = useState(false);
+  const [activePanel, setActivePanel] = useState<StudioPanelKey | null>(null);
   const excalidrawApiRef = useRef<ExcalidrawImperativeAPI | null>(null);
 
   useEffect(() => {
@@ -143,6 +160,23 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
       );
     });
 
+  const onReorderSlides = (activeId: string, overId: string) => {
+    setSlides((prev) => {
+      const oldIndex = prev.findIndex((slide) => slide.id === activeId);
+      const newIndex = prev.findIndex((slide) => slide.id === overId);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+      return arrayMove(prev, oldIndex, newIndex).map((slide, index) => ({
+        ...slide,
+        order: index,
+      }));
+    });
+  };
+
+  const onToggleHiddenSlide = (id: string) =>
+    setSlides((prev) =>
+      prev.map((slide) => (slide.id === id ? { ...slide, isHidden: !slide.isHidden } : slide)),
+    );
+
   const onDeleteSlide = (id: string) => {
     if (slides.length <= 1) return;
     setSlides((prev) =>
@@ -158,6 +192,11 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     excalidrawApiRef.current = api;
   };
 
+  const onOpenPanel = (panel: StudioPanelKey) =>
+    setActivePanel((prev) => (prev === panel ? null : panel));
+
+  const onClosePanel = () => setActivePanel(null);
+
   const onSave = () => {
     captureActiveSlideElements();
     setIsSaving(true);
@@ -168,16 +207,24 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
 
   const value: AppPresentationsStudioContextProps = {
     title: MOCK_TITLE,
+    createdAtLabel: MOCK_CREATED_AT_LABEL,
+    createdBy: MOCK_CREATED_BY,
+    isFavorited: MOCK_IS_FAVORITED,
     slides,
     activeSlideId,
     activeSlide,
     onSelectSlide,
     onAddSlide,
+    onReorderSlides,
     onDuplicateSlide,
+    onToggleHiddenSlide,
     onDeleteSlide,
     registerExcalidrawApi,
     isSaving,
     onSave,
+    activePanel,
+    onOpenPanel,
+    onClosePanel,
   };
 
   return (

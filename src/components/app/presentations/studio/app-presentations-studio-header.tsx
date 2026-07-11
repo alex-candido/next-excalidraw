@@ -1,10 +1,11 @@
 import { AppNavBrand } from "@/components/app/app-nav-brand";
-import { AppPresentationsStudioActions } from "@/components/app/presentations/studio/app-presentations-studio-actions";
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutHeader } from "@/components/layouts/layout-header";
 import { LayoutNavActions } from "@/components/layouts/layout-nav-actions";
 import { LayoutNavBrand } from "@/components/layouts/layout-nav-brand";
 import { LayoutNavEnd } from "@/components/layouts/layout-nav-end";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function AppPresentationsStudioHeader() {
   return (
@@ -15,7 +16,8 @@ export function AppPresentationsStudioHeader() {
         </LayoutNavBrand>
         <LayoutNavEnd>
           <LayoutNavActions>
-            <AppPresentationsStudioActions />
+            <ThemeToggle />
+            <LanguageSwitcher />
           </LayoutNavActions>
         </LayoutNavEnd>
       </LayoutContainer>

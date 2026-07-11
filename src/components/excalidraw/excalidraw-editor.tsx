@@ -1,6 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import type { Excalidraw as ExcalidrawType } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
 
@@ -12,9 +14,16 @@ const Excalidraw = dynamic(
 );
 
 export function ExcalidrawEditor(props: ExcalidrawEditorProps) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const theme = mounted && resolvedTheme === "dark" ? "dark" : "light";
+
   return (
     <div className="size-full">
-      <Excalidraw {...props} />
+      <Excalidraw theme={theme} {...props} />
     </div>
   );
 }
