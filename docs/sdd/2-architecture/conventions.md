@@ -317,6 +317,16 @@ Regras:
 - Componentes de domínio não são importados por outros domínios — `app/` não importa de `admin/` e vice-versa
 - Componentes de `excalidraw/` nunca são renderizados no servidor
 
+### Responsividade mobile
+
+Dois padrões estabelecidos (ver ADR-007), escolhidos conforme o tipo de diferença entre breakpoints:
+
+**1. Diferença só de apresentação/posição** — variantes puramente CSS via `hidden md:flex` / `flex md:hidden`, sem JS de detecção (ex: `AppLayoutRail`, `AppPresentationsStudioSlideList`/`SlideListMobile`). Evita flash de conteúdo errado durante hidratação, já que a visibilidade é resolvida pelo CSS antes de qualquer JS rodar.
+
+**2. Diferença de comportamento/interação** (não dá pra resolver só com CSS — ex: estratégia de drag-and-drop por eixo, aside docked vs overlay) — usar o hook `useIsMobile()` (`src/hooks/use-mobile.ts`, breakpoint 768px = `md`) pra ramificar em JS. Referência: `ui/sidebar.tsx` e `AppPresentationsStudioPanel` (aside fixo no desktop, `Sheet` no mobile).
+
+Regra: nunca usar `useIsMobile()` quando um `hidden`/`md:hidden` resolveria — só recorrer ao hook quando a branch precisa de lógica JS distinta, não só CSS distinto.
+
 ## src/config/
 
 Configurações de ambiente e roles da aplicação:

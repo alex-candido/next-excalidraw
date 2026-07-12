@@ -1,0 +1,17 @@
+{
+  "app": {
+    "present": {
+      "actions": {
+        "exit": "Salir de la presentación",
+        "fullscreenEnter": "Pantalla completa",
+        "fullscreenExit": "Salir de pantalla completa",
+        "theme": "Cambiar tema"
+      },
+      "nav": {
+        "previous": "Diapositiva anterior",
+        "next": "Siguiente diapositiva",
+        "counter": "Diapositiva {current} de {total}"
+      }
+    }
+  }
+}

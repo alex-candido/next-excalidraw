@@ -80,3 +80,56 @@
 **Decisão:** Tratar Multi e Single como modalidades separadas com workflows independentes. Single não passa por outline — vai direto para geração de elementos. Single também suporta vision model (imagem → Excalidraw).
 
 **Consequências:** O `slideWorkflow` atual pode ser reutilizado no Single com parâmetros simplificados (tipo e representação fornecidos diretamente pelo usuário). Um step dedicado para vision (image → skeleton) precisará ser criado para o subtipo de digitalização de imagem.
+
+---
+
+## ADR-006 — Sincronização de tema do Excalidraw via next-themes
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** O app já usa `next-themes` (light/dark/system, `attribute="class"`), mas o canvas Excalidraw tem seu próprio sistema de tema interno (`theme?: "light" | "dark"`, sem conceito de "system").
+
+**Decisão:** Centralizar a sincronização dentro do `ExcalidrawEditor` (wrapper único usado no Studio e nos sandboxes de dev) — lê `resolvedTheme` via `useTheme()` e repassa como prop `theme` pro `<Excalidraw>`. A prop é reativa (confirmado no código-fonte: `componentDidUpdate` do Excalidraw compara `prevProps.theme !== this.props.theme` e atualiza o estado interno), então o canvas se re-tematiza ao vivo sem lógica extra.
+
+**Alternativas consideradas:**
+- Sincronizar em cada consumidor de `ExcalidrawEditor` individualmente — rejeitado por duplicar lógica e arriscar inconsistência entre Studio e sandboxes
+
+**Consequências:** Qualquer novo uso de `ExcalidrawEditor` ganha a sincronização automaticamente, sem precisar lembrar de passar `theme`. Guard de `mounted` evita mismatch de hidratação (mesmo padrão do `ThemeToggle`), com fallback `"light"` até montar.
+
+---
+
+## ADR-007 — Painéis secundários do Studio: aside fixo no desktop, Sheet no mobile
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** `AppPresentationsStudioPanel` (Configurações/Source/Histórico) precisa funcionar tanto em telas largas quanto estreitas. No mobile, a página usa um grid (`1fr`/`auto`) compartilhado com o Canvas e a faixa de slides — um aside fixo (`w-80`, altura calculada) não tem como participar desse grid sem estourar o layout ou disputar espaço com o Canvas.
+
+**Decisão:** Reaproveitar o padrão que `ui/sidebar.tsx` já usa para o mesmo problema — `useIsMobile()` decide entre aside docked (desktop, `hidden md:flex`) e `Sheet` lateral direita (mobile, overlay portalado via `@base-ui/react/dialog`, fora do fluxo de layout da página).
+
+**Alternativas descartadas:**
+- Fazer o Panel compartilhar a mesma linha do grid que o Canvas (`row-start-1`, sobrepondo) — funcionava, mas exigia manter Canvas e Panel sincronizados manualmente em toda mudança futura de layout; descartado em favor do Sheet, que não depende do grid da página
+
+**Consequências:** Esse padrão (aside no desktop, Sheet no mobile via `useIsMobile()`) vira a referência para qualquer outro painel secundário que precisar de tratamento mobile futuro (ex: settings, filtros).
+
+---
+
+## ADR-008 — Present mode: sem provider de dados próprio; canvas medido via `window.innerWidth/innerHeight`
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** `analysis.reference.md` cita `inscribed/PresentationMode.tsx` (`exportToImageUrls`, pré-renderiza todos os slides como imagem) como referência de Present Mode — mas essa abordagem pressupõe frames do Excalidraw, já rejeitados pelo ADR-004. Também analisamos `github.com/scastiel/excalidraw-slides` (`SlideEditor.tsx`) a pedido, mas esse repo usa o pacote antigo e descontinuado `excalidraw` (não `@excalidraw/excalidraw`), de uma época em que a API aceitava `width`/`height` como props diretas — removidas nas versões atuais (`ExcalidrawProps` não tem mais esses campos; confirmado no `types.d.ts` da versão instalada, 0.18.1).
+
+**Decisão (dados):** `/presentations/[id]/present` não tem provider de dados próprio — reaproveita `useAppPresentationsStudio()` (já global, registrado em `providers/app/index.tsx`) via `useAppPresentationsPresentNavigation()` (`src/hooks/app/`), que centraliza a derivação de slides apresentáveis (filtra `isHidden`) e navegação anterior/próximo, consumida por `AppPresentationsPresentCanvas`, `AppPresentationsPresentNav` e o listener de teclado. `AppPresentationsPresentProvider` existe só para estado de UI da própria página (`isFullscreen`, `containerRef` da Fullscreen API) — nunca para slides.
+
+**Decisão (tamanho do canvas):** `AppPresentationsPresentCanvas` mede `window.innerWidth`/`window.innerHeight` (com listener de `resize`) e aplica como `width`/`height` explícitos via inline style no wrapper do `ExcalidrawEditor` — não `size-full`/`height:100%`. Motivo: mesmo com a página ancorada em `h-screen` e a cadeia de flexbox correta, `height:100%` não se propagou de forma confiável até o canvas (comportamento observado e confirmado empiricamente, não só teórico) — o Excalidraw simplesmente não preenchia o espaço do pai a menos que o tamanho fosse um valor explícito. Como o Present ocupa a janela inteira (sem layout parcial como o Studio, que divide espaço com SlideList/Panel/Toolbar), medir a janela é uma fonte de tamanho legítima e sempre correta — mas essa medição fica isolada no `AppPresentationsPresentCanvas`, **não** no `ExcalidrawEditor` compartilhado, porque lá quebraria o Studio (cujo canvas ocupa só parte da tela).
+
+**Alternativas descartadas:**
+- `exportToImageUrls` — não se aplica sem frames (ver contexto)
+- `width`/`height` como props do `<Excalidraw>` (técnica do `excalidraw-slides`) — API removida na versão atual do pacote
+- `ResizeObserver` medindo o elemento pai do `ExcalidrawEditor` — tentado primeiro; falhou de forma sutil (media valores levemente errados fora do fullscreen e "travava" no tamanho do fullscreen até dar refresh, provavelmente por reobservar uma caixa que também dependia da mesma cadeia de CSS ambígua)
+- Colocar a medição de janela no `ExcalidrawEditor` compartilhado — quebraria o Studio
+
+**Consequências:** Chrome nativo do Excalidraw (menu, toolbar, footer/zoom/undo-redo, botão de sair do zen mode, context menu) é escondido via CSS em `globals.css`, escopado a `.app-presentations-present-canvas .excalidraw` (não afeta o Studio) — `viewModeEnabled + zenModeEnabled` já cobrem a maior parte, o CSS cobre o que sobra (ex: `.disable-zen-mode`, o botão nativo de sair do zen mode, substituído pelo botão de sair do `AppPresentationsPresentNav`).

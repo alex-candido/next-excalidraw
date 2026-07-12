@@ -128,3 +128,19 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Modo apresentação (presentations/[id]/present) esconde todo o chrome nativo do Excalidraw
+ * (menu, toolbar, footer/zoom/undo-redo, botão de ajuda, gatilho da biblioteca, botão de
+ * sair do zen mode) — a navegação e a saída ficam só no nosso app-presentations-present-nav.
+ * viewModeEnabled + zenModeEnabled já removem a maior parte; isso cobre o que sobra.
+ */
+.app-presentations-present-canvas .excalidraw .layer-ui__wrapper,
+.app-presentations-present-canvas .excalidraw .App-menu_top,
+.app-presentations-present-canvas .excalidraw .App-menu_left,
+.app-presentations-present-canvas .excalidraw .App-menu_right,
+.app-presentations-present-canvas .excalidraw .App-menu_bottom,
+.app-presentations-present-canvas .excalidraw .disable-zen-mode,
+.app-presentations-present-canvas .excalidraw .context-menu {
+  display: none !important;
+}

@@ -1,9 +1,5 @@
-export default async function PresentPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+import { AppPresentationsPresentView } from "@/components/app/presentations/present/app-presentations-present-view";
 
-  return <div>Present — {id}</div>;
+export default function PresentPage() {
+  return <AppPresentationsPresentView />;
 }

@@ -1,0 +1,17 @@
+{
+  "app": {
+    "present": {
+      "actions": {
+        "exit": "Sair da apresentação",
+        "fullscreenEnter": "Tela cheia",
+        "fullscreenExit": "Sair da tela cheia",
+        "theme": "Alternar tema"
+      },
+      "nav": {
+        "previous": "Slide anterior",
+        "next": "Próximo slide",
+        "counter": "Slide {current} de {total}"
+      }
+    }
+  }
+}

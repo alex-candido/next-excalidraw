@@ -7,8 +7,8 @@ export default function PresentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <LayoutWrapper>
-      <LayoutMain className="pb-20 md:pb-0">
+    <LayoutWrapper className="h-screen overflow-hidden">
+      <LayoutMain className="min-h-0">
         {children}
       </LayoutMain>
     </LayoutWrapper>

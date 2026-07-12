@@ -102,3 +102,4 @@ https://github.com/ramacuy/ai-excalidraw/
 https://github.com/github/awesome-copilot/tree/main/skills/excalidraw-diagram-generator
 https://github.com/Agents365-ai/excalidraw-skill
 https://github.com/Humanoidme/excalidraw_ai
+https://github.com/scastiel/excalidraw-slides

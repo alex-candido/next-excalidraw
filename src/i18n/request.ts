@@ -17,6 +17,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     appNew,
     appOutline,
     appStudio,
+    appPresent,
     landingNav,
     landingHome,
     landingProduct,
@@ -34,6 +35,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`./dictionaries/${locale}/app-new.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-outline.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-studio.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-present.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-nav.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-home.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/landing-product.json`).then((m) => m.default),
@@ -56,6 +58,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
         ...appNew.app,
         ...appOutline.app,
         ...appStudio.app,
+        ...appPresent.app,
       },
       landing: {
         ...landingNav.landing,

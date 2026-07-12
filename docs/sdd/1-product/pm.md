@@ -109,7 +109,7 @@ outline API route
 - [x] `P3` App module — app/community — AppCommunityHeader · AppCommunityToolbar · AppCommunityModal (duplicate view ↔ author view navigation) · AppCommunityModalDuplicateView · AppCommunityModalAuthorView
 - [x] `P2` App module — presentations/[id]/outline — AppPresentationsOutlineHero (colapsa em prompt + controls-bar) · AppPresentationsOutlineList (drag reorder · delete · add manual) · AppPresentationsOutlineCard (regenerate) · AppPresentationsOutlineParameters (theme/amount em cards) · AppPresentationsOutlineBottomBar
 - [x] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
-- [ ] `P2` App module — presentations/[id]/present — AppPresentSlide · AppPresentNav · AppPresentControls
+- [x] `P2` App module — presentations/[id]/present — AppPresentationsPresentView (fullscreen, Escape/←/→ globais) · AppPresentationsPresentCanvas (Excalidraw view+zen mode, tamanho medido via `window.innerWidth/innerHeight`) · AppPresentationsPresentNav (pill flutuante única: sair · anterior/contador/próximo · tela cheia · tema)
 - [ ] `P3` App module — settings/profile, settings/billing, settings/team
 - [ ] `P3` Admin module — dashboard, users, logs, settings
 
@@ -232,9 +232,20 @@ outline API route
 ## Done
 ---
 
-- [x] **App module — presentations/[id]/studio — mapeamento de components completo** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
-  - `AppPresentationsStudioToolbar` (voltar · título · ações) · `AppPresentationsStudioActions` (save · present)
-  - `AppPresentationsStudioSlideList` (sidebar scrollável) · `AppPresentationsStudioSlideListItem` (thumbnail placeholder mapeando `slide.thumbnail` · badge de ordem via `SelectableCard` + `Badge`)
+- [x] **App module — presentations/[id]/present — mapeamento de components completo, modo apresentação fullbleed** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
+  - `AppPresentationsPresentView` — sem provider de dados próprio, lê `slides`/`activeSlideId`/`onSelectSlide` direto do `AppPresentationsStudioProvider` (global) via `useAppPresentationsPresentNavigation()` (`src/hooks/app/`) — navegar aqui atualiza o mesmo `activeSlideId` do Studio, então voltar mantém o slide certo. Listener global de teclado (`←`/`→` navega, `Esc` sai) — ver ADR-008
+  - `AppPresentationsPresentCanvas` — `ExcalidrawEditor` em `viewModeEnabled + zenModeEnabled`, remontado por `key={activeSlide.id}` (mesmo padrão do Studio/ADR-004) · overlay transparente dividido em metade esquerda/direita pra navegação por clique (bloqueia pan/zoom do Excalidraw durante a apresentação, ref: `excalidraw-slides`) · tamanho medido via `window.innerWidth/innerHeight` com listener de `resize`, não `height:100%`/`flex-1` — ver ADR-008 (motivo)
+  - `AppPresentationsPresentNav` — pill flutuante única (`bottom-4`, sempre visível): sair da apresentação · anterior/contador/próximo · tela cheia (Fullscreen API real via `containerRef`) · tema (botão único cicla light→dark→system, sem dropdown)
+  - Chrome nativo do Excalidraw (menu, toolbar, footer/zoom/undo-redo, botão de sair do zen mode, context menu) escondido via CSS em `globals.css`, escopado a `.app-presentations-present-canvas .excalidraw` — não afeta o Studio
+  - `AppPresentationsPresentProvider` (`providers/app/`) — só estado de UI da própria página (`isFullscreen`, `containerRef`, `onToggleFullscreen`); nunca guarda slides
+  - Novo dicionário `app-present.json` (pt-BR/en-US/es), registrado em `i18n/request.ts`
+- [x] **App module — presentations/[id]/studio — mapeamento de components completo, incluindo responsividade mobile e painéis** (i18n pt-BR / en-US / es · dados mock · sem lógica dinâmica)
+  - **Layout responsivo** — `page.tsx` usa `flex` (desktop) / `grid grid-rows-[1fr_auto]` (mobile): Canvas preenche o espaço restante (`1fr`) sem precisar calcular altura da faixa de slides manualmente
+  - `AppPresentationsStudioSlideList` (desktop, aside `w-56` com `ScrollArea` customizada) e `AppPresentationsStudioSlideListMobile` (faixa horizontal fixa no rodapé) — mesmo estado/handlers do provider, dnd-kit alternando `verticalListSortingStrategy`/`horizontalListSortingStrategy` conforme o eixo
+  - `AppPresentationsStudioSlideListItem` — redesenhado: drag handle como botão pequeno (`self-start`, tamanho de ícone) na lateral esquerda, sem bloquear o scroll horizontal no mobile · menu ⋮ com header mostrando o título (título não é mais exibido no corpo do card) · ações duplicar/ocultar/copiar link/ver detalhes do outline/excluir
+  - `AppPresentationsStudioToolbar` — nova seção com `AppPresentationsStudioActions` (save · export · present · ⋮), posicionada dentro do `AppPresentationsStudioCanvas`, acima do editor — mesma composição em mobile e desktop
+  - `AppPresentationsStudioPanel` (Configurações/Source/Histórico) — aside fixo no desktop (`hidden md:flex`), `Sheet` lateral direita no mobile via `useIsMobile()` (mesmo padrão do `ui/sidebar.tsx`) — ver ADR-007
+  - `ExcalidrawEditor` sincroniza tema com `next-themes` (`resolvedTheme` → prop `theme` do Excalidraw, reativa) — ver ADR-006
   - `AppPresentationsStudioCanvas` — encapsula `ExcalidrawEditor` existente, remonta via `key={activeSlide.id}` (ADR-004: slides separados, sem frames) · `scrollToContent({ fitToViewport: true })` ao trocar de slide
   - `AppPresentationsStudioProvider` — mock de slides, captura elementos ativos via `excalidrawAPI.getSceneElements()` ao trocar/salvar · `title` é mock local (schema real deriva de `outline.title` via `outline_id`, relação 1:1)
   - Fix: import de `skeletonSerializer` (`@excalidraw/excalidraw`) adiado para `useEffect` client-only — provider é global (montado em `providers/index.tsx`) e o pacote toca `window` na avaliação do módulo, quebrando SSR de qualquer rota
