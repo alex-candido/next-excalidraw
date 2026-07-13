@@ -48,7 +48,8 @@
       "language": "Idioma",
       "cta": {
         "signIn": "Iniciar sesión",
-        "getStarted": "Comenzar gratis"
+        "getStarted": "Comenzar gratis",
+        "dashboard": "Ir al Dashboard"
       }
     }
   }

@@ -1,10 +1,10 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-export async function LandingNavCta() {
-  const t = await getTranslations("landing.nav.cta");
+export function LandingNavCta() {
+  const t = useTranslations("landing.nav.cta");
 
   return (
     <>

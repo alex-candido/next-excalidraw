@@ -3,6 +3,15 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "tryAgain": "Try again",
-    "returnHome": "Return home"
+    "returnHome": "Return home",
+    "userMenu": {
+      "trigger": "User menu",
+      "upgrade": "Upgrade to Pro",
+      "billing": "Billing",
+      "profile": "Profile",
+      "account": "Account",
+      "notifications": "Notifications",
+      "signOut": "Sign out"
+    }
   }
 }

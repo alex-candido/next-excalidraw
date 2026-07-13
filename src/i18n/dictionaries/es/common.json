@@ -3,6 +3,15 @@
     "loading": "Cargando...",
     "error": "Algo salió mal",
     "tryAgain": "Intentar de nuevo",
-    "returnHome": "Volver al inicio"
+    "returnHome": "Volver al inicio",
+    "userMenu": {
+      "trigger": "Menú de usuario",
+      "upgrade": "Mejorar a Pro",
+      "billing": "Facturación",
+      "profile": "Perfil",
+      "account": "Cuenta",
+      "notifications": "Notificaciones",
+      "signOut": "Cerrar sesión"
+    }
   }
 }

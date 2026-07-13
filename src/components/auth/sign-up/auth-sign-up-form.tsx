@@ -52,7 +52,12 @@ export function AuthSignUpForm({
               </div>
               <div className="flex flex-col gap-1">
                 <CardTitle>{t("success.title")}</CardTitle>
-                <CardDescription>{t("success.description", { email: submittedEmail })}</CardDescription>
+                <CardDescription>
+                {t.rich("success.description", {
+                  email: submittedEmail,
+                  strong: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+                })}
+              </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="auth-sign-up-form-success-body">

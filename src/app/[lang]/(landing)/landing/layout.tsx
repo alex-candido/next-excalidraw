@@ -1,3 +1,4 @@
+import { LandingAppShortcut } from "@/components/landing/landing-app-shortcut";
 import { LandingLayoutHeader } from "@/components/landing/landing-layout-header";
 import { LandingLayoutFooter } from "@/components/landing/landing-layout-footer";
 import { LayoutApp } from "@/components/layouts/layout-app";
@@ -9,6 +10,7 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
     <LayoutApp id="landing">
       <LayoutWrapper>
         <LandingLayoutHeader />
+        <LandingAppShortcut />
         <LayoutMain>{children}</LayoutMain>
         <LandingLayoutFooter />
       </LayoutWrapper>

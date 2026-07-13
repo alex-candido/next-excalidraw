@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectableCard } from "@/components/ui/blocks/selectable-card";
+import { SelectableCard } from "@/components/ui/selectable-card";
 import { cn } from "@/lib/utils";
 
 interface AppPresentationsOutlineThemeCardProps {

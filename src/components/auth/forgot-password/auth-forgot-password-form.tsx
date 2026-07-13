@@ -24,7 +24,7 @@ export function AuthForgotPasswordForm({
   const tValidation = useTranslations("auth.validation");
 
   const { requestPasswordReset } = useAuth();
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const { register, handleSubmit, formState } = useForm<ForgotPasswordInput, unknown>({
     schema: forgotPasswordSchema(tValidation),
@@ -33,7 +33,7 @@ export function AuthForgotPasswordForm({
       const { error } = await requestPasswordReset(data);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => setIsSuccess(true),
+    onSuccess: (_data, formValues) => setSubmittedEmail(formValues.email),
   });
 
   return (
@@ -42,7 +42,7 @@ export function AuthForgotPasswordForm({
       {...props}
     >
       <Card className="auth-forgot-password-form-card">
-        {isSuccess ? (
+        {submittedEmail ? (
           <>
             <CardHeader className="auth-forgot-password-form-success-header flex flex-col items-center gap-3 text-center">
               <div className="auth-forgot-password-form-success-icon-wrapper flex size-12 items-center justify-center rounded-full bg-primary/10">
@@ -50,7 +50,12 @@ export function AuthForgotPasswordForm({
               </div>
               <div className="flex flex-col gap-1">
                 <CardTitle>{t("success.title")}</CardTitle>
-                <CardDescription>{t("success.description")}</CardDescription>
+                <CardDescription>
+                  {t.rich("success.description", {
+                    email: submittedEmail,
+                    strong: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+                  })}
+                </CardDescription>
               </div>
             </CardHeader>
           </>

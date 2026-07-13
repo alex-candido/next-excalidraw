@@ -48,7 +48,8 @@
       "language": "Language",
       "cta": {
         "signIn": "Sign in",
-        "getStarted": "Get started"
+        "getStarted": "Get started",
+        "dashboard": "Go to Dashboard"
       }
     }
   }
