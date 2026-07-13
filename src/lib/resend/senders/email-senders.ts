@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import { emailClient } from "@/lib/brevo";
+import { emailClient } from "@/lib/resend";
 import { ResetPasswordEmailTemplate } from "@/components/emails/reset-password-email";
 import { VerifyEmailTemplate } from "@/components/emails/verify-email";
 

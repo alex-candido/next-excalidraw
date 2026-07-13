@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/drizzle";
-import { emailSenders } from "@/lib/brevo/senders/email-senders";
+import { emailSenders } from "@/lib/resend/senders/email-senders";
 import { env } from "@/config/env-config";
 
 export const auth = betterAuth({
@@ -11,10 +11,26 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    autoSignIn: false,
+    sendResetPassword: async ({ user, url }) => {
+      await emailSenders().sendResetPassword(user.email, url);
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       await emailSenders().sendVerification(user.email, url);
     },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+  },
+  socialProviders: {
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
   },
 });

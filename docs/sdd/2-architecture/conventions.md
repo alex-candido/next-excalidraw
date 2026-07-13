@@ -33,7 +33,7 @@ Componente React
        └─ app/api/     route.ts — recebe req, valida e delega
             └─ server/services/   orquestra lógica de negócio
                  ├─ server/repositories/   queries Drizzle por entidade (como models do Rails)
-                 └─ lib/                   integrações externas (mastra, excalidraw, brevo...)
+                 └─ lib/                   integrações externas (mastra, excalidraw, resend...)
 ```
 
 Regras:
@@ -154,7 +154,7 @@ Integrações e bibliotecas internas:
 ```
 lib/
   better-auth/    cliente e servidor de autenticação
-  brevo/          envio de emails transacionais
+  resend/         envio de emails transacionais
     senders/      funções de envio por tipo de email (reset, verificação)
   drizzle/
     schema/       definição das tabelas e enums — source of truth do banco

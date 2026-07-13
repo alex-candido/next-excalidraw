@@ -18,7 +18,11 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
+import { useForm } from "@/hooks/use-form";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { signInSchema, type SignInInput } from "@/schemas/auth-schema";
 
 export function AuthSignInForm({
   className,
@@ -26,6 +30,20 @@ export function AuthSignInForm({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const t = useTranslations("auth.signIn");
   const tError = useTranslations("auth.error");
+  const tValidation = useTranslations("auth.validation");
+
+  const router = useRouter();
+  const { signInCredentials } = useAuth();
+
+  const { register, handleSubmit, formState } = useForm<SignInInput, unknown>({
+    schema: signInSchema(tValidation),
+    defaultValues: { email: "", password: "" },
+    mutationFn: async (data) => {
+      const { error } = await signInCredentials(data);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => router.push("/app/dashboard"),
+  });
 
   return (
     <div
@@ -41,15 +59,15 @@ export function AuthSignInForm({
         <CardContent className="auth-sign-in-form-body flex flex-col gap-5">
           <Alert
             variant="destructive"
-            className="auth-sign-in-form-error hidden"
+            className={cn("auth-sign-in-form-error", !formState.errors.root && "hidden")}
           >
             <AlertCircle className="size-4" />
             <AlertTitle>{tError("title")}</AlertTitle>
             <AlertDescription>{tError("description")}</AlertDescription>
           </Alert>
 
-          <form className="auth-sign-in-form-fields flex flex-col gap-4">
-            <Field className="auth-sign-in-form-field-email">
+          <form onSubmit={handleSubmit} className="auth-sign-in-form-fields flex flex-col gap-4">
+            <Field className="auth-sign-in-form-field-email" data-invalid={!!formState.errors.email}>
               <FieldLabel htmlFor="sign-in-email">
                 {t("fields.email.label")}
               </FieldLabel>
@@ -57,11 +75,12 @@ export function AuthSignInForm({
                 id="sign-in-email"
                 type="email"
                 placeholder={t("fields.email.placeholder")}
+                {...register("email")}
               />
-              <FieldError />
+              <FieldError errors={[formState.errors.email]} />
             </Field>
 
-            <Field className="auth-sign-in-form-field-password">
+            <Field className="auth-sign-in-form-field-password" data-invalid={!!formState.errors.password}>
               <div className="flex items-center justify-between">
                 <FieldLabel htmlFor="sign-in-password">
                   {t("fields.password.label")}
@@ -77,13 +96,23 @@ export function AuthSignInForm({
                 id="sign-in-password"
                 type="password"
                 placeholder={t("fields.password.placeholder")}
+                {...register("password")}
               />
-              <FieldError />
+              <FieldError errors={[formState.errors.password]} />
             </Field>
 
-            <Button type="submit" className="auth-sign-in-form-submit w-full">
-              <Loader2 className="auth-sign-in-form-submit-icon hidden size-4 animate-spin" />
-              {t("submit")}
+            <Button
+              type="submit"
+              disabled={formState.isSubmitting}
+              className="auth-sign-in-form-submit w-full"
+            >
+              <Loader2
+                className={cn(
+                  "auth-sign-in-form-submit-icon size-4 animate-spin",
+                  !formState.isSubmitting && "hidden",
+                )}
+              />
+              {formState.isSubmitting ? t("submitting") : t("submit")}
             </Button>
           </form>
 

@@ -33,9 +33,13 @@ Ciclo 1 — Pipeline AI (concluído)
   Scaffold, outlineWorkflow, slideWorkflow, schemas, lib/excalidraw
 
 Ciclo 2 — Integração & UI Base (atual)
-  Fase 2a — Mapeamento de components (em andamento): landing ✅ · auth · app · admin
+  Fase 2a — Mapeamento de components: landing ✅ · auth ✅ · app ✅ (settings adiado pro final, junto do admin)
   Nota: não há rota /presentations/new — o form de criação está no /app/dashboard
-  Fase 2b — Páginas funcionais: API routes + .http, persistência no banco, páginas essenciais (new, outline, studio, present)
+  Fase 2b — Integração dinâmica, nesta ordem:
+    1. landing · auth · app (atual) — API routes + .http, persistência no banco, páginas essenciais (new, outline, studio, present)
+    2. Mapeamento de components do admin
+    3. Integração dinâmica do admin
+    4. Settings (app + admin) — mapeamento de components e integração juntos, por último
 
 Ciclo 3 — Qualidade & Features
   Parallelism, retry, custo de tokens, modelo dinâmico, editor/present, agent chat, templates
@@ -97,8 +101,8 @@ outline API route
 ## Active
 ---
 
-**Mapeamento de components — módulos UI**
-*(Ordem: landing ✅ → auth ✅ → app ✅ (shell) → app (detail pages, outline ✅ · studio ✅) → admin)*
+**Mapeamento de components — módulos UI** *(concluído para landing/auth/app — settings e admin ficam pro final, depois da integração dinâmica de app. Ver Ciclo 2/Fase 2b acima)*
+*(Ordem: landing ✅ → auth ✅ → app ✅ (shell) → app (detail pages, outline ✅ · studio ✅ · present ✅) → ~~admin~~ (adiado) → ~~settings~~ (adiado))*
 
 - [x] `P1` Landing module — mapeamento completo
 - [x] `P1` Auth module — sign-in, sign-up, forgot-password, reset-password
@@ -110,10 +114,14 @@ outline API route
 - [x] `P2` App module — presentations/[id]/outline — AppPresentationsOutlineHero (colapsa em prompt + controls-bar) · AppPresentationsOutlineList (drag reorder · delete · add manual) · AppPresentationsOutlineCard (regenerate) · AppPresentationsOutlineParameters (theme/amount em cards) · AppPresentationsOutlineBottomBar
 - [x] `P2` App module — presentations/[id]/studio — AppStudioCanvas · AppStudioSlideList · AppStudioToolbar · AppStudioActions
 - [x] `P2` App module — presentations/[id]/present — AppPresentationsPresentView (fullscreen, Escape/←/→ globais) · AppPresentationsPresentCanvas (Excalidraw view+zen mode, tamanho medido via `window.innerWidth/innerHeight`) · AppPresentationsPresentNav (pill flutuante única: sair · anterior/contador/próximo · tela cheia · tema)
-- [ ] `P3` App module — settings/profile, settings/billing, settings/team
-- [ ] `P3` Admin module — dashboard, users, logs, settings
+- [ ] `P3` App module — settings/profile, settings/billing, settings/team *(adiado — só depois da integração dinâmica de app + mapeamento/integração do admin)*
+- [ ] `P3` Admin module — dashboard, users, logs, settings *(adiado — mapeamento vem só depois da integração dinâmica de landing/auth/app)*
 
-**UI — Ciclo 2** *(UI funcional — identidade visual e estrutura de componentes serão revisadas em etapa futura de design)*
+**UI — Ciclo 2 · Fase 2b (atual)** *(integração dinâmica de landing/auth/app — substituir mock state por fetch real, persistência no banco)*
+- [x] `P1` Auth module — integração dinâmica completa (sign-in, sign-up, forgot-password, reset-password) — `useForm` (react-hook-form + zod) + `useAuth` (better-auth: email/password, Google OAuth, reset/forgot password) · Resend pra e-mails transacionais (ver ADR-009) · testado ponta a ponta (cadastro → e-mail de verificação → login automático → redirect pro dashboard)
+- [ ] `P1` Testar manualmente todas as páginas de auth (sign-in, sign-up, forgot-password, reset-password) — cobrir estados de erro (credenciais inválidas, token expirado/inválido, e-mail duplicado)
+- [ ] `P2` Header do app — user dropdown (avatar, nome, sign-out) — componente compartilhado entre os módulos que têm header autenticado
+- [ ] `P2` User groups & permissions — popular `session.user.group` (falta `databaseHooks` no better-auth fazendo join `user_group`→`group`; schema e seeds já existem) · trabalhar RBAC completo (`group`/`user_group`/`permission`/`group_permission`/`user_permission`) — pré-requisito pro módulo admin
 - [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
 - [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide

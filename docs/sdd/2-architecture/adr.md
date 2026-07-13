@@ -133,3 +133,22 @@
 - Colocar a medição de janela no `ExcalidrawEditor` compartilhado — quebraria o Studio
 
 **Consequências:** Chrome nativo do Excalidraw (menu, toolbar, footer/zoom/undo-redo, botão de sair do zen mode, context menu) é escondido via CSS em `globals.css`, escopado a `.app-presentations-present-canvas .excalidraw` (não afeta o Studio) — `viewModeEnabled + zenModeEnabled` já cobrem a maior parte, o CSS cobre o que sobra (ex: `.disable-zen-mode`, o botão nativo de sair do zen mode, substituído pelo botão de sair do `AppPresentationsPresentNav`).
+
+---
+
+## ADR-009 — E-mail transacional: Resend no lugar de Brevo
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** O projeto usava Brevo (`@getbrevo/brevo`, API REST) para os e-mails de verificação e reset de senha do Better Auth. Ao testar o fluxo de auth de ponta a ponta, toda tentativa de envio retornava `403 permission_denied` ("Your SMTP account is not yet activated"). Investigação: (1) chave de API trocada por uma do tipo certo — mesmo erro; (2) IP da máquina bloqueado por allowlist — resolvido, mesmo erro depois; (3) nova API key gerada — mesmo erro; (4) conta Brevo suspensa por segurança (e-mail de "cuenta en peligro", suspeita de vazamento de credencial) — trocada a senha, revogadas as chaves, criada conta nova — **mesmo erro na conta nova**; (5) trocado o transporte de API REST para SMTP relay (`smtp-relay.brevo.com:587` via `nodemailer`, credencial de tipo diferente) — **mesmo erro** ("Message failed: 502 ... SMTP account is not yet activated"). Confirmado: o bloqueio é de nível de conta, aplicado a qualquer transporte (API ou SMTP), em qualquer conta nova/free-tier — não é específico de uma chave, IP ou conta comprometida.
+
+**Decisão:** Substituir Brevo por Resend (`resend` SDK). Resend não exige ativação manual de conta para envio transacional — funciona assim que a conta é criada e a API key é gerada, com domínio de teste (`onboarding@resend.dev`) liberado por padrão (com uma restrição própria: só entrega para o e-mail dono da conta Resend, até um domínio verificado ser configurado).
+
+**Diferença de modelo de verificação de remetente (relevante para dev):** Brevo permite verificar um **e-mail único** (mesmo um gmail.com) sem precisar de domínio próprio — depois de verificado, envia para qualquer destinatário. Resend **não tem** essa opção — só aceita verificação de **domínio inteiro** (registros DNS). Não é bug nem configuração nossa; é diferença real de produto entre os dois provedores.
+
+**Alternativas descartadas:**
+- Continuar com Brevo (API REST ou SMTP relay) — bloqueio de conta persistente em duas contas diferentes, ambos os transportes
+- SendGrid — também oferece verificação de e-mail único (como o Brevo), mas não avaliado; risco de fricção parecida de ativação em conta nova, comum no setor
+
+**Consequências:** `src/lib/brevo/` → `src/lib/resend/` (mesma assinatura pública `emailClient().send({ to, subject, react })`, `email-senders.ts` inalterado). Resend aceita o componente React diretamente (`react: ReactElement`) em `resend.emails.send()` — não precisamos mais chamar `@react-email/render` manualmente. Em dev, `EMAIL_FROM_ADDRESS=onboarding@resend.dev` só entrega para o e-mail da conta Resend; antes de produção é necessário verificar um domínio próprio em resend.com → Domains.
