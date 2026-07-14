@@ -2,15 +2,15 @@
 
 Existem dois caminhos de criação:
 
-- **AI-generated** (este documento) — prompt → outline → slides → editor
-- **Manual** — modal com title + type → editor vazio. Ver `manual-creation.feature.md`
+- **AI-generated** (este documento) — prompt → outline → slides → studio
+- **Manual** — modal com title + type → studio vazio. Ver `manual-creation.feature.md`
 
-Cobre o ciclo completo do caminho AI — da submissão do formulário até o editor. Os detalhes dos workflows AI estão documentados em `pipeline/outline-generation.pipeline.md` e `pipeline/slide-generation.pipeline.md`.
+Cobre o ciclo completo do caminho AI — da submissão do formulário até o studio. Os detalhes dos workflows AI estão documentados em `pipeline/outline-generation.pipeline.md` e `pipeline/slide-generation.pipeline.md`.
 
 ## Visão geral
 
 ```
-/app/dashboard (form)
+/app/dashboard (AppDashboardForm)
         │
         ▼
 POST /api/v1/app/presentations                               → cria Presentation (draft)
@@ -25,12 +25,27 @@ POST /api/v1/app/presentations/[id]/outlines/generate        → gera outlines
 POST /api/v1/app/presentations/[id]/slides/generate          → gera slides
         │
         ▼
-/presentations/[id]/editor                                   → canvas Excalidraw por slide
+/presentations/[id]/studio                                   → canvas Excalidraw por slide
 ```
 
 ---
 
 ## Etapa 1 — Criação da Presentation
+
+### Componentes — `AppDashboardForm` (`components/app/dashboard/form/`)
+
+```
+app-dashboard-form.tsx           ← container (server) — engine-bar / body / controls-bar
+  ├─ app-dashboard-form-engine.tsx     ← badge "Excalidraw" locked (server, estático)
+  ├─ app-dashboard-form-options.tsx   ← toggle Multi/Single — MOCK, sem estado real (dois botões sem onClick efetivo)
+  ├─ app-dashboard-form-input.tsx     ← Textarea do prompt — MOCK, sem value/onChange
+  ├─ app-dashboard-form-actions.tsx   ← attach (mock) + Enviar — MOCK, `Link` hardcoded pra `/app/presentations/mock/outline`
+  └─ app-dashboard-form-controls.tsx  ← selects slideCount/language/aspectRatio — MOCK, defaultValue="0" estático
+```
+
+Nenhum campo do form tem estado real hoje — é puramente visual. Pendente de integração: elevar o estado (prompt, type, slideCount, language, aspectRatio) pro `app-dashboard-form.tsx` (ou um provider, se precisar ser compartilhado com outro component), e trocar `AppDashboardFormActions`'s `Link` mock por `useAppPresentation().useCreate()` seguido de `useAppPresentation().useGenerateOutline()`, navegando pro `/presentations/[id]/outline` só depois da geração completar (ver Etapa 2).
+
+Ver `manual-creation.feature.md` pro caminho alternativo sem AI (`AppDashboardNewModal`, mesmo módulo `components/app/dashboard/`).
 
 ### Entrada
 
@@ -235,7 +250,7 @@ slide-service.generate()
 
 ### Redirect
 
-Frontend redireciona para `/presentations/[id]/editor`.
+Frontend redireciona para `/presentations/[id]/studio`.
 
 ---
 

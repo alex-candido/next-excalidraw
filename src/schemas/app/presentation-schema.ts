@@ -7,6 +7,7 @@ import {
   PresentationScenario,
   PresentationTheme,
 } from "@/lib/drizzle/schema/presentation"
+import { outlineSchema } from "@/schemas/app/outline-schema"
 
 export const AMOUNT_RANGE: Record<number, [number, number]> = {
   [PresentationAmount.auto]:      [4,  20],
@@ -81,4 +82,60 @@ export const presentationGenerateSchema = z.object({
 })
 
 export type PresentationGenerate = z.infer<typeof presentationGenerateSchema>
+
+export const presentationSchema = z.object({
+  id:           z.string().uuid(),
+  code:         z.string(),
+  slug:         z.string(),
+  userId:       z.string(),
+  type:         z.number().int(),
+  title:        z.string(),
+  userPrompt:   z.string().nullable(),
+  systemPrompt: z.string().nullable(),
+  language:     z.number().int(),
+  aspectRatio:  z.number().int(),
+  slideCount:   z.number().int(),
+  amount:       z.number().int(),
+  audience:     z.number().int(),
+  scenario:     z.number().int(),
+  theme:        z.number().int(),
+  keywords:     z.array(z.string()).nullable(),
+  visibility:   z.number().int(),
+  status:       z.number().int(),
+  viewsCount:   z.number().int(),
+  usage:        z.record(z.string(), z.unknown()).nullable(),
+  createdAt:    z.string(),
+  updatedAt:    z.string(),
+})
+
+export type Presentation = z.infer<typeof presentationSchema>
+
+export const presentationWithOutlinesSchema = presentationSchema.extend({
+  outlines: z.array(outlineSchema),
+})
+
+export type PresentationWithOutlines = z.infer<typeof presentationWithOutlinesSchema>
+
+export const presentationCreateResultSchema = z.object({
+  presentationId: z.string().uuid(),
+  type:           z.number().int(),
+})
+
+export type PresentationCreateResult = z.infer<typeof presentationCreateResultSchema>
+
+export const presentationGenerateResultSchema = z.union([
+  z.object({
+    presentationId: z.string().uuid(),
+    title:          z.string(),
+    outlines:       z.array(outlineSchema),
+  }),
+  z.object({
+    presentationId: z.string().uuid(),
+    outlineId:      z.string().uuid(),
+    slideId:        z.string().uuid(),
+    title:          z.string(),
+  }),
+])
+
+export type PresentationGenerateResult = z.infer<typeof presentationGenerateResultSchema>
 

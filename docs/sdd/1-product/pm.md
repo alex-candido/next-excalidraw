@@ -123,14 +123,15 @@ outline API route
 - [x] `P2` Header do app e da landing — `UserMenu` compartilhado (`components/ui/user-menu.tsx`) — avatar · nome/e-mail · badge de grupo · upgrade to pro · billing/perfil/conta/notificações · sign-out. `LayoutNavUserMenu` (Layer 1) + `LandingHeaderAuthSlot` (exclusividade CTA↔UserMenu conforme sessão) · `LandingAppShortcut` (pill flutuante pro app quando logado)
 - [x] `P2` User groups & permissions — `permission-repository.ts`/`permission-service.ts` (`server/repositories|services/auth/`) resolvem RBAC completo (default do grupo + overrides por usuário, deny sempre vence) · `customSession` (better-auth) popula `session.user.group` e `session.user.permissions` já resolvidos · `customSessionClient` no client pra inferência de tipos · `UserMenu` sem o cast temporário · `usePermissions()` (`hooks/use-permission.ts`) pronto pra gating de UI (fail-closed) — ver ADR-010
 - [ ] `P2` Aplicar `hasPermission()` como guarda de autorização dentro dos services (antes da mutação) e `usePermissions()`/`hasPermission()` como gating de UI nas rotas/telas de app/admin — feito durante a integração dinâmica de cada módulo, não como etapa isolada
-- [ ] `P1` Página `/presentations/new` — form com prompt, idioma, aspectRatio, slideCount, amount, audience, scenario, theme, keywords
+- [x] `P1` `actions/app/` (`app-presentation-actions.ts`, `app-outline-actions.ts`, `app-slide-actions.ts` + `actions/api-client.ts` — fetch wrapper compartilhado) e `hooks/app/` (`use-app-presentation.ts`, `use-app-outline.ts`, `use-app-slide.ts` — react-query) para as rotas `/api/v1/app/presentations/**` já existentes — mesmo padrão acoplado de `server/repositories`/`server/services` (`function xActions()/useAppX() {...; return {}}`, hooks filhos definidos dentro e retornados no final) — types de modelo/resultado vivem em `schemas/app/` (nunca inline nas actions) — pré-requisito pras páginas abaixo, ainda não consumido por nenhuma tela
+- [ ] `P1` Modal `AppDashboardNewModal` (`components/app/dashboard/`) — não existe página `/presentations/new`, criação é via modal, disparado por `AppNavRail`/`AppDashboardRecentsHeader`/`AppPresentationsHeader`. Hoje 100% mock (nem o título tem estado) — trocar por `useAppPresentation().useCreate()` e navegar pro `/presentations/[id]/outline` após criar
 - [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
 - [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide
 - [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen
 
 **Regeneração individual de outline**
 - [x] `P1` Definir abordagem: reuso do `multiOutlineWorkflow` com `slideCount=1` — já implementado em `multiOutlineService().regenerate()`
-- [ ] `P2` Implementar rota `POST /api/v1/app/outlines/[id]/regenerate`
+- [x] `P2` Implementar rota — já existe como `POST /api/v1/app/presentations/[id]/outlines/[outlineId]/generate` (`multiOutlineService().regenerate()`), documentada em `http/v1/app/outlines.http` e coberta por `outlineActions().regenerate`/`useAppOutline().useRegenerate`
 
 ---
 
@@ -184,7 +185,7 @@ outline API route
 - [ ] `P3` Página `/app/app/community` — galeria de presentations públicas (`visibility: public`) com filtro por tags e duplicar
 - [ ] `P3` Dashboard section de templates — vitrine curada com N templates em destaque (dinâmico, via DB)
 - [ ] `P3` Suporte a `visibility: public` na presentation — campo no schema + lógica de publicação
-- [ ] `P3` AppNavMenu — adicionar Templates e Community como sub-items de Presentations
+- [ ] `P3` AppNavRail — adicionar Templates e Community como sub-items de Presentations
 
 **Chat de Edição (Agent) — Ciclo 3**
 - [ ] `P2` Definir tools do agent de edição — baseado no modelo do `presentation-ai` (ref: `temp/presentation-ai/src/ai/agents/presentation/createAgent.ts`) — 8 tools: `edit_slide_properties`, `replace_image`, `change_theme`, `regenerate_slide`, `create_slide`, `delete_slide`, `webSearch`, `respond_to_user`

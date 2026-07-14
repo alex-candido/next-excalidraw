@@ -1,18 +1,18 @@
 # Feature: Manual Presentation Creation
 
-Criação de uma presentation sem geração AI — o usuário acessa o editor com o canvas vazio e constrói manualmente.
+Criação de uma presentation sem geração AI — o usuário acessa o studio com o canvas vazio e constrói manualmente.
 
 ## Contexto
 
-O fluxo principal de criação passa pelo `AppDashboardForm`: prompt → outline → slides (AI). Esta feature adiciona um caminho alternativo: criação manual via modal, sem prompt e sem geração de conteúdo. O resultado é uma presentation em `status: draft` com zero slides, aberta diretamente no editor.
+O fluxo principal de criação passa pelo `AppDashboardForm` (`/app/dashboard`): prompt → outline → slides (AI). Esta feature adiciona um caminho alternativo: criação manual via modal, sem prompt e sem geração de conteúdo. O resultado é uma presentation em `status: draft` com zero slides, aberta diretamente no studio.
 
 ## Visão geral
 
 ```
-trigger "+" (AppNavMenu ou AppDashboardRecents header)
+trigger "+" (AppNavRail · AppDashboardRecentsHeader · AppPresentationsHeader · AppPresentationsEmpty)
         │
         ▼
-AppNewPresentationModal
+AppDashboardNewModal
   title (opcional, default "Untitled")
   engine (Excalidraw, locked)
   type (multi | single)
@@ -22,12 +22,12 @@ POST /api/v1/app/presentations
   { title, type, status: draft }
         │
         ▼
-/app/presentations/[id]/editor  ← canvas vazio
+/app/presentations/[id]/studio  ← canvas vazio
 ```
 
 ---
 
-## Modal — AppNewPresentationModal
+## Modal — AppDashboardNewModal
 
 ### Campos
 
@@ -39,40 +39,49 @@ POST /api/v1/app/presentations
 
 ### Seção de features (estática)
 
-Abaixo de um separador, 3 bullets fixos descrevendo o canvas Excalidraw:
-- "An AI-powered all-in-one diagram platform"
-- "A polished whiteboard tool with a clean, intuitive hand-drawn style"
-- "Free-form drawing with shapes, arrows, text, and more"
+Abaixo de um separador, bullets fixos (`app.new.features`) descrevendo o canvas Excalidraw.
 
 ### Ações
 
-- **Cancelar** — fecha o modal sem criar nada
-- **Criar** — submete e redireciona para o editor
+- **Cancelar** — fecha o modal sem criar nada (wired — `DialogClose` + `onCancel`)
+- **Criar** — hoje é um `Link` hardcoded pra `/app/presentations/mock/outline` (mock — ainda não dispara `POST /api/v1/app/presentations` nem lê o `title`/`type` do estado local)
 
 ---
 
 ## Pontos de entrada
 
-### 1. AppNavMenu
+Todos abrem o mesmo `AppDashboardNewModal` via estado local (`open`/`onOpenChange`) — cada trigger é dono do seu próprio `useState`, não existe estado global do modal.
 
-Novo `SidebarMenuItem` com botão `+` (ícone `Plus`) dentro do `SidebarMenu`, posicionado abaixo dos itens de navegação existentes (Home · Presentations · Settings). Abre o modal via estado local.
+### 1. `AppNavRail` (`components/app/app-nav-rail.tsx`)
 
-### 2. AppDashboardRecents header
+Botão `+` (`app-nav-rail-new`, ícone `Plus`), fixo no topo do rail, acima dos itens de navegação (Home · Presentations · Templates · Community · Settings).
 
-Terceiro botão ao lado do "Ver todas" — `Button variant="outline" size="sm"` com ícone `Plus`, mesmo padrão do shuffle e view-all. Abre o mesmo modal.
+### 2. `AppDashboardRecentsHeader` (`components/app/dashboard/recents/app-dashboard-recents-header.tsx`)
+
+Botão ao lado do "Ver todas", mesmo padrão do shuffle e view-all.
+
+### 3. `AppPresentationsHeader` (`components/app/presentations/app-presentations-header.tsx`)
+
+Trigger no header da listagem de presentations (`/app/presentations`).
+
+### 4. `AppPresentationsEmpty` (`components/app/presentations/app-presentations-empty.tsx`)
+
+CTA no estado vazio da listagem (sem nenhuma presentation ainda).
 
 ---
 
 ## Componentes
 
 ```
-components/app/new/
-  app-new-presentation-modal.tsx           ← Dialog organism (client)
-  app-new-presentation-modal-engine.tsx    ← badge Excalidraw locked
-  app-new-presentation-modal-type.tsx      ← toggle Multi / Single
-  app-new-presentation-modal-features.tsx  ← 3 bullets Excalidraw
-  app-new-presentation-modal-actions.tsx   ← Cancelar + Criar
+components/app/dashboard/
+  app-dashboard-new-modal.tsx           ← Dialog organism (client) — junta title input + engine + type + features + actions
+  app-dashboard-new-modal-engine.tsx    ← badge Excalidraw locked (mesmo componente do AppDashboardFormEngine, versão modal)
+  app-dashboard-new-modal-type.tsx      ← toggle Multi / Single — ÚNICO campo com estado real (useState no pai, passado via props)
+  app-dashboard-new-modal-features.tsx  ← bullets estáticos do Excalidraw
+  app-dashboard-new-modal-actions.tsx   ← Cancelar (wired) + Criar (mock, ver acima)
 ```
+
+Vive em `components/app/dashboard/`, não em `components/app/new/` — mesmo módulo do `AppDashboardForm`, já que ambos os caminhos de criação partem da mesma página (`/app/dashboard`) e dos triggers "+" espalhados pelo app.
 
 ---
 
@@ -97,7 +106,7 @@ Reutiliza o endpoint existente `POST /api/v1/app/presentations` sem alterações
 }
 ```
 
-O frontend redireciona para `/app/presentations/${presentationId}/editor`.
+O frontend deve redirecionar para `/app/presentations/${presentationId}/studio` (hoje redireciona pra um path mock, ver "Ações" acima).
 
 ---
 
@@ -107,23 +116,13 @@ O frontend redireciona para `/app/presentations/${presentationId}/editor`.
 
 Nenhuma alteração necessária. `userPrompt` já é nullable; `title` recebe "Untitled" como fallback; `status` default é `draft (0)`.
 
-### Editor (`presentations/[id]/editor`)
+### Studio (`presentations/[id]/studio`)
 
-O editor precisa tratar `slides = []` — presentation recém-criada manualmente não tem slides. Isso já é um requisito independente desta feature (qualquer presentation em `draft` pode não ter slides).
-
-### Diagrama lógico
-
-Nova ramificação no fluxo de criação:
-
-```
-/app/dashboard
-  ├─ AppDashboardForm (com prompt) → outline → slides → editor
-  └─ AppNewPresentationModal (+)   → editor (canvas vazio)
-```
+O studio precisa tratar `slides = []` — presentation recém-criada manualmente não tem slides. Isso já é um requisito independente desta feature (qualquer presentation em `draft` pode não ter slides).
 
 ### presentation-creation.feature.md
 
-Atualizar para documentar os dois caminhos de criação: AI-generated e manual.
+Documenta os dois caminhos de criação: AI-generated e manual — ver seção "Etapa 1" de lá para o mapeamento do `AppDashboardForm`.
 
 ---
 
@@ -132,3 +131,11 @@ Atualizar para documentar os dois caminhos de criação: AI-generated e manual.
 - Nenhum campo de `aspectRatio`, `language` ou `theme` no modal — defaults do banco são suficientes para o MVP manual
 - Sem validação de título mínimo — "Untitled" é sempre um fallback válido
 - Sem geração de outline ou slides neste fluxo
+
+---
+
+## Pendências de integração (estado atual — tudo mock)
+
+- `app-dashboard-new-modal.tsx` — título não tem `useState`/`onChange`, valor nunca é lido
+- `app-dashboard-new-modal-actions.tsx` — botão "Criar" é um `Link` hardcoded pra `/app/presentations/mock/outline`, não chama `presentationActions().create()`/`useAppPresentation().useCreate()`
+- Nenhum dos 4 triggers passa dados adicionais pro modal — hoje é só `open`/`onOpenChange`

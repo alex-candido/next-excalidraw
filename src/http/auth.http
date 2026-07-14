@@ -1,0 +1,70 @@
+@baseUrl = http://localhost:3000/api/auth
+
+# ─── Auth (better-auth) ─────────────────────────────────────────────────────
+# Cookies de sessão são setados pelo sign-in/sign-up e reaproveitados pelas
+# próximas requisições automaticamente pelo REST Client (mesma sessão de arquivo).
+
+### POST /sign-up/email — criar conta (dispara e-mail de verificação, Resend)
+POST {{baseUrl}}/sign-up/email
+Content-Type: application/json
+
+{
+  "name": "Novo Usuário",
+  "email": "novo.usuario@example.com",
+  "password": "Dev@1234!",
+  "callbackURL": "/app/dashboard"
+}
+
+###
+
+### POST /sign-in/email — login com e-mail e senha
+POST {{baseUrl}}/sign-in/email
+Content-Type: application/json
+
+{
+  "email": "admin@dev.local",
+  "password": "Dev@1234!"
+}
+
+###
+
+### POST /sign-in/social — login com Google (retorna URL de redirect do OAuth)
+POST {{baseUrl}}/sign-in/social
+Content-Type: application/json
+
+{
+  "provider": "google",
+  "callbackURL": "/app/dashboard"
+}
+
+###
+
+### GET /get-session — sessão atual (group + permissions resolvidos via customSession)
+GET {{baseUrl}}/get-session
+
+###
+
+### POST /sign-out — encerrar sessão
+POST {{baseUrl}}/sign-out
+
+###
+
+### POST /request-password-reset — solicitar link de redefinição de senha
+POST {{baseUrl}}/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "admin@dev.local",
+  "redirectTo": "/auth/reset-password"
+}
+
+###
+
+### POST /reset-password — redefinir senha com o token do e-mail
+POST {{baseUrl}}/reset-password
+Content-Type: application/json
+
+{
+  "newPassword": "NovaSenha@1234!",
+  "token": "<token-do-email>"
+}

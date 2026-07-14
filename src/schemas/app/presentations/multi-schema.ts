@@ -50,3 +50,16 @@ export type MultiWorkflowInput  = z.infer<typeof multiWorkflowInputSchema>
 export type MultiWorkflowOutput = z.infer<typeof multiWorkflowOutputSchema>
 export type OutlineBulkUpdate   = z.infer<typeof outlineBulkUpdateSchema>
 export type OutlineRegenerate   = z.infer<typeof outlineRegenerateSchema>
+
+export const outlineRegenerateResultSchema = z.object({
+  id:             z.string().uuid(),
+  order:          z.number().int(),
+  type:           z.number().int(),
+  title:          z.string(),
+  description:    z.string().nullable(),
+  concepts:       z.array(z.string()).nullable(),
+  representation: z.number().int(),
+  layout:         z.string().nullable(),
+})
+
+export type OutlineRegenerateResult = z.infer<typeof outlineRegenerateResultSchema>

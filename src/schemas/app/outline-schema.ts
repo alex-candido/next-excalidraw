@@ -36,3 +36,20 @@ export const outlineWorkflowOutputSchema = z.object({
 export type OutlineItem           = z.infer<typeof outlineItemSchema>
 export type OutlineToolOutput     = z.infer<typeof outlineToolOutputSchema>
 export type OutlineWorkflowOutput = z.infer<typeof outlineWorkflowOutputSchema>
+
+export const outlineSchema = z.object({
+  id: z.string().uuid(),
+  presentationId: z.string().uuid(),
+  order: z.number().int(),
+  type: z.number().int(),
+  title: z.string(),
+  description: z.string().nullable(),
+  concepts: z.array(z.string()).nullable(),
+  representation: z.number().int(),
+  layout: z.string().nullable(),
+  score: z.number().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export type Outline = z.infer<typeof outlineSchema>

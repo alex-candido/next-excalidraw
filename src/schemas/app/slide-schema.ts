@@ -90,3 +90,39 @@ export type SlideRegenerate     = z.infer<typeof slideRegenerateSchema>
 export type SlideWorkflowInput  = z.infer<typeof slideWorkflowInputSchema>
 export type SlideToolOutput     = z.infer<typeof slideToolOutputSchema>
 export type SlideWorkflowOutput = z.infer<typeof slideWorkflowOutputSchema>
+
+export const slideSchema = z.object({
+  id:             z.string().uuid(),
+  presentationId: z.string().uuid(),
+  outlineId:      z.string().uuid(),
+  order:          z.number().int(),
+  composition:    z.record(z.string(), z.unknown()).nullable(),
+  elements:       z.array(z.record(z.string(), z.unknown())).nullable(),
+  appState:       z.record(z.string(), z.unknown()).nullable(),
+  files:          z.record(z.string(), z.unknown()).nullable(),
+  thumbnail:      z.string().nullable(),
+  status:         z.number().int(),
+  createdAt:      z.string(),
+  updatedAt:      z.string(),
+})
+
+export type Slide = z.infer<typeof slideSchema>
+
+export const slideGenerateResultSchema = z.object({
+  presentationId: z.string().uuid(),
+  slides: z.array(z.object({
+    id:        z.string().uuid(),
+    order:     z.number().int(),
+    outlineId: z.string().uuid(),
+  })),
+})
+
+export type SlideGenerateResult = z.infer<typeof slideGenerateResultSchema>
+
+export const slideRegenerateResultSchema = z.object({
+  id:        z.string().uuid(),
+  order:     z.number().int(),
+  outlineId: z.string().uuid(),
+})
+
+export type SlideRegenerateResult = z.infer<typeof slideRegenerateResultSchema>
