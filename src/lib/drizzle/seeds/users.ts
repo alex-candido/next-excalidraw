@@ -1,4 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
+import { hashPassword } from "better-auth/crypto";
 import postgres from "postgres";
 import { account } from "../schema/account";
 import { user } from "../schema/user";
@@ -25,7 +26,7 @@ export const USERS = [
 ] as const;
 
 export async function seedUsers() {
-  const passwordHash = await Bun.password.hash(DEFAULT_PASSWORD);
+  const passwordHash = await hashPassword(DEFAULT_PASSWORD);
 
   await db.insert(user).values([...USERS]).onConflictDoNothing();
 
@@ -37,7 +38,10 @@ export async function seedUsers() {
     password: passwordHash,
   }));
 
-  await db.insert(account).values(accounts).onConflictDoNothing();
+  await db
+    .insert(account)
+    .values(accounts)
+    .onConflictDoUpdate({ target: account.id, set: { password: passwordHash } });
 
   console.log(`  ✓ users  (password: ${DEFAULT_PASSWORD})`);
   await client.end();

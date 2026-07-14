@@ -1,4 +1,4 @@
-// import { authRouteMiddleware } from "@/middleware/auth-route-middleware";
+import { authRouteMiddleware } from "@/middleware/auth-route-middleware";
 import { globalRouteMiddleware } from "@/middleware/global-route-middleware";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -7,8 +7,8 @@ export async function proxy(request: NextRequest) {
   try {
     let response: NextResponse | undefined;
 
-    // response = await authRouteMiddleware(request);
-    // if (response) return response;
+    response = await authRouteMiddleware(request);
+    if (response) return response;
 
     response = await globalRouteMiddleware(request);
     if (response) return response;

@@ -152,3 +152,28 @@
 - SendGrid — também oferece verificação de e-mail único (como o Brevo), mas não avaliado; risco de fricção parecida de ativação em conta nova, comum no setor
 
 **Consequências:** `src/lib/brevo/` → `src/lib/resend/` (mesma assinatura pública `emailClient().send({ to, subject, react })`, `email-senders.ts` inalterado). Resend aceita o componente React diretamente (`react: ReactElement`) em `resend.emails.send()` — não precisamos mais chamar `@react-email/render` manualmente. Em dev, `EMAIL_FROM_ADDRESS=onboarding@resend.dev` só entrega para o e-mail da conta Resend; antes de produção é necessário verificar um domínio próprio em resend.com → Domains.
+
+---
+
+## ADR-010 — RBAC: `customSession` (não `databaseHooks`) + resolução de permissões em duas camadas (sessão para UX, service para autorização real)
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** O schema de RBAC (`group`, `user_group`, `permission`, `group_permission`, `user_permission`) já existia, mas `session.user.group` nunca era populado pelo Better Auth — o client só enxerga os campos nativos de `user`. `auth-route-middleware.ts` já esperava `session.user.group` (usado para redirecionar por `groupRedirects`/`groupAllowedRoutes`), então essa era a peça faltante pro RBAC baseado em grupo funcionar de ponta a ponta. Avaliamos `databaseHooks` do Better Auth primeiro — rejeitado porque opera sobre o registro bruto do `Session`/`User` no banco (write hooks), não sobre a resposta enriquecida que o client de fato consome via `authClient.useSession()`.
+
+**Decisão (mecanismo):** Usar o plugin oficial `customSession` (server) + `customSessionClient<typeof auth>()` (client, só inferência de tipo). `customSession` embrulha o endpoint `get-session` e permite devolver um objeto arbitrário como novo shape de sessão — usado para enriquecer `session.user` com `group` (nome do grupo do usuário) e `permissions` (lista de chaves já resolvidas), calculados por `permissionService().getUserPermissions(userId)`.
+
+**Decisão (resolução de permissões):** `group_permission` define o default por grupo; `user_permission` guarda overrides pontuais por usuário (`PermissionType.grant`/`deny`). Resolução: começa com as permissions do grupo, aplica os grants do usuário, e por último remove as negadas — **deny sempre vence**, inclusive sobre um grant do próprio usuário (não deveria coexistir pra mesma permission, já que `user_permission` tem unique em `(user_id, permission_id)`, mas a ordem de aplicação garante a precedência mesmo assim). Model equivalente ao sistema de permissions do Django (`user.has_perm()`, grupos + overrides individuais).
+
+**Decisão (duas camadas de verificação, não redundantes — responsabilidades diferentes):**
+1. **Sessão (`session.user.permissions`)** — usada só no client, pra UX (esconder/desabilitar ações que o usuário não pode executar, evitar disparar uma request que vai tomar 403). Não é fonte de autorização: pode estar servida do cookie cache do Better Auth, desatualizada em relação ao banco.
+2. **Service, no momento da ação** — `permissionService().hasPermission(userId, key)` chamado dentro do service (não na `route.ts`, que só delega), antes da mutação, sempre lendo o estado atual do banco. Esta é a única camada que efetivamente autoriza ou barra a ação.
+
+**Estrutura criada:** `server/repositories/auth/permission-repository.ts` (`findGroupWithPermissions`, `findUserPermissionOverrides` — read-only, via relational query API) + `server/services/auth/permission-service.ts` (`getUserPermissions`, `hasPermission` — resolução). `hooks/use-permission.ts` (`usePermissions()`) espelha isso no client, lendo direto de `session.user.permissions` (sem query própria) — fail-closed (`session.data` ausente/pendente → `permissions: []`). Nenhuma rota/service de domínio (presentation/outline/slide) nem tela foi alterada ainda para usar `hasPermission`/`usePermissions` — isso acontece durante a integração dinâmica de cada módulo (app, depois admin), não nesta etapa. `UserMenu` (`components/ui/user-menu.tsx`) perdeu o cast temporário `(user as {group?: string})`, já que `user.group` agora vem tipado de verdade via `customSessionClient`.
+
+**Alternativas descartadas:**
+- `databaseHooks` — não enriquece a resposta que o client consome, só o registro bruto do banco
+- Calcular permissions só no momento da ação (sem popular a sessão) — descartado como única fonte, porque perde a camada de UX (esconder ações não permitidas antes de disparar a request); mantido como camada complementar, não substituta
+
+**Consequências:** Qualquer novo módulo que precisar checar permissão de ação (app, depois admin) reusa `permissionService().hasPermission(userId, key)` dentro do próprio service, sem precisar reimplementar a resolução grupo+overrides. Fica pendente decidir se, quando o volume de checagens crescer, vale a pena usar o cookie-cache do Better Auth pra evitar uma query por request em rotas protegidas (não é um problema agora, só uma consideração de performance futura).

@@ -45,9 +45,7 @@ export function UserMenu({ actions, upgradeHref }: UserMenuProps) {
   if (!session.data) return null;
 
   const { user } = session.data;
-  // `group` ainda não vem populado pelo better-auth (falta databaseHooks fazendo o join
-  // user_group→group) — cai em "guest" até essa pendência ser resolvida.
-  const group = (user as { group?: string }).group ?? "guest";
+  const group = user.group ?? "guest";
 
   return (
     <DropdownMenu>
