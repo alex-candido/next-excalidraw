@@ -63,7 +63,8 @@ export const LANGUAGE_NAMES: Record<number, string> = {
 
 export const presentationCreateSchema = z.object({
   type:        z.number().int().default(PresentationType.multi),
-  userPrompt:  z.string().min(1),
+  title:       z.string().optional(),
+  userPrompt:  z.string().min(1).optional(),
   language:    z.number().int().default(PresentationLanguage.en),
   aspectRatio: z.number().int().default(0),
   slideCount:  z.number().int().default(0),

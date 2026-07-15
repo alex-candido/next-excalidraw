@@ -4,7 +4,7 @@ import { createContext, ReactNode, useContext, useEffect, useRef, useState } fro
 
 type AppPresentationsPresentContextProps = {
   isFullscreen: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   onToggleFullscreen: () => void;
 };
 

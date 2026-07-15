@@ -3,11 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { presentationActions } from "@/actions/app/app-presentation-actions";
+import type { PresentationWithOutlines } from "@/schemas/app/presentation-schema";
 
 export const appPresentationKeys = {
   all: ["presentations"] as const,
   detail: (id: string) => ["presentations", id] as const,
 };
+
+type RefetchInterval = number | false | ((data: PresentationWithOutlines | undefined) => number | false);
 
 export function useAppPresentation() {
   const queryClient = useQueryClient();
@@ -19,11 +22,16 @@ export function useAppPresentation() {
     });
   }
 
-  function useDetail(id: string) {
+  function useDetail(id: string, options?: { refetchInterval?: RefetchInterval }) {
+    const refetchInterval = options?.refetchInterval;
+
     return useQuery({
       queryKey: appPresentationKeys.detail(id),
       queryFn: () => presentationActions().findById(id),
       enabled: !!id,
+      refetchInterval: typeof refetchInterval === "function"
+        ? (query) => refetchInterval(query.state.data)
+        : refetchInterval,
     });
   }
 

@@ -1,0 +1,167 @@
+{
+  "app": {
+    "start": {
+      "hero": {
+        "tagline": "From prompt to visual",
+        "title": "Turn ideas into visual presentations",
+        "description": "Describe what you want to communicate. The rest — structure, layout, and visual elements — is generated automatically.",
+        "features": {
+          "languages": "10 languages",
+          "ratios": "6 aspect ratios",
+          "audiences": "5 audiences",
+          "themes": "10 themes",
+          "amounts": "5 detail levels",
+          "scenarios": "5 scenarios",
+          "slideCount": "Up to 20 slides"
+        }
+      },
+      "form": {
+        "placeholder": "Describe the flow, structure, or diagram you want to create...",
+        "send": "Create",
+        "upload": "Upload image",
+        "hint": "Press Enter to create · Shift + Enter for a new line",
+        "engine": {
+          "label": "Engine",
+          "name": "Excalidraw"
+        },
+        "options": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        },
+        "controls": {
+          "slideCount": {
+            "label": "Slides",
+            "items": [
+              "Auto",
+              "5",
+              "8",
+              "10",
+              "15",
+              "20"
+            ]
+          },
+          "language": {
+            "label": "Language",
+            "items": [
+              "Portuguese",
+              "English",
+              "Spanish",
+              "French",
+              "German",
+              "Italian",
+              "Japanese",
+              "Chinese",
+              "Arabic",
+              "Hindi"
+            ]
+          },
+          "aspectRatio": {
+            "label": "Ratio",
+            "items": [
+              "16:9",
+              "4:3",
+              "1:1",
+              "9:16",
+              "A4",
+              "Letter"
+            ]
+          },
+          "amount": {
+            "label": "Detail",
+            "items": [
+              "Auto",
+              "Minimal",
+              "Concise",
+              "Detailed",
+              "Extensive"
+            ]
+          },
+          "audience": {
+            "label": "Audience",
+            "items": [
+              "General",
+              "Business",
+              "Investor",
+              "Teacher",
+              "Student"
+            ]
+          },
+          "scenario": {
+            "label": "Scenario",
+            "items": [
+              "Auto",
+              "Promotional",
+              "Teaching",
+              "Analytical",
+              "Report"
+            ]
+          }
+        }
+      },
+      "suggestions": {
+        "title": "Examples to get started",
+        "description": "Pick an example or describe your idea in the form above.",
+        "shuffle": "Shuffle",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        },
+        "items": [
+          {
+            "label": "Create an authentication flow with social login and password recovery",
+            "type": "multi"
+          },
+          {
+            "label": "Microservices architecture diagram with API gateway",
+            "type": "single"
+          },
+          {
+            "label": "Product roadmap with epics and milestones for next quarter",
+            "type": "multi"
+          },
+          {
+            "label": "User onboarding flow from sign-up to activation",
+            "type": "multi"
+          }
+        ]
+      },
+      "recents": {
+        "title": "Recent",
+        "description": "Your most recent presentations and diagrams.",
+        "viewAll": "View all",
+        "empty": "No presentations yet. Create your first one above.",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        }
+      },
+      "templates": {
+        "title": "Templates",
+        "description": "Ready-made presentations to use as a starting point.",
+        "viewAll": "View all",
+        "empty": "No templates available at the moment.",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        },
+        "modal": {
+          "use": "Use this template"
+        }
+      },
+      "community": {
+        "title": "Community",
+        "description": "Public presentations created by the community.",
+        "viewAll": "View community",
+        "empty": "No public presentations yet.",
+        "types": {
+          "multi": "Presentation",
+          "single": "Diagram"
+        },
+        "modal": {
+          "duplicate": "Duplicate to my collection",
+          "view": "View"
+        }
+      }
+    }
+  }
+}

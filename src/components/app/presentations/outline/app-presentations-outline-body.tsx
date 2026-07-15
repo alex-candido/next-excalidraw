@@ -14,7 +14,7 @@ export function AppPresentationsOutlineBody() {
     onRegenerateCard,
     onDelete,
     onAdd,
-    regeneratingCardId,
+    regeneratingIds,
     params,
     onParamChange,
   } = useAppPresentationsOutline();
@@ -30,7 +30,7 @@ export function AppPresentationsOutlineBody() {
         onRegenerate={onRegenerateCard}
         onDelete={onDelete}
         onAdd={onAdd}
-        regeneratingId={regeneratingCardId}
+        regeneratingIds={regeneratingIds}
       />
       <AppPresentationsOutlineParameters
         theme={params.theme}

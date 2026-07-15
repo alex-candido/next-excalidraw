@@ -127,10 +127,16 @@ outline API route
 - [x] `P2` Documentação de API navegável — `lib/openapi/document.ts` (zod-openapi, gera OpenAPI 3.1 a partir dos schemas de `schemas/app/` já existentes) servido em `/dev/openapi.json` e renderizado via Scalar em `/dev/api-docs` — ver ADR-011. Complementa (não substitui) os `.http`
 - [x] `P1` Processamento em background (Inngest) — envelope `{status: "completed"|"pending"}` aplicado nas 4 rotas de generate/regenerate (`schemas/app/generation-schema.ts`); as 4 rotas (`outlines/generate`, `outlines/[id]/generate`, `slides/generate`, `slides/[id]/generate`) migradas de fato pro Inngest (`lib/inngest/functions/`), cada uma validada ponta a ponta via curl (202 instantâneo → job roda em background → resultado aparece em `GET /presentations/:id`/`GET /presentations/:id/slides`) — ver ADR-012. Dev requer `bun run dev:all` (Next.js + Inngest Dev Server juntos, via `concurrently`) + `INNGEST_DEV=1` no `.env.local`
 - [ ] `P2` Endpoint de status de generation dedicado (`GET .../generations/:id`) — hoje o client só descobre que terminou dando poll em `GET /presentations/:id`
-- [ ] `P1` Modal `AppDashboardNewModal` (`components/app/dashboard/`) — não existe página `/presentations/new`, criação é via modal, disparado por `AppNavRail`/`AppDashboardRecentsHeader`/`AppPresentationsHeader`. Hoje 100% mock (nem o título tem estado) — trocar por `useAppPresentation().useCreate()` e navegar pro `/presentations/[id]/outline` após criar
-- [ ] `P2` Página `/presentations/[id]/outline` — listagem dos outlines com botão de regenerar item individual
-- [ ] `P2` Página `/presentations/[id]/studio` — editor Excalidraw por slide
-- [ ] `P2` Página `/presentations/[id]/present` — modo apresentação fullscreen
+- [x] `P1` Renomeado `app/dashboard` → `app/start` (não é um dashboard, é a tela de criação/entrada do app) — rota, 19 componentes (`AppDashboard*` → `AppStart*`), provider, i18n (`app-dashboard.json` → `app-start.json`, namespace `app.start`) e todos os redirects (`roles-config.ts`, `use-auth.ts`, `auth-sign-in-form.tsx`, `landing-app-shortcut.tsx`, `app-nav-rail.tsx`)
+- [x] `P1` `AppStartForm` (prompt + IA) wireado — novo `AppStartProvider` (`providers/app/app-start-provider.tsx`, sem "Form" no nome) cria a presentation (`useAppPresentation().useCreate()`), dispara `generateOutline` (chamada direta da action, não do hook — id só existe depois do create resolver) e navega pro `/presentations/[id]/outline`
+- [x] `P1` `AppStartNewModal` (criação manual, sem IA) wireado — título com estado real, cria via `useCreate()` e navega direto pro `/studio` (sem outline). Exigiu abrir `userPrompt` no `presentationCreateSchema` (agora opcional) e aceitar `title` no create (antes gravava `""` fixo)
+- [x] `P1` `AppPresentationsOutlineProvider` — trocado mock global por dados reais (`useParams()` + `useAppPresentation().useDetail(id)`), editar campos fica local até "Gerar" (persiste via bulk-update), regenerar individual/tudo agora é assíncrono (Inngest) — provider faz *poll* comparando `updatedAt` pra saber quando terminou. Delete/add/reorder de outline ficam só locais (sem persistência — gaps de backend conhecidos, ver Backlog)
+- [x] `P2` `AppPresentationsStudioProvider` — mesmo tratamento do outline (dados reais via `useAppPresentation().useDetail(id)` + `useAppSlide().useList(id)`, poll enquanto espera geração inicial). Título de cada slide vem do outline correspondente via `outlineId` (`slide` não guarda título próprio). `onSave` persiste via `useAppSlide().useBulkUpdate()`, lendo os elements atuais direto da API do Excalidraw (não do estado). Add/duplicate/reorder/toggle-hidden de slide ficam só locais (mesmos gaps de backend do outline). Validado via curl (formato do skeleton/appState real bate com o `skeletonSerializer` já existente)
+- [ ] `P2` Página `/presentations/[id]/present` — não precisa de trabalho, já lê do Studio
+- [x] `P2` Listagem `/app/presentations` — novo `AppPresentationsListProvider` (`providers/app/app-presentations-list-provider.tsx`), busca real via `useAppPresentation().useList()` e separa ativos/trash client-side por `status` (a rota já retorna os dois juntos). `isTrashView`/`onTrashToggle` movidos do estado local do `AppPresentations` pro provider — `AppPresentationsHeader` deixou de receber isso via props, consome o provider direto. `AppPresentationsSearch` (Cmd-K) também usa dados reais agora
+- [x] `P2` Trash/delete confirm — `AppPresentationTrashModal.onConfirm` conectado com `useAppPresentation().useMoveToTrash()` via `onMoveToTrash` do provider — validado ponta a ponta (`GET /presentations` já retorna a mistura ativos/trash certa)
+- [ ] `P3` `AppStartRecents` (preview de recentes no `/app/start`) ainda usa array mock — agora que `useAppPresentationsList()` existe, dá pra reaproveitar direto (não fazia parte do pedido original, só ficou fácil depois desse passo)
+- [ ] `P1` **`onSave` do Studio sobrescreve `slide.elements` com o formato errado (real `ExcalidrawElement[]`, não skeleton)** — achado ao investigar a bagunça de posicionamento reportada em todos os slides da presentation `a403cfa5-7150-4f0e-8518-fa2295ff65c8`. Inspecionando os dados reais no banco: `slide.elements` já contém elementos totalmente convertidos (`seed`, `versionNonce`, `index`, `boundElements`, `startBinding`/`endBinding` reais etc.), não o `ExcalidrawElementSkeleton` bruto que a IA gera (ADR-001 documenta a coluna como skeleton). Causa: `AppPresentationsStudioProvider.onSave()` (`src/providers/app/app-presentations-studio-provider.tsx`) pega `scene.elements` — já processado por `convertToExcalidrawElements` no client — e persiste direto via `bulkUpdate`, sobrescrevendo o skeleton original assim que o usuário salva. Na próxima hidratação, esse dado já-convertido passa de novo por `convertToExcalidrawElements` (2ª conversão), que não é garantidamente idempotente pra elementos vinculados — hipótese de causa raiz da bagunça reportada, mas ainda não confirmada com uma seta real do banco (consulta interrompida). Reverted (a pedido do usuário) as duas mitigações client-side tentadas (try/catch → canvas vazio; sanitização de tipo de `id`) para o erro real voltar a aparecer sem ser mascarado. Próximo passo: confirmar a hipótese da dupla conversão inspecionando uma seta real persistida, e decidir o fix — não persistir o formato convertido de volta em `slide.elements` (manter sempre skeleton), ou fazer o reverse-transform antes de salvar. Só depois disso investigar se o skeleton *original* da IA (antes de qualquer save) também tem problemas de sintaxe de vínculo (prompt/tool do `slideWorkflow`, `lib/mastra/`)
 
 **Regeneração individual de outline**
 - [x] `P1` Definir abordagem: reuso do `multiOutlineWorkflow` com `slideCount=1` — já implementado em `multiOutlineService().regenerate()`
@@ -140,6 +146,22 @@ outline API route
 
 ## Backlog
 ---
+
+**Gaps de backend do outline (achados ao integrar o provider)**
+- [ ] `P2` Deletar outline — `outlineRepository()` não tem método de remoção; hoje `onDelete` na página de outline só mexe em estado local, não persiste
+- [ ] `P2` Adicionar outline manual — bulk-update só faz `UPDATE`, não `INSERT`; precisa de `outlineRepository().create()` + rota própria
+- [ ] `P2` Persistir reorder — `outlineBulkUpdateSchema` não inclui `order`; hoje `onReorder` também só é local
+
+**Gaps de backend do slide (achados ao integrar o Studio provider)**
+- [ ] `P2` Deletar/adicionar/reordenar slide — mesmos gaps do outline (`slideRepository()` não tem remove/create único, `slideBulkUpdateSchema` não inclui `order`)
+- [ ] `P3` `slide.status` não é atualizável via bulk-update — `onToggleHiddenSlide` (esconder/mostrar) não persiste
+
+**Gaps de backend da listagem de presentations (achados ao integrar `AppPresentationsListProvider`)**
+- [ ] `P3` Favoritar — schema não tem campo `favorited`
+- [ ] `P3` Renomear/duplicar/compartilhar/copiar link — nenhuma dessas ações tem rota própria ainda
+- [ ] `P3` Restaurar da lixeira / excluir definitivamente (1 item ou em lote) — só existe `moveToTrash`; falta o caminho inverso e a exclusão real (mesmo `presentationRepository().remove()` do job de retenção, ver item de Infraestrutura)
+- [ ] `P3` Filtros (recentes/minhas/favoritas) — `Tabs` sem `onValueChange`, não filtra nada
+- [ ] `P3` Nome de exibição do criador (`createdBy`) — só temos `userId`, sem lookup de nome de usuário
 
 **Pipeline AI**
 - [ ] `P2` Geração de slides em paralelo (um por outline)

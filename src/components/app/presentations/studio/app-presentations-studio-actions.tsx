@@ -17,6 +17,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -75,6 +76,7 @@ export function AppPresentationsStudioActions() {
   const t = useTranslations("app.studio.header");
   const { title, createdAtLabel, createdBy, isFavorited, onSave, isSaving, onOpenPanel } =
     useAppPresentationsStudio();
+  const { id } = useParams<{ id: string }>();
   const [trashModalOpen, setTrashModalOpen] = useState(false);
 
   return (
@@ -106,7 +108,7 @@ export function AppPresentationsStudioActions() {
 
       <Button
         size="sm"
-        render={<Link href="/app/presentations/mock/present" />}
+        render={<Link href={`/app/presentations/${id}/present`} />}
         nativeButton={false}
         className="gap-1.5"
       >

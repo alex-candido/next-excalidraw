@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
-import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
+import { AppStartNewModal } from "@/components/app/start/app-start-new-modal";
 
 export function AppPresentationsEmpty({
   className,
@@ -41,7 +41,7 @@ export function AppPresentationsEmpty({
         </Button>
       </div>
 
-      <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+      <AppStartNewModal open={modalOpen} onOpenChange={setModalOpen} />
     </>
   );
 }

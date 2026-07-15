@@ -29,7 +29,7 @@ interface AppPresentationsOutlineListProps {
   onRegenerate: (id: string) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
-  regeneratingId?: string | null;
+  regeneratingIds?: Set<string>;
 }
 
 export function AppPresentationsOutlineList({
@@ -41,7 +41,7 @@ export function AppPresentationsOutlineList({
   onRegenerate,
   onDelete,
   onAdd,
-  regeneratingId = null,
+  regeneratingIds,
 }: AppPresentationsOutlineListProps) {
   const t = useTranslations("app.outline.list");
   const sensors = useSensors(
@@ -95,7 +95,7 @@ export function AppPresentationsOutlineList({
                 onRepresentationChange={onRepresentationChange}
                 onRegenerate={onRegenerate}
                 onDelete={onDelete}
-                isRegenerating={regeneratingId === item.id}
+                isRegenerating={regeneratingIds?.has(item.id) ?? false}
               />
             ))}
           </div>

@@ -3,7 +3,13 @@
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { arrayMove } from "@dnd-kit/sortable";
+import { useParams } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
+
+import { useAppPresentation } from "@/hooks/app/use-app-presentation";
+import { useAppSlide } from "@/hooks/app/use-app-slide";
+import { SlideStatus } from "@/lib/drizzle/schema/slide";
+import { formatRelativeDate } from "@/lib/utils";
 
 export interface AppPresentationsStudioScene {
   type: "excalidraw";
@@ -17,21 +23,16 @@ export interface AppPresentationsStudioScene {
 export interface AppPresentationsStudioSlide {
   id: string;
   order: number;
-  /** Mock apenas — no schema real vem de `outline.title` via `outline_id` (relação 1:1 outline↔slide) */
   title: string;
-  /** Mapeia `slide.thumbnail` — undefined até a geração automática existir (Ciclo 4) */
   thumbnail?: string;
-  /** Mock local — reflete o futuro `slide.status = inactive` (persistência real na Fase 2b) */
   isHidden?: boolean;
   scene: AppPresentationsStudioScene;
+  isLocal?: boolean;
 }
 
 export type StudioPanelKey = "settings" | "source" | "history";
 
-const MOCK_TITLE = "Microsserviços na Nuvem";
-const MOCK_CREATED_AT_LABEL = "há 2 dias";
-const MOCK_CREATED_BY = "Alex C.";
-const MOCK_IS_FAVORITED = false;
+const POLL_INTERVAL_MS = 3000;
 
 function buildEmptyScene(): AppPresentationsStudioScene {
   return {
@@ -44,26 +45,13 @@ function buildEmptyScene(): AppPresentationsStudioScene {
   };
 }
 
-const MOCK_SLIDE_TITLES = [
-  "Microsserviços na Nuvem",
-  "O problema com monólitos",
-  "Comunicação entre serviços",
-  "Observabilidade e resiliência",
-  "Próximos passos",
-];
-
-const MOCK_SLIDES: AppPresentationsStudioSlide[] = MOCK_SLIDE_TITLES.map((title, order) => ({
-  id: `s${order + 1}`,
-  order,
-  title,
-  scene: buildEmptyScene(),
-}));
-
 type AppPresentationsStudioContextProps = {
   title: string;
   createdAtLabel: string;
   createdBy: string;
   isFavorited: boolean;
+  isLoading: boolean;
+  isWaitingSlides: boolean;
   slides: AppPresentationsStudioSlide[];
   activeSlideId: string;
   activeSlide: AppPresentationsStudioSlide;
@@ -92,32 +80,76 @@ export const useAppPresentationsStudio = () => {
 };
 
 export const AppPresentationsStudioProvider = ({ children }: { children: ReactNode }) => {
-  const [slides, setSlides] = useState<AppPresentationsStudioSlide[]>(MOCK_SLIDES);
-  const [activeSlideId, setActiveSlideId] = useState(MOCK_SLIDES[0].id);
+  const routeParams = useParams<{ id?: string; lang?: string }>();
+  const presentationId = routeParams.id ?? "";
+  const lang = routeParams.lang ?? "en-US";
+
+  const { useDetail } = useAppPresentation();
+  const { useList, useBulkUpdate } = useAppSlide();
+
+  const [slides, setSlides] = useState<AppPresentationsStudioSlide[]>([]);
+  const [activeSlideId, setActiveSlideId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [activePanel, setActivePanel] = useState<StudioPanelKey | null>(null);
+  const [hasHydrated, setHasHydrated] = useState(false);
   const excalidrawApiRef = useRef<ExcalidrawImperativeAPI | null>(null);
+  const serializeRef = useRef<((skeletons: unknown[]) => AppPresentationsStudioScene) | null>(null);
+  const [isSerializerReady, setIsSerializerReady] = useState(false);
 
+  const { data: presentation, isLoading: isLoadingPresentation } = useDetail(presentationId);
+  // slideService().generate() cria os slides um de cada vez, em sequência — não dá pra
+  // considerar "terminou" só porque achou 1+ slide, senão hidrata cedo demais e ignora
+  // os que ainda estão sendo persistidos. Espera bater com a quantidade de outlines.
+  const expectedSlideCount = presentation?.outlines.length ?? 0;
+  const { data: rawSlides, isLoading: isLoadingSlides } = useList(presentationId, {
+    refetchInterval: (data) =>
+      !hasHydrated && expectedSlideCount > 0 && (data?.length ?? 0) < expectedSlideCount
+        ? POLL_INTERVAL_MS
+        : false,
+  });
+  const bulkUpdate = useBulkUpdate(presentationId);
+
+  // convertToExcalidrawElements toca `window` na avaliação do módulo — import adiado
+  // pra useEffect client-only, senão quebra SSR (provider é global, montado em providers/app/index.tsx).
   useEffect(() => {
     let isMounted = true;
-
     import("@/lib/excalidraw/serialize/skeleton-serializer").then(({ skeletonSerializer }) => {
       if (!isMounted) return;
-      const { serialize } = skeletonSerializer();
-      setSlides((prev) =>
-        prev.map((slide) => ({
-          ...slide,
-          scene: serialize([
-            { type: "text", x: 120, y: 140, text: slide.title, fontSize: 28 },
-          ]) as AppPresentationsStudioScene,
-        })),
-      );
+      serializeRef.current = (skeletons) => skeletonSerializer().serialize(skeletons as never) as AppPresentationsStudioScene;
+      setIsSerializerReady(true);
     });
-
     return () => {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!rawSlides || !isSerializerReady || hasHydrated) return;
+    // Ainda esperando a geração inicial terminar (poll continua) — não hidrata com
+    // um subconjunto parcial dos slides.
+    if (expectedSlideCount > 0 && rawSlides.length < expectedSlideCount) return;
+    if (rawSlides.length === 0) return;
+
+    const outlineTitleById = new Map(presentation?.outlines.map((o) => [o.id, o.title]) ?? []);
+    const serialize = serializeRef.current;
+    if (!serialize) return;
+
+    const hydrated = rawSlides
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((s) => ({
+        id: s.id,
+        order: s.order,
+        title: outlineTitleById.get(s.outlineId) ?? "",
+        thumbnail: s.thumbnail ?? undefined,
+        isHidden: s.status === SlideStatus.inactive,
+        scene: serialize((s.elements ?? []) as unknown[]),
+      }));
+
+    setSlides(hydrated);
+    setActiveSlideId(hydrated[0]?.id ?? "");
+    setHasHydrated(true);
+  }, [rawSlides, isSerializerReady, hasHydrated, presentation]);
 
   const captureActiveSlideElements = () => {
     const api = excalidrawApiRef.current;
@@ -139,6 +171,8 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     setActiveSlideId(id);
   };
 
+  // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só local
+  // (mesmo tratamento combinado pro outline). Ver pm.md Backlog.
   const onAddSlide = () =>
     setSlides((prev) => [
       ...prev,
@@ -147,6 +181,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
         order: prev.length,
         title: "Novo slide",
         scene: buildEmptyScene(),
+        isLocal: true,
       },
     ]);
 
@@ -154,7 +189,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     setSlides((prev) => {
       const index = prev.findIndex((slide) => slide.id === id);
       if (index === -1) return prev;
-      const duplicate = { ...prev[index], id: crypto.randomUUID() };
+      const duplicate = { ...prev[index], id: crypto.randomUUID(), isLocal: true };
       return [...prev.slice(0, index + 1), duplicate, ...prev.slice(index + 1)].map(
         (slide, i) => ({ ...slide, order: i }),
       );
@@ -197,19 +232,41 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
 
   const onClosePanel = () => setActivePanel(null);
 
-  const onSave = () => {
+  const onSave = async () => {
     captureActiveSlideElements();
     setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 1200);
+    try {
+      const api = excalidrawApiRef.current;
+      const activeElements = api ? [...api.getSceneElements()] : undefined;
+
+      await bulkUpdate.mutateAsync({
+        slides: slides
+          .filter((s) => !s.isLocal)
+          .map((s) => ({
+            id: s.id,
+            elements: ((s.id === activeSlideId ? activeElements : undefined) ?? s.scene.elements) as unknown as Record<string, unknown>[],
+            appState: s.scene.appState,
+          })),
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const activeSlide = slides.find((slide) => slide.id === activeSlideId) ?? slides[0];
+  const activeSlide = slides.find((slide) => slide.id === activeSlideId) ?? slides[0] ?? {
+    id: "",
+    order: 0,
+    title: "",
+    scene: buildEmptyScene(),
+  };
 
   const value: AppPresentationsStudioContextProps = {
-    title: MOCK_TITLE,
-    createdAtLabel: MOCK_CREATED_AT_LABEL,
-    createdBy: MOCK_CREATED_BY,
-    isFavorited: MOCK_IS_FAVORITED,
+    title: presentation?.title ?? "",
+    createdAtLabel: presentation ? formatRelativeDate(presentation.createdAt, lang) : "",
+    createdBy: "",
+    isFavorited: false,
+    isLoading: isLoadingPresentation || isLoadingSlides,
+    isWaitingSlides: !hasHydrated,
     slides,
     activeSlideId,
     activeSlide,

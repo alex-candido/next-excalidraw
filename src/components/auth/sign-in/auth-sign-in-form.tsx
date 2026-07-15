@@ -42,7 +42,7 @@ export function AuthSignInForm({
       const { error } = await signInCredentials(data);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => router.push("/app/dashboard"),
+    onSuccess: () => router.push("/app/start"),
   });
 
   return (

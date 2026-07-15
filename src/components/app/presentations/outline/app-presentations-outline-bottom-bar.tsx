@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { useAppPresentationsOutline } from "@/providers/app/app-presentations-outline-provider";
 
@@ -31,9 +30,7 @@ export function AppPresentationsOutlineBottomBar({ className }: AppPresentations
         <Button
           className="app-presentations-outline-bottom-bar-generate gap-1.5"
           onClick={onGenerate}
-          disabled={isGenerating}
-          render={<Link href="/app/presentations/mock/studio" />}
-          nativeButton={false}
+          disabled={isGenerating || count === 0}
         >
           {isGenerating ? t("generating") : t("generate")}
           {!isGenerating && <ArrowRight className="size-4" />}

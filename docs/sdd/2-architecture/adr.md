@@ -230,3 +230,21 @@ Duas variações no meio do caminho, pela forma como cada service já rastreava 
 - BullMQ/Redis — exigiria infra própria (Redis) só pra isso; Inngest já resolve execução durável + retry sem infra adicional pro estágio atual do projeto
 
 **Consequências:** `multiOutlineService().generate()`, `multiOutlineService().regenerate()` e `slideService().regenerate()` mudaram de assinatura (recebem `generationId` como parâmetro) — únicos callers eram as rotas, então sem impacto em outros lugares. `slideService().generate()` manteve a assinatura (tracking interno por item preservado). Todas as 4 rotas validadas end-to-end manualmente (curl): respondem `202` instantâneo, function completa em background (visível no dashboard do Inngest Dev Server), resultado aparece via poll depois.
+
+---
+
+## ADR-013 — Providers globais de `app/` não podem usar `useRouter`/`Link` de `@/i18n/navigation`
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** Ao integrar `AppStartProvider` e `AppPresentationsOutlineProvider` com navegação real (redirecionar pro outline/studio depois de criar/gerar), ambos quebraram em runtime com `Error: No intl context found`. Causa: `AppProviders` (que monta todos os providers de `app/`, incluindo esses dois) é renderizado por `Providers` em `app/layout.tsx` — o layout **raiz**, fora do segmento `[lang]`. O `NextIntlClientProvider` só é montado dentro de `app/[lang]/layout.tsx`, um nível abaixo. Como esses providers são montados como wrapper (não como `children` que fluem pra dentro do `[lang]/layout.tsx`), o corpo do próprio provider executa **fora** do contexto do next-intl — mesmo que seus componentes filhos (que de fato renderizam dentro do `{children}`) tenham acesso normal a esse contexto.
+
+**Decisão:** Dentro do corpo de qualquer provider montado em `providers/app/` (ou qualquer wrapper global equivalente), usar `useRouter`/`useParams` de `next/navigation` (puro, sem depender de contexto do next-intl) — nunca `@/i18n/navigation`. Como a locale-prefix automática do wrapper i18n não está disponível aqui, o path precisa ser montado manualmente: `useParams<{ lang: string }>()` fornece o `lang` da rota atual (isso funciona porque `useParams` só lê o segmento da URL, não depende de nenhum contexto React) para prefixar: `router.push(\`/${lang}/app/...\`)`.
+
+Regra prática: **componentes renderizados como filhos** (páginas, components que vivem dentro da árvore de `{children}`) podem seguir usando `@/i18n/navigation` normalmente — o problema é específico de código que roda no corpo de um provider que embrulha `{children}` a partir de fora do `[lang]/layout.tsx`.
+
+**Alternativas descartadas:**
+- Mover `<Providers>` de `app/layout.tsx` pra dentro de `app/[lang]/layout.tsx` — resolveria o problema na raiz, mas é uma mudança estrutural maior (afeta toda a árvore de providers, incluindo landing/auth/admin) só para resolver algo que tem workaround simples e localizado
+
+**Consequências:** Qualquer provider novo em `providers/app/` que precisar navegar (o próximo é o `AppPresentationsStudioProvider`) deve seguir esse mesmo padrão desde o início — `next/navigation` + `useParams()` pro locale, não `@/i18n/navigation`.

@@ -9,9 +9,9 @@ export type GroupNameKey = keyof typeof GroupName;
 
 export const groupRedirects: Record<GroupNameKey, string> = {
   admin: "/admin/dashboard",
-  member: "/app/dashboard",
-  guest: "/app/dashboard",
-  viewer: "/app/dashboard",
+  member: "/app/start",
+  guest: "/app/start",
+  viewer: "/app/start",
 };
 
 export const groupAllowedRoutes: Record<GroupNameKey, string[]> = {

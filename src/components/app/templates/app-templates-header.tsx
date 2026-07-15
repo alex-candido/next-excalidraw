@@ -27,7 +27,7 @@ export function AppTemplatesHeader({
         <Button
           variant="ghost"
           size="sm"
-          render={<Link href="/app/dashboard" />}
+          render={<Link href="/app/start" />}
           nativeButton={false}
           className="app-templates-header-back -ml-2 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
         >

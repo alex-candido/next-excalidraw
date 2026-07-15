@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
-import { routing } from "./routing";
 import { hasLocale } from "./dictionaries";
+import { routing } from "./routing";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
@@ -28,7 +28,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`./dictionaries/${locale}/common.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/auth.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-nav.json`).then((m) => m.default),
-    import(`./dictionaries/${locale}/app-dashboard.json`).then((m) => m.default),
+    import(`./dictionaries/${locale}/app-start.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-presentations.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-templates.json`).then((m) => m.default),
     import(`./dictionaries/${locale}/app-community.json`).then((m) => m.default),

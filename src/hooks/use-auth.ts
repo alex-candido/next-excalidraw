@@ -9,7 +9,7 @@ export function useAuth() {
   const session = authClient.useSession();
 
   async function signUp(input: SignUpInput) {
-    return authClient.signUp.email({ ...input, callbackURL: "/app/dashboard" });
+    return authClient.signUp.email({ ...input, callbackURL: "/app/start" });
   }
 
   async function signInCredentials(input: SignInInput) {
@@ -17,7 +17,7 @@ export function useAuth() {
   }
 
   async function signInGoogle() {
-    return authClient.signIn.social({ provider: "google", callbackURL: "/app/dashboard" });
+    return authClient.signIn.social({ provider: "google", callbackURL: "/app/start" });
   }
 
   async function signOut() {

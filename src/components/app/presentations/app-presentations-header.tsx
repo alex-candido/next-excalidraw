@@ -9,25 +9,21 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 
-import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
+import { AppStartNewModal } from "@/components/app/start/app-start-new-modal";
 import { AppPresentationsSearch } from "@/components/app/app-presentations-search";
+import { useAppPresentationsList } from "@/providers/app/app-presentations-list-provider";
 
-interface AppPresentationsHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  trashCount?: number;
-  isTrashView?: boolean;
-  onTrashToggle?: () => void;
-}
+type AppPresentationsHeaderProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function AppPresentationsHeader({
-  trashCount = 0,
-  isTrashView = false,
-  onTrashToggle,
   className,
   ...props
 }: AppPresentationsHeaderProps) {
   const t = useTranslations("app.presentations.header");
   const tNew = useTranslations("app.new");
   const [modalOpen, setModalOpen] = useState(false);
+  const { trashItems, isTrashView, onTrashToggle } = useAppPresentationsList();
+  const trashCount = trashItems.length;
 
   return (
     <>
@@ -59,7 +55,7 @@ export function AppPresentationsHeader({
               <Button
                 variant="ghost"
                 size="sm"
-                render={<Link href="/app/dashboard" />}
+                render={<Link href="/app/start" />}
                 nativeButton={false}
                 className="app-presentations-header-back -ml-2 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
               >
@@ -103,7 +99,7 @@ export function AppPresentationsHeader({
       </div>
 
       {!isTrashView && (
-        <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+        <AppStartNewModal open={modalOpen} onOpenChange={setModalOpen} />
       )}
     </>
   );

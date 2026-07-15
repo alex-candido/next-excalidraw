@@ -14,42 +14,13 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  PresentationLanguage,
-  PresentationType,
-} from "@/lib/drizzle/schema/presentation";
+import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
+import { useAppPresentationsList } from "@/providers/app/app-presentations-list-provider";
 
 const TYPE_KEY = Object.fromEntries(
   Object.entries(PresentationType).map(([k, v]) => [v, k]),
 ) as Record<number, keyof typeof PresentationType>;
-
-const ITEMS = [
-  {
-    id: "1",
-    title: "Fluxo de autenticação com login social",
-    type: PresentationType.multi,
-    language: PresentationLanguage.ptBR,
-    slideCount: 8,
-    createdAtLabel: "há 2 dias",
-  },
-  {
-    id: "2",
-    title: "Arquitetura de microsserviços com API gateway",
-    type: PresentationType.single,
-    language: PresentationLanguage.en,
-    slideCount: 1,
-    createdAtLabel: "há 5 dias",
-  },
-  {
-    id: "3",
-    title: "Roadmap Q3 — Produto e Entregas",
-    type: PresentationType.multi,
-    language: PresentationLanguage.ptBR,
-    slideCount: 12,
-    createdAtLabel: "há 1 semana",
-  },
-];
 
 export function AppPresentationsSearch({
   className,
@@ -59,6 +30,7 @@ export function AppPresentationsSearch({
   const t = useTranslations("app.presentations");
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { items } = useAppPresentationsList();
 
   return (
     <>
@@ -91,7 +63,7 @@ export function AppPresentationsSearch({
           <CommandEmpty className="py-10 text-sm text-muted-foreground">
             {t("toolbar.searchEmpty")}
           </CommandEmpty>
-          {ITEMS.map((item) => (
+          {items.map((item) => (
             <CommandItem
               key={item.id}
               value={item.title}

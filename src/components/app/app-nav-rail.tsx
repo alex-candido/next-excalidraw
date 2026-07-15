@@ -20,10 +20,10 @@ import {
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-import { AppDashboardNewModal } from "@/components/app/dashboard/app-dashboard-new-modal";
+import { AppStartNewModal } from "@/components/app/start/app-start-new-modal";
 
 const NAV_ITEMS = [
-  { key: "home", icon: Home, href: "/app/dashboard" },
+  { key: "home", icon: Home, href: "/app/start" },
   {
     key: "presentations",
     icon: GalleryVerticalEnd,
@@ -90,7 +90,7 @@ export function AppNavRail() {
         </nav>
       </TooltipProvider>
 
-      <AppDashboardNewModal open={modalOpen} onOpenChange={setModalOpen} />
+      <AppStartNewModal open={modalOpen} onOpenChange={setModalOpen} />
     </>
   );
 }

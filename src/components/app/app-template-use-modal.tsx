@@ -40,7 +40,7 @@ export function AppTemplateUseModal({
   slideCount = 1,
   createdBy,
 }: AppTemplateUseModalProps) {
-  const t = useTranslations("app.dashboard.templates");
+  const t = useTranslations("app.start.templates");
   const tActions = useTranslations("app.new.actions");
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);

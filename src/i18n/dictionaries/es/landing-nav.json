@@ -49,7 +49,7 @@
       "cta": {
         "signIn": "Iniciar sesión",
         "getStarted": "Comenzar gratis",
-        "dashboard": "Ir al Dashboard"
+        "continue": "Continuar"
       }
     }
   }

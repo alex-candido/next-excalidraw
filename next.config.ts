@@ -1,6 +1,6 @@
 import createMDX from "@next/mdx";
-import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
       // App
       {
         source: "/:lang(pt-BR|en-US|es)/app",
-        destination: "/:lang/app/dashboard",
+        destination: "/:lang/app/start",
         permanent: false,
       },
       {

@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:3000/api/v1/app
 @presentationId = <presentationId>
 
-### POST /presentations — criar apresentação (draft)
+### POST /presentations — criar apresentação (draft, com prompt de IA)
 POST {{baseUrl}}/presentations
 Content-Type: application/json
 
@@ -12,6 +12,17 @@ Content-Type: application/json
   "aspectRatio": 0,
   "slideCount": 0,
   "keywords": ["IA", "automação", "futuro do trabalho"]
+}
+
+###
+
+### POST /presentations — criar apresentação manual (sem IA, título direto — userPrompt omitido)
+POST {{baseUrl}}/presentations
+Content-Type: application/json
+
+{
+  "type": 1,
+  "title": "Minha apresentação"
 }
 
 ###
