@@ -21,18 +21,12 @@ function slugify(text: string, code: string) {
 }
 
 export function singleOutlineService() {
-  async function generate(presentationId: string, userId: string, input: SingleGenerate) {
+  async function generate(presentationId: string, generationId: string, userId: string, input: SingleGenerate) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
 
-    // Step 1: generate outline
-    const outlineGen = await generationRepository().create({
-      presentationId,
-      type:   GenerationType.outline,
-      status: GenerationStatus.pending,
-    })
-
+    // Step 1: generate outline (usa o generationId já criado pelo caller)
     let outlineId:    string
     let outlineTitle: string
     let outlineRep:   string
@@ -68,14 +62,14 @@ export function singleOutlineService() {
         status: PresentationStatus.active,
       })
 
-      await generationRepository().update(outlineGen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.completed,
         completedAt: new Date(),
         usage:       result.metadata.usage as Record<string, unknown>,
         model:       { name: result.metadata.model } as Record<string, unknown>,
       })
     } catch (err) {
-      await generationRepository().update(outlineGen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.failed,
         completedAt: new Date(),
       })

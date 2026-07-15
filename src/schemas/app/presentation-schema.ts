@@ -7,7 +7,9 @@ import {
   PresentationScenario,
   PresentationTheme,
 } from "@/lib/drizzle/schema/presentation"
+import { generationResponseSchema } from "@/schemas/app/generation-schema"
 import { outlineSchema } from "@/schemas/app/outline-schema"
+import { outlineRegenerateResultSchema } from "@/schemas/app/presentations/multi-schema"
 
 export const AMOUNT_RANGE: Record<number, [number, number]> = {
   [PresentationAmount.auto]:      [4,  20],
@@ -127,7 +129,7 @@ export const presentationGenerateResultSchema = z.union([
   z.object({
     presentationId: z.string().uuid(),
     title:          z.string(),
-    outlines:       z.array(outlineSchema),
+    outlines:       z.array(outlineRegenerateResultSchema),
   }),
   z.object({
     presentationId: z.string().uuid(),
@@ -138,4 +140,8 @@ export const presentationGenerateResultSchema = z.union([
 ])
 
 export type PresentationGenerateResult = z.infer<typeof presentationGenerateResultSchema>
+
+export const presentationGenerateResponseSchema = generationResponseSchema(presentationGenerateResultSchema)
+
+export type PresentationGenerateResponse = z.infer<typeof presentationGenerateResponseSchema>
 

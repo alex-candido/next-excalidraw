@@ -1,8 +1,6 @@
 @baseUrl = http://localhost:3000/api/v1/app
 @presentationId = <presentationId>
 
-# ─── Presentations ────────────────────────────────────────────────────────────
-
 ### POST /presentations — criar apresentação (draft)
 POST {{baseUrl}}/presentations
 Content-Type: application/json
@@ -28,5 +26,5 @@ GET {{baseUrl}}/presentations/{{presentationId}}
 
 ###
 
-### DELETE /presentations/:id — remover apresentação
+### DELETE /presentations/:id — mover pra lixeira (soft-delete, status: trash — exclusão definitiva acontece depois, via job de retenção)
 DELETE {{baseUrl}}/presentations/{{presentationId}}

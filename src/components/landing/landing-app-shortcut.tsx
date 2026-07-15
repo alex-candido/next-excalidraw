@@ -16,7 +16,7 @@ export function LandingAppShortcut() {
     <div className="landing-app-shortcut fixed top-20 inset-x-0 z-30 flex justify-center px-4">
       <Link
         href="/app/dashboard"
-        className="landing-app-shortcut-pill flex items-center gap-1.5 rounded-full border bg-background/95 px-3 py-1 text-xs font-medium shadow-lg backdrop-blur-sm transition-colors hover:bg-muted"
+        className="landing-app-shortcut-pill flex items-center gap-1.5 rounded-full border bg-background/95 px-3.5 py-1.5 text-sm font-medium shadow-lg backdrop-blur-sm transition-colors hover:bg-muted"
       >
         {t("dashboard")}
         <ArrowRight className="size-3.5" />

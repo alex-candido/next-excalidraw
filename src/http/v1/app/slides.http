@@ -4,7 +4,7 @@
 
 # ─── Slides ───────────────────────────────────────────────────────────────────
 
-### POST /presentations/:id/slides/generate — gerar slides
+### POST /presentations/:id/slides/generate — gerar slides (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id/slides)
 POST {{baseUrl}}/presentations/{{presentationId}}/slides/generate
 Content-Type: application/json
 
@@ -54,7 +54,7 @@ Content-Type: application/json
 
 ###
 
-### POST /presentations/:id/slides/:slideId/generate — regenerar slide individual
+### POST /presentations/:id/slides/:slideId/generate — regenerar slide individual (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id/slides)
 POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/generate
 Content-Type: application/json
 

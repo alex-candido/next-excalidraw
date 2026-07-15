@@ -4,7 +4,7 @@ import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { PresentationStatus } from "@/lib/drizzle/schema/presentation"
-import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
+import { GenerationStatus } from "@/lib/drizzle/schema/generation"
 import type { OutlineWorkflowOutput } from "@/schemas/app/outline-schema"
 import type { MultiGenerate, OutlineRegenerate, OutlineBulkUpdate } from "@/schemas/app/presentations/multi-schema"
 
@@ -19,16 +19,10 @@ function slugify(text: string, code: string) {
 }
 
 export function multiOutlineService() {
-  async function generate(presentationId: string, userId: string, input: MultiGenerate) {
+  async function generate(presentationId: string, generationId: string, userId: string, input: MultiGenerate) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
-
-    const gen = await generationRepository().create({
-      presentationId,
-      type:   GenerationType.outline,
-      status: GenerationStatus.pending,
-    })
 
     try {
       const workflow = mastra.getWorkflow("multiOutlineWorkflow")
@@ -54,7 +48,7 @@ export function multiOutlineService() {
         status: PresentationStatus.active,
       })
 
-      await generationRepository().update(gen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.completed,
         completedAt: new Date(),
         usage:       result.metadata.usage as Record<string, unknown>,
@@ -76,7 +70,7 @@ export function multiOutlineService() {
         })),
       }
     } catch (err) {
-      await generationRepository().update(gen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.failed,
         completedAt: new Date(),
       })
@@ -93,41 +87,54 @@ export function multiOutlineService() {
     return { updated }
   }
 
-  async function regenerate(presentationId: string, outlineId: string, userId: string, input: OutlineRegenerate) {
+  async function regenerate(presentationId: string, outlineId: string, generationId: string, userId: string, input: OutlineRegenerate) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
 
-    const typeKey = Object.entries(OutlineType).find(([, v]) => v === input.type)?.[0] ?? "content"
+    try {
+      const workflow = mastra.getWorkflow("multiOutlineWorkflow")
+      const run      = await workflow.createRun()
+      const { result } = await run.start({
+        inputData: {
+          userPrompt: input.userPrompt,
+          language:   input.language,
+          slideCount: 1,
+        },
+      }) as { result: OutlineWorkflowOutput }
 
-    const workflow = mastra.getWorkflow("multiOutlineWorkflow")
-    const run      = await workflow.createRun()
-    const { result } = await run.start({
-      inputData: {
-        userPrompt: input.userPrompt,
-        language:   input.language,
-        slideCount: 1,
-      },
-    }) as { result: OutlineWorkflowOutput }
+      const item = result.outlines[0]
+      if (!item) throw new Error("Workflow returned no outlines")
 
-    const item = result.outlines[0]
-    if (!item) throw new Error("Workflow returned no outlines")
+      const updated = await outlineRepository().update(outlineId, {
+        title:          item.title,
+        description:    item.description,
+        representation: OutlineRepresentation[item.representation as keyof typeof OutlineRepresentation],
+      })
 
-    const updated = await outlineRepository().update(outlineId, {
-      title:          item.title,
-      description:    item.description,
-      representation: OutlineRepresentation[item.representation as keyof typeof OutlineRepresentation],
-    })
+      await generationRepository().update(generationId, {
+        status:      GenerationStatus.completed,
+        completedAt: new Date(),
+        usage:       result.metadata.usage as Record<string, unknown>,
+        model:       { name: result.metadata.model } as Record<string, unknown>,
+      })
 
-    return {
-      id:             updated.id,
-      order:          updated.order,
-      type:           updated.type,
-      title:          updated.title,
-      description:    updated.description,
-      concepts:       updated.concepts,
-      representation: updated.representation,
-      layout:         updated.layout,
+      return {
+        id:             updated.id,
+        order:          updated.order,
+        type:           updated.type,
+        title:          updated.title,
+        description:    updated.description,
+        concepts:       updated.concepts,
+        representation: updated.representation,
+        layout:         updated.layout,
+      }
+    } catch (err) {
+      await generationRepository().update(generationId, {
+        status:      GenerationStatus.failed,
+        completedAt: new Date(),
+      })
+      throw err
     }
   }
 

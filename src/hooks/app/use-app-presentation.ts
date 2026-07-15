@@ -36,9 +36,9 @@ export function useAppPresentation() {
     });
   }
 
-  function useRemove() {
+  function useMoveToTrash() {
     return useMutation({
-      mutationFn: presentationActions().remove,
+      mutationFn: presentationActions().moveToTrash,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: appPresentationKeys.all });
       },
@@ -54,5 +54,5 @@ export function useAppPresentation() {
     });
   }
 
-  return { useList, useDetail, useCreate, useRemove, useGenerateOutline };
+  return { useList, useDetail, useCreate, useMoveToTrash, useGenerateOutline };
 }

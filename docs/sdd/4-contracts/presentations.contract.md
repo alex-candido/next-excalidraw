@@ -128,7 +128,7 @@ Retorna detalhes de uma apresentação com seus outlines.
 
 ## DELETE /api/v1/app/presentations/[id]
 
-Remove uma apresentação e todos os dados associados (outlines, slides, generations).
+Soft-delete — muda `status` pra `trash (3)`, não remove a linha nem os dados associados (outlines, slides, generations). A exclusão definitiva acontece depois, via job de retenção (ainda não implementado).
 
 ### Path params
 

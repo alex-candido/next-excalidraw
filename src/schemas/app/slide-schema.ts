@@ -2,6 +2,7 @@ import { z } from "zod"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { workflowMetaBaseSchema } from "@/lib/mastra/mappers/workflow-metadata-mapper"
 import { AspectRatio, PresentationLanguage } from "@/lib/drizzle/schema/presentation"
+import { generationResponseSchema } from "@/schemas/app/generation-schema"
 
 const OUTLINE_TYPES  = Object.keys(OutlineType)           as [string, ...string[]]
 const OUTLINE_REPS   = Object.keys(OutlineRepresentation) as [string, ...string[]]
@@ -119,6 +120,10 @@ export const slideGenerateResultSchema = z.object({
 
 export type SlideGenerateResult = z.infer<typeof slideGenerateResultSchema>
 
+export const slideGenerateResponseSchema = generationResponseSchema(slideGenerateResultSchema)
+
+export type SlideGenerateResponse = z.infer<typeof slideGenerateResponseSchema>
+
 export const slideRegenerateResultSchema = z.object({
   id:        z.string().uuid(),
   order:     z.number().int(),
@@ -126,3 +131,7 @@ export const slideRegenerateResultSchema = z.object({
 })
 
 export type SlideRegenerateResult = z.infer<typeof slideRegenerateResultSchema>
+
+export const slideRegenerateResponseSchema = generationResponseSchema(slideRegenerateResultSchema)
+
+export type SlideRegenerateResponse = z.infer<typeof slideRegenerateResponseSchema>

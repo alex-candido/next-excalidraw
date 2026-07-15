@@ -87,19 +87,13 @@ export function slideService() {
     return { updated }
   }
 
-  async function regenerate(presentationId: string, slideId: string, userId: string, input: SlideRegenerate) {
+  async function regenerate(presentationId: string, slideId: string, generationId: string, userId: string, input: SlideRegenerate) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
 
     const existing = await slideRepository().findById(slideId)
     if (!existing) throw Object.assign(new Error("Slide not found"), { status: 404 })
-
-    const gen = await generationRepository().create({
-      presentationId,
-      type:   GenerationType.slide,
-      status: GenerationStatus.pending,
-    })
 
     try {
       const workflow = mastra.getWorkflow("slideWorkflow")
@@ -124,7 +118,7 @@ export function slideService() {
         appState: {},
       })
 
-      await generationRepository().update(gen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.completed,
         completedAt: new Date(),
         usage:       result.metadata.usage as Record<string, unknown>,
@@ -133,7 +127,7 @@ export function slideService() {
 
       return { id: updated.id, order: updated.order, outlineId: updated.outlineId }
     } catch (err) {
-      await generationRepository().update(gen.id, {
+      await generationRepository().update(generationId, {
         status:      GenerationStatus.failed,
         completedAt: new Date(),
       })

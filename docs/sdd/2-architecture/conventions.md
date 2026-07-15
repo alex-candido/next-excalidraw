@@ -175,6 +175,10 @@ lib/
     mappers/      mappers de output dos workflows (ex: workflow-metadata-mapper)
     tools/        tools chamadas pelos agentes via tool call
     workflows/    pipelines de geração (outlineWorkflow, slideWorkflow)
+  openapi/        documento OpenAPI gerado a partir dos schemas Zod (zod-openapi), servido em app/dev/
+  inngest/
+    client.ts     instância do Inngest (id do app)
+    functions/    background functions (uma por evento) — ver ADR-012
   utils/          utilitários compartilhados por toda a aplicação
 ```
 

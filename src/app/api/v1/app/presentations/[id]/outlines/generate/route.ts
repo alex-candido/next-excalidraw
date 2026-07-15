@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server"
 import { presentationGenerateSchema } from "@/schemas/app/presentation-schema"
-import { PresentationType } from "@/lib/drizzle/schema/presentation"
+import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
-import { multiOutlineService } from "@/server/services/app/multi-outline-service"
-import { singleOutlineService } from "@/server/services/app/single-outline-service"
+import { generationRepository } from "@/server/repositories/app/generation-repository"
+import { inngest } from "@/lib/inngest/client"
 
 const DEV_USER_ID = "00000001-0000-4000-8000-000000000001"
 
@@ -18,30 +18,30 @@ export async function POST(req: NextRequest, { params }: Params) {
     return Response.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  try {
-    const presentation = await presentationRepository().findById(id)
-    if (!presentation) {
-      return Response.json({ error: "Presentation not found" }, { status: 404 })
-    }
-
-    if (presentation.type === PresentationType.single) {
-      const result = await singleOutlineService().generate(id, DEV_USER_ID, {
-        userPrompt: parsed.data.userPrompt,
-        language:   parsed.data.language,
-      })
-      return Response.json(result, { status: 201 })
-    }
-
-    const result = await multiOutlineService().generate(id, DEV_USER_ID, {
-      userPrompt: parsed.data.userPrompt,
-      language:   parsed.data.language,
-      slideCount: parsed.data.slideCount,
-      keywords:   parsed.data.keywords,
-    })
-    return Response.json(result, { status: 201 })
-  } catch (err: unknown) {
-    const status  = (err as { status?: number }).status ?? 500
-    const message = err instanceof Error ? err.message : "Internal server error"
-    return Response.json({ error: message }, { status })
+  const presentation = await presentationRepository().findById(id)
+  if (!presentation) {
+    return Response.json({ error: "Presentation not found" }, { status: 404 })
   }
+  if (presentation.userId !== DEV_USER_ID) {
+    return Response.json({ error: "Forbidden" }, { status: 403 })
+  }
+
+  const generation = await generationRepository().create({
+    presentationId: id,
+    type:           GenerationType.outline,
+    status:         GenerationStatus.pending,
+  })
+
+  await inngest.send({
+    name: "presentation/outline.generate.requested",
+    data: {
+      presentationId:   id,
+      generationId:     generation.id,
+      userId:           DEV_USER_ID,
+      presentationType: presentation.type,
+      input:            parsed.data,
+    },
+  })
+
+  return Response.json({ status: "pending", generationId: generation.id }, { status: 202 })
 }

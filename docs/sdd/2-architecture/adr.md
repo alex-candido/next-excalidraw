@@ -177,3 +177,56 @@
 - Calcular permissions só no momento da ação (sem popular a sessão) — descartado como única fonte, porque perde a camada de UX (esconder ações não permitidas antes de disparar a request); mantido como camada complementar, não substituta
 
 **Consequências:** Qualquer novo módulo que precisar checar permissão de ação (app, depois admin) reusa `permissionService().hasPermission(userId, key)` dentro do próprio service, sem precisar reimplementar a resolução grupo+overrides. Fica pendente decidir se, quando o volume de checagens crescer, vale a pena usar o cookie-cache do Better Auth pra evitar uma query por request em rotas protegidas (não é um problema agora, só uma consideração de performance futura).
+
+---
+
+## ADR-011 — Documentação de API: Scalar + zod-openapi no lugar do Next REST Framework
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** Os `.http` (`src/http/`) já cobrem teste rápido via REST Client, mas não têm uma UI navegável/compartilhável. Avaliamos duas opções pra gerar essa documentação a partir do que já existe (schemas Zod em `schemas/app/`, source of truth de input/output de cada rota).
+
+**Decisão:** `zod-openapi` (gera o documento OpenAPI 3.1 a partir dos schemas Zod já existentes, sem duplicar tipo nenhum) + `@scalar/nextjs-api-reference` (só renderiza esse documento numa UI interativa). Confirmado suporte nativo a Zod v4 no `zod-openapi` (import direto de `zod`) antes de instalar.
+
+**Alternativa descartada — Next REST Framework:** exigiria reescrever os 11 `route.ts` existentes pro builder próprio dele (`route.get(...).handler(...)`) pra conseguir introspectar os schemas — invasivo e quebra a convenção já estabelecida (`route.ts` fino, delega pra `services/`). Scalar + zod-openapi é puramente aditivo: nenhum `route.ts` foi alterado.
+
+**Estrutura:** `lib/openapi/document.ts` (`createDocument()` referenciando os schemas de `presentation-schema.ts`, `presentations/multi-schema.ts`, `slide-schema.ts`) → servido em `app/dev/openapi.json/route.ts` → renderizado em `app/dev/api-docs/route.ts` (Scalar). Fora do roteamento `[lang]` por ser ferramenta de dev, não rota de produto — mesmo racional do antigo `app/dev/sandbox/` (removido, movido pro usuário pra `./temp`).
+
+**Consequências:** Cobre hoje só as 11 rotas de `/api/v1/app/presentations/**`. Ao adicionar rotas novas (admin, settings), o padrão é: schema já existe em `schemas/`, só adicionar a entrada correspondente em `lib/openapi/document.ts`. Não substitui os `.http` — continuam sendo o fluxo rápido de teste manual via REST Client; o Scalar é complementar (UI navegável, sem side-effect ao só abrir a página).
+
+---
+
+## ADR-012 — Processamento em background: Inngest nas 4 rotas de generate/regenerate
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** As rotas de geração via IA (`outlines/generate`, `outlines/[id]/generate`, `slides/generate`, `slides/[id]/generate`) rodavam o workflow do Mastra e persistiam o resultado de forma **síncrona**, dentro do próprio handler da rota — o client ficava esperando a duração inteira da geração (dezenas de segundos). Se o usuário navegasse pra outra rota ou desse refresh, a conexão HTTP era perdida e o client nunca saberia se/quando terminou (mesmo que o trabalho no servidor completasse). Além disso, sem retry automático: qualquer falha transitória (rede, rate limit do LLM) exigia o usuário disparar tudo de novo manualmente.
+
+**Decisão (ferramenta):** Inngest — execução durável orientada a eventos, já com retry automático por function e memoização por `step.run()`. A tabela `generation` (`GenerationType`/`GenerationStatus`: pending/completed/failed) já existia no schema e já era exatamente o mecanismo necessário pra rastrear esse status assíncrono — nenhuma migration nova precisou ser criada.
+
+**Decisão (contrato de resposta):** Antes de mexer na execução em si, as 4 rotas de generate/regenerate passaram a responder com um envelope discriminado (`generationResponseSchema`, `schemas/app/generation-schema.ts`): `{status: "completed", data: T} | {status: "pending", generationId}`. Isso desacopla a mudança de contrato da mudança de implementação — `actions/app/` e `hooks/app/` já tipam pros dois branches antes de qualquer rota virar assíncrona de fato.
+
+**Decisão (rollout):** Migração rota por rota (não um `/v2` paralelo nem "big bang"), validando cada uma via curl antes de seguir pra próxima — `outlines/generate` primeiro, depois `outlines/[id]/generate`, `slides/generate` e `slides/[id]/generate`, todas seguindo o mesmo formato:
+1. `route.ts` cria a `generation` (status: pending) e despacha `inngest.send({name: "...", data: {..., generationId, ...}})`, respondendo `202` com `{status: "pending", generationId}` na hora — sem esperar a IA.
+2. Uma function em `lib/inngest/functions/` por evento (`generate-outline.ts`, `regenerate-outline.ts`, `generate-slides.ts`, `regenerate-slide.ts`), cada uma rodando o service correspondente dentro de um `step.run()`, usando o `generationId` já criado.
+3. Cliente descobre que terminou dando poll em `GET /presentations/:id` / `GET /presentations/:id/slides` — não existe endpoint de status dedicado ainda.
+
+Duas variações no meio do caminho, pela forma como cada service já rastreava (ou não) generation antes:
+- `multiOutlineService().regenerate()` **não tinha nenhum tracking de generation** — adicionado do zero (aceita `generationId` externo, igual `generate()`)
+- `slideService().generate()` (lote) já cria uma `generation` **por item** internamente — isso ficou como está; o `generationId` que a rota cria é só um wrapper pra rastrear o lote inteiro, atualizado pela function após a chamada ao service (não passado pra dentro dele)
+
+**Ambiente de dev:** `bun run dev:all` (script novo, usa `concurrently` pra rodar `next dev` + `inngest-cli dev` juntos, prefixados/coloridos) + `INNGEST_DEV=1` no `.env.local` (sem isso o SDK assume modo cloud e exige signing key). Em produção, quem faz esse papel é o serviço cloud da Inngest (`INNGEST_EVENT_KEY`/`INNGEST_SIGNING_KEY`, integração via Vercel Marketplace — sincroniza automaticamente a cada deploy, ainda não configurado).
+
+**Armadilhas encontradas:**
+- API do `createFunction` na versão instalada (4.12.1): não é mais `createFunction(config, trigger, handler)`, e sim `createFunction({ id, triggers: { event } }, handler)` (trigger dentro do primeiro argumento)
+- `inngest-cli` via `npx inngest-cli@latest` falha (`Inngest CLI binary not found` — postinstall que baixa o binário nativo é pulado numa instalação efêmera). Resolvido instalando como devDependency local (`bun add -d inngest-cli` + `bun pm trust inngest-cli`) e apontando o script pro binário local, não pro `npx ...@latest`
+
+**Alternativa considerada e descartada — `after()` (`next/server`, nativo, sem serviço externo):** resolveria a parte de "sobrevive a navegação/refresh do usuário" (via `waitUntil` da Vercel), mas sem retry automático, sem checkpointing por step (se cair no meio é tudo-ou-nada) e preso ao `maxDuration` da rota (a geração de slides em lote já passa de 90s). Fica registrado como opção mais simples pra casos que não precisam dessas garantias (ex: incrementar `presentation.viewsCount` de forma fire-and-forget) — não é substituto do Inngest pros fluxos de geração via IA.
+
+**Outras alternativas descartadas:**
+- Manter síncrono e só aumentar o timeout da rota — não resolve o problema de perder o resultado se o client navegar/atualizar a página
+- BullMQ/Redis — exigiria infra própria (Redis) só pra isso; Inngest já resolve execução durável + retry sem infra adicional pro estágio atual do projeto
+
+**Consequências:** `multiOutlineService().generate()`, `multiOutlineService().regenerate()` e `slideService().regenerate()` mudaram de assinatura (recebem `generationId` como parâmetro) — únicos callers eram as rotas, então sem impacto em outros lugares. `slideService().generate()` manteve a assinatura (tracking interno por item preservado). Todas as 4 rotas validadas end-to-end manualmente (curl): respondem `202` instantâneo, function completa em background (visível no dashboard do Inngest Dev Server), resultado aparece via poll depois.

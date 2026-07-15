@@ -4,14 +4,14 @@
 
 # ─── Outlines ─────────────────────────────────────────────────────────────────
 
-### POST /presentations/:id/outlines/generate — gerar outlines
+### POST /presentations/:id/outlines/generate — gerar outlines (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id)
 POST {{baseUrl}}/presentations/{{presentationId}}/outlines/generate
 Content-Type: application/json
 
 {
   "userPrompt": "Uma apresentação sobre inteligência artificial no mercado de trabalho",
   "language": 0,
-  "slideCount": 0,
+  "slideCount": 5,
   "keywords": ["IA", "automação", "futuro do trabalho"]
 }
 
@@ -34,7 +34,7 @@ Content-Type: application/json
 
 ###
 
-### POST /presentations/:id/outlines/:outlineId/generate — regenerar outline individual
+### POST /presentations/:id/outlines/:outlineId/generate — regenerar outline individual (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id)
 POST {{baseUrl}}/presentations/{{presentationId}}/outlines/{{outlineId}}/generate
 Content-Type: application/json
 

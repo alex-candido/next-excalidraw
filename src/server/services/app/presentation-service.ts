@@ -29,5 +29,18 @@ export function presentationService() {
     return { presentationId: row.id, type: row.type }
   }
 
-  return { create }
+  async function findById(id: string, userId: string) {
+    const presentation = await presentationRepository().findById(id)
+    if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
+    if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
+
+    return presentation
+  }
+
+  async function moveToTrash(id: string, userId: string) {
+    await findById(id, userId)
+    return presentationRepository().update(id, { status: PresentationStatus.trash })
+  }
+
+  return { create, findById, moveToTrash }
 }

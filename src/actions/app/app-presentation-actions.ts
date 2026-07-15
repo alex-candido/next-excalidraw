@@ -4,7 +4,7 @@ import type {
   PresentationCreate,
   PresentationCreateResult,
   PresentationGenerate,
-  PresentationGenerateResult,
+  PresentationGenerateResponse,
   PresentationWithOutlines,
 } from "@/schemas/app/presentation-schema"
 
@@ -27,16 +27,16 @@ export function presentationActions() {
     })
   }
 
-  async function remove(id: string) {
+  async function moveToTrash(id: string) {
     await apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" })
   }
 
   async function generateOutline(id: string, input: PresentationGenerate) {
-    return apiFetch<PresentationGenerateResult>(`${BASE}/${id}/outlines/generate`, {
+    return apiFetch<PresentationGenerateResponse>(`${BASE}/${id}/outlines/generate`, {
       method: "POST",
       body: JSON.stringify(input),
     })
   }
 
-  return { list, findById, create, remove, generateOutline }
+  return { list, findById, create, moveToTrash, generateOutline }
 }
