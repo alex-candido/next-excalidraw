@@ -1,8 +1,11 @@
 "use client";
 
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -10,31 +13,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import type { PresentationCreate } from "@/schemas/app/presentation-schema";
 import { useAppStart } from "@/providers/app/app-start-provider";
 
 // slideCount só faz sentido pro modo multi (número de slides de uma apresentação) —
-// no modo single é uma página só, esse parâmetro não se aplica. Todos os outros
-// ficam sempre visíveis, sem esconder atrás de "mais opções".
+// no modo single é uma página só, esse parâmetro não se aplica.
 const ALL_KEYS = [
   "slideCount", "language", "aspectRatio", "amount", "audience", "scenario", "theme",
 ] as const satisfies readonly (keyof PresentationCreate)[];
 
 type ControlKey = (typeof ALL_KEYS)[number];
 
+// 1ª linha sempre visível — os demais ficam atrás do botão "mais" (2ª linha),
+// evitando os 7 juntos numa linha só (poluído). Todos continuam acessíveis,
+// só progressivamente revelados, não escondidos de vez atrás de um menu.
+const PRIMARY_KEYS = new Set<ControlKey>(["slideCount", "language", "aspectRatio", "amount"]);
+
 // Campos que uma suggestion clicada preenche (ver AppStartProvider.onSelectSuggestion)
-// — mudar qualquer um manualmente desfaz o vínculo. slideCount/language ficam
-// de fora: a suggestion não define esses dois.
-const SUGGESTION_FIELDS = new Set<ControlKey>(["aspectRatio", "amount", "audience", "scenario", "theme"]);
+// — mudar qualquer um manualmente desfaz o vínculo. `language` fica de fora:
+// a suggestion não define idioma, é sempre o do app atual.
+const SUGGESTION_FIELDS = new Set<ControlKey>(["slideCount", "aspectRatio", "amount", "audience", "scenario", "theme"]);
 
 export function AppStartFormControls() {
   const t = useTranslations("app.start.form.controls");
   const { type, control, onSuggestionFieldEdit } = useAppStart();
+  const [expanded, setExpanded] = useState(false);
 
   const keys = ALL_KEYS.filter(
     (key) => key !== "slideCount" || type === PresentationType.multi,
   );
+  const primaryKeys = keys.filter((key) => PRIMARY_KEYS.has(key));
+  const secondaryKeys = keys.filter((key) => !PRIMARY_KEYS.has(key));
 
   const renderControl = (key: ControlKey) => {
     const items = t.raw(`${key}.items`) as string[];
@@ -80,8 +96,36 @@ export function AppStartFormControls() {
   };
 
   return (
-    <div className="app-start-form-controls flex flex-wrap items-center gap-1.5">
-      {keys.map(renderControl)}
+    <div className="app-start-form-controls flex flex-col gap-1.5">
+      <div className="app-start-form-controls-row flex flex-wrap items-center gap-1.5">
+        {primaryKeys.map(renderControl)}
+        {secondaryKeys.length > 0 && (
+          <TooltipProvider delay={300}>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="app-start-form-controls-toggle shrink-0 text-muted-foreground"
+                    aria-label={expanded ? t("less") : t("more")}
+                    onClick={() => setExpanded((v) => !v)}
+                  />
+                }
+              >
+                {expanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+              </TooltipTrigger>
+              <TooltipContent>{expanded ? t("less") : t("more")}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+      {expanded && secondaryKeys.length > 0 && (
+        <div className="app-start-form-controls-row flex flex-wrap items-center gap-1.5">
+          {secondaryKeys.map(renderControl)}
+        </div>
+      )}
     </div>
   );
 }

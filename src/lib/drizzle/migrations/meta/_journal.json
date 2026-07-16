@@ -43,6 +43,13 @@
       "when": 1784221073371,
       "tag": "0005_fine_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784234850964,
+      "tag": "0006_sturdy_firelord",
+      "breakpoints": true
     }
   ]
 }

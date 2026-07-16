@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server"
-import { slideBulkUpdateSchema } from "@/schemas/app/slide-schema"
+import { slideBulkUpdateSchema, slideManualCreateSchema } from "@/schemas/app/slide-schema"
 import { slideRepository } from "@/server/repositories/app/slide-repository"
 import { slideService } from "@/server/services/app/slide-service"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
@@ -17,6 +17,25 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const slides = await slideRepository().findByPresentationId(id)
   return Response.json({ slides }, { status: 200 })
+}
+
+export async function POST(req: NextRequest, { params }: Params) {
+  const { id } = await params
+  const body   = await req.json()
+  const parsed = slideManualCreateSchema.safeParse(body)
+
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.flatten() }, { status: 400 })
+  }
+
+  try {
+    const created = await slideService().createManual(id, DEV_USER_ID, parsed.data.slides)
+    return Response.json({ created }, { status: 201 })
+  } catch (err: unknown) {
+    const status = (err as { status?: number }).status ?? 500
+    const message = err instanceof Error ? err.message : "Internal server error"
+    return Response.json({ error: message }, { status })
+  }
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {

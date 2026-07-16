@@ -1,4 +1,4 @@
-import { db } from "@/lib/drizzle"
+import { db, type DbClient } from "@/lib/drizzle"
 import { outline } from "@/lib/drizzle/schema/outline"
 import { eq, inArray } from "drizzle-orm"
 
@@ -6,8 +6,8 @@ export type OutlineInsert = typeof outline.$inferInsert
 export type OutlineUpdate = Partial<Pick<OutlineInsert, "title" | "description" | "representation">>
 
 export function outlineRepository() {
-  async function createMany(data: OutlineInsert[]) {
-    return db.insert(outline).values(data).returning()
+  async function createMany(data: OutlineInsert[], client: DbClient = db) {
+    return client.insert(outline).values(data).returning()
   }
 
   async function findByPresentationId(presentationId: string) {

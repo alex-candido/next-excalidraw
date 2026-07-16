@@ -18,6 +18,7 @@ export interface AppPresentationsListItem {
   createdAtLabel: string;
   createdBy: string;
   isFavorited: boolean;
+  thumbnail: string | null;
 }
 
 interface AppPresentationsListContextProps {
@@ -27,6 +28,8 @@ interface AppPresentationsListContextProps {
   isTrashView: boolean;
   onTrashToggle: () => void;
   onMoveToTrash: (id: string) => void;
+  onRename: (id: string, title: string) => void;
+  onDuplicate: (id: string) => void;
 }
 
 const AppPresentationsListContext = createContext<AppPresentationsListContextProps | undefined>(undefined);
@@ -43,14 +46,17 @@ function toListItem(p: Presentation, lang: string): AppPresentationsListItem {
     createdBy: "",
     // Sem campo `favorited` no schema ainda — gap conhecido, ver pm.md Backlog.
     isFavorited: false,
+    thumbnail: p.thumbnail,
   };
 }
 
 export const AppPresentationsListProvider = ({ children }: { children: ReactNode }) => {
   const { lang } = useParams<{ lang?: string }>();
-  const { useList, useMoveToTrash } = useAppPresentation();
+  const { useList, useMoveToTrash, useRename, useDuplicate } = useAppPresentation();
   const { data, isLoading } = useList();
   const moveToTrash = useMoveToTrash();
+  const rename = useRename();
+  const duplicate = useDuplicate();
   const [isTrashView, setIsTrashView] = useState(false);
 
   const all = data ?? [];
@@ -68,6 +74,8 @@ export const AppPresentationsListProvider = ({ children }: { children: ReactNode
     isTrashView,
     onTrashToggle: () => setIsTrashView((v) => !v),
     onMoveToTrash: (id: string) => moveToTrash.mutate(id),
+    onRename: (id: string, title: string) => rename.mutate({ id, title }),
+    onDuplicate: (id: string) => duplicate.mutate(id),
   };
 
   return (

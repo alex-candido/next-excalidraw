@@ -2,7 +2,7 @@
   "app": {
     "new": {
       "trigger": "Nova apresentação",
-      "title": "Nova apresentação",
+      "title": "Nova apresentação em branco",
       "fields": {
         "title": {
           "label": "Título",
@@ -21,12 +21,26 @@
         "singleDescription": "Um canvas único para diagramas e esquemas"
       },
       "features": {
-        "label": "Excalidraw",
-        "items": [
-          "An AI-powered all-in-one diagram platform",
-          "A polished whiteboard tool with a clean, intuitive hand-drawn style",
-          "Free-form drawing with shapes, arrows, text, and more"
-        ]
+        "multi": {
+          "label": "Apresentação",
+          "items": [
+            "Vários slides conectados por uma narrativa",
+            "Estrutura em tópicos, editável a qualquer momento",
+            "Ideal pra pitch, aula, relatório ou proposta"
+          ]
+        },
+        "single": {
+          "label": "Diagrama",
+          "items": [
+            "Um único canvas livre pra desenhar",
+            "Fluxogramas, mapas mentais, arquiteturas e esquemas",
+            "Formas, setas e texto — sem estrutura de slides"
+          ]
+        }
+      },
+      "blank": {
+        "cta": "Quer gerar com IA?",
+        "link": "Use o formulário principal"
       },
       "actions": {
         "cancel": "Cancelar",

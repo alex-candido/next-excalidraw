@@ -1,73 +1,75 @@
 "use client";
 
-import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
-import { arrayMove } from "@dnd-kit/sortable";
 import { useParams } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
 import { useAppSlide } from "@/hooks/app/use-app-slide";
 import { routing } from "@/i18n/routing";
+import { OutlineType } from "@/lib/drizzle/schema/outline";
 import { SlideStatus } from "@/lib/drizzle/schema/slide";
 import { formatRelativeDate } from "@/lib/utils";
+import {
+  type AppPresentationsStudioScene,
+  type AppPresentationsStudioSlide,
+  useStudioStore,
+} from "@/store/app-studio-store";
 
-export interface AppPresentationsStudioScene {
-  type: "excalidraw";
-  version: number;
-  source: string;
-  elements: readonly ExcalidrawElement[];
-  appState: { viewBackgroundColor: string; gridSize: number };
-  files: Record<string, never>;
+function findCoverSlide(slides: AppPresentationsStudioSlide[], outlines: { id: string; type: number }[] | undefined) {
+  const outlineTypeById = new Map(outlines?.map((o) => [o.id, o.type]) ?? []);
+  return slides.find((s) => !s.isLocal && s.outlineId && outlineTypeById.get(s.outlineId) === OutlineType.cover);
 }
 
-export interface AppPresentationsStudioSlide {
-  id: string;
-  order: number;
-  title: string;
-  thumbnail?: string;
-  isHidden?: boolean;
-  scene: AppPresentationsStudioScene;
-  isLocal?: boolean;
+// Compartilhado entre o save manual e a geração automática pós-hidratação —
+// os elements passados já são os que devem valer (ativos no canvas ou os
+// salvos, dependendo de quem chama), essa função só exporta e sobe.
+async function uploadCoverThumbnail(presentationId: string, slideId: string, elements: unknown, appState: unknown) {
+  const { exportToBlob } = await import("@excalidraw/excalidraw");
+  const blob = await exportToBlob({
+    elements: elements as never,
+    appState: appState as never,
+    files: null,
+    mimeType: "image/png",
+    maxWidthOrHeight: 400,
+  });
+
+  const formData = new FormData();
+  formData.append("file", blob, "thumbnail.png");
+  await fetch(`/api/v1/app/presentations/${presentationId}/slides/${slideId}/thumbnail`, {
+    method: "POST",
+    body: formData,
+  });
 }
 
-export type StudioPanelKey = "settings" | "source" | "history";
+export type {
+  AppPresentationsStudioScene,
+  AppPresentationsStudioSlide,
+  StudioPanelKey,
+} from "@/store/app-studio-store";
+export {
+  useStudioActions,
+  useStudioActivePanel,
+  useStudioActiveSlide,
+  useStudioActiveSlideId,
+  useStudioIsSaving,
+  useStudioIsWaitingSlides,
+  useStudioSlides,
+} from "@/store/app-studio-store";
 
 const POLL_INTERVAL_MS = 3000;
 
-function buildEmptyScene(): AppPresentationsStudioScene {
-  return {
-    type: "excalidraw",
-    version: 2,
-    source: "https://excalidraw.com",
-    elements: [],
-    appState: { viewBackgroundColor: "#ffffff", gridSize: 20 },
-    files: {},
-  };
-}
-
+// Só os valores derivados do servidor que raramente mudam (1x por load da
+// presentation, não a cada edição) — o estado de edição em si (slides,
+// activeSlideId, painel, etc.) vive no Zustand (store/app-studio-store.ts),
+// que dá subscription seletiva por slice em vez de re-renderizar tudo a cada
+// mudança, como Context faria. Ver docs/sdd/1-product/pm/decisions.md.
 type AppPresentationsStudioContextProps = {
   title: string;
   createdAtLabel: string;
   createdBy: string;
   isFavorited: boolean;
   isLoading: boolean;
-  isWaitingSlides: boolean;
-  slides: AppPresentationsStudioSlide[];
-  activeSlideId: string;
-  activeSlide: AppPresentationsStudioSlide;
-  onSelectSlide: (id: string) => void;
-  onAddSlide: () => void;
-  onReorderSlides: (activeId: string, overId: string) => void;
-  onDuplicateSlide: (id: string) => void;
-  onToggleHiddenSlide: (id: string) => void;
-  onDeleteSlide: (id: string) => void;
-  registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
-  isSaving: boolean;
   onSave: () => void;
-  activePanel: StudioPanelKey | null;
-  onOpenPanel: (panel: StudioPanelKey) => void;
-  onClosePanel: () => void;
 };
 
 const AppPresentationsStudioContext = createContext<AppPresentationsStudioContextProps | undefined>(undefined);
@@ -86,16 +88,25 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
   const lang = routeParams.lang ?? routing.defaultLocale;
 
   const { useDetail } = useAppPresentation();
-  const { useList, useBulkUpdate } = useAppSlide();
+  const { useList, useCreateManual, useBulkUpdate } = useAppSlide();
 
-  const [slides, setSlides] = useState<AppPresentationsStudioSlide[]>([]);
-  const [activeSlideId, setActiveSlideId] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [activePanel, setActivePanel] = useState<StudioPanelKey | null>(null);
+  const resetForPresentation = useStudioStore((s) => s.resetForPresentation);
+  const hydrate = useStudioStore((s) => s.hydrate);
+  const setIsSaving = useStudioStore((s) => s.setIsSaving);
+  const captureActiveSlideElements = useStudioStore((s) => s.captureActiveSlideElements);
+  const reconcileCreatedSlides = useStudioStore((s) => s.reconcileCreatedSlides);
+
   const [hasHydrated, setHasHydrated] = useState(false);
-  const excalidrawApiRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const serializeRef = useRef<((skeletons: unknown[]) => AppPresentationsStudioScene) | null>(null);
   const [isSerializerReady, setIsSerializerReady] = useState(false);
+
+  // Presentation trocou (navegação sem reload, ex: lista -> studio de outra
+  // presentation) — store é global, então precisa resetar manualmente (não
+  // acontece sozinho como aconteceria com um useState de componente desmontado).
+  useEffect(() => {
+    resetForPresentation(presentationId);
+    setHasHydrated(false);
+  }, [presentationId, resetForPresentation]);
 
   const { data: presentation, isLoading: isLoadingPresentation } = useDetail(presentationId);
   // slideService().generate() cria os slides um de cada vez, em sequência — não dá pra
@@ -108,6 +119,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
         ? POLL_INTERVAL_MS
         : false,
   });
+  const createManual = useCreateManual(presentationId);
   const bulkUpdate = useBulkUpdate(presentationId);
 
   // convertToExcalidrawElements toca `window` na avaliação do módulo — import adiado
@@ -129,7 +141,6 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     // Ainda esperando a geração inicial terminar (poll continua) — não hidrata com
     // um subconjunto parcial dos slides.
     if (expectedSlideCount > 0 && rawSlides.length < expectedSlideCount) return;
-    if (rawSlides.length === 0) return;
 
     const outlineTitleById = new Map(presentation?.outlines.map((o) => [o.id, o.title]) ?? []);
     const serialize = serializeRef.current;
@@ -145,120 +156,74 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
         thumbnail: s.thumbnail ?? undefined,
         isHidden: s.status === SlideStatus.inactive,
         scene: serialize((s.elements ?? []) as unknown[]),
+        outlineId: s.outlineId,
       }));
 
-    setSlides(hydrated);
-    setActiveSlideId(hydrated[0]?.id ?? "");
+    hydrate(hydrated);
     setHasHydrated(true);
-  }, [rawSlides, isSerializerReady, hasHydrated, presentation]);
 
-  const captureActiveSlideElements = () => {
-    const api = excalidrawApiRef.current;
-    if (!api) return;
-
-    const elements = [...api.getSceneElements()];
-    setSlides((prev) =>
-      prev.map((slide) =>
-        slide.id === activeSlideId
-          ? { ...slide, scene: { ...slide.scene, elements } }
-          : slide,
-      ),
-    );
-  };
-
-  const onSelectSlide = (id: string) => {
-    if (id === activeSlideId) return;
-    captureActiveSlideElements();
-    setActiveSlideId(id);
-  };
-
-  // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só local
-  // (mesmo tratamento combinado pro outline). Ver pm.md Backlog.
-  const onAddSlide = () =>
-    setSlides((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        order: prev.length,
-        title: "Novo slide",
-        scene: buildEmptyScene(),
-        isLocal: true,
-      },
-    ]);
-
-  const onDuplicateSlide = (id: string) =>
-    setSlides((prev) => {
-      const index = prev.findIndex((slide) => slide.id === id);
-      if (index === -1) return prev;
-      const duplicate = { ...prev[index], id: crypto.randomUUID(), isLocal: true };
-      return [...prev.slice(0, index + 1), duplicate, ...prev.slice(index + 1)].map(
-        (slide, i) => ({ ...slide, order: i }),
-      );
-    });
-
-  const onReorderSlides = (activeId: string, overId: string) => {
-    setSlides((prev) => {
-      const oldIndex = prev.findIndex((slide) => slide.id === activeId);
-      const newIndex = prev.findIndex((slide) => slide.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-      return arrayMove(prev, oldIndex, newIndex).map((slide, index) => ({
-        ...slide,
-        order: index,
-      }));
-    });
-  };
-
-  const onToggleHiddenSlide = (id: string) =>
-    setSlides((prev) =>
-      prev.map((slide) => (slide.id === id ? { ...slide, isHidden: !slide.isHidden } : slide)),
-    );
-
-  const onDeleteSlide = (id: string) => {
-    if (slides.length <= 1) return;
-    setSlides((prev) =>
-      prev.filter((slide) => slide.id !== id).map((slide, i) => ({ ...slide, order: i })),
-    );
-    if (id === activeSlideId) {
-      const fallback = slides.find((slide) => slide.id !== id);
-      if (fallback) setActiveSlideId(fallback.id);
+    // Cobre o caso de o usuário nunca clicar em "Salvar" (só olhar o Studio e
+    // ir direto pra Apresentar, por exemplo) — sem isso a capa nunca seria
+    // gerada. Só dispara se a capa ainda não tiver thumbnail (não repete a
+    // cada vez que o Studio é aberto).
+    const coverSlide = findCoverSlide(hydrated, presentation?.outlines);
+    if (coverSlide && !coverSlide.thumbnail && coverSlide.scene.elements.length > 0) {
+      uploadCoverThumbnail(presentationId, coverSlide.id, coverSlide.scene.elements, coverSlide.scene.appState)
+        .catch((err) => console.warn("Falha ao gerar thumbnail da capa:", err));
     }
-  };
-
-  const registerExcalidrawApi = (api: ExcalidrawImperativeAPI | null) => {
-    excalidrawApiRef.current = api;
-  };
-
-  const onOpenPanel = (panel: StudioPanelKey) =>
-    setActivePanel((prev) => (prev === panel ? null : panel));
-
-  const onClosePanel = () => setActivePanel(null);
+  }, [rawSlides, isSerializerReady, hasHydrated, presentation, hydrate, presentationId]);
 
   const onSave = async () => {
     captureActiveSlideElements();
     setIsSaving(true);
     try {
-      const api = excalidrawApiRef.current;
-      const activeElements = api ? [...api.getSceneElements()] : undefined;
+      let { slides, activeSlideId } = useStudioStore.getState();
+      const { excalidrawApi } = useStudioStore.getState();
+      const activeElements = excalidrawApi ? [...excalidrawApi.getSceneElements()] : undefined;
 
-      await bulkUpdate.mutateAsync({
-        slides: slides
-          .filter((s) => !s.isLocal)
-          .map((s) => ({
+      const outlineTypeById = new Map(presentation?.outlines.map((o) => [o.id, o.type]) ?? []);
+
+      // Slide adicionado no Studio (onAddSlide) fica só local até aqui — o
+      // outline que ele precisa (FK obrigatória) é criado junto, no mesmo
+      // request, decidido no servidor (cover se for o primeiro da presentation,
+      // senão content). Só depois disso os ids deixam de ser de mentira.
+      const localSlides = slides.filter((s) => s.isLocal);
+      if (localSlides.length > 0) {
+        const { created } = await createManual.mutateAsync({
+          slides: localSlides.map((s) => ({ tempId: s.id, order: s.order, title: s.title })),
+        });
+        created.forEach((c) => outlineTypeById.set(c.outlineId, c.type));
+        reconcileCreatedSlides(created);
+        ({ slides, activeSlideId } = useStudioStore.getState());
+      }
+
+      const slidesToPersist = slides.filter((s) => !s.isLocal);
+      if (slidesToPersist.length > 0) {
+        await bulkUpdate.mutateAsync({
+          slides: slidesToPersist.map((s) => ({
             id: s.id,
             elements: ((s.id === activeSlideId ? activeElements : undefined) ?? s.scene.elements) as unknown as Record<string, unknown>[],
             appState: s.scene.appState,
           })),
-      });
+        });
+      }
+
+      // Capa = slide do outline type=cover (não é só o primeiro por posição,
+      // embora na prática coincidam — a fonte de verdade é o type). Gera a
+      // thumbnail a partir dos elements reais que acabaram de ser salvos, não
+      // bloqueia/derruba o save principal se falhar.
+      const coverSlide = slides.find((s) => !s.isLocal && s.outlineId && outlineTypeById.get(s.outlineId) === OutlineType.cover);
+
+      if (coverSlide) {
+        const coverElements = (coverSlide.id === activeSlideId ? activeElements : undefined) ?? coverSlide.scene.elements;
+        if (coverElements && coverElements.length > 0) {
+          await uploadCoverThumbnail(presentationId, coverSlide.id, coverElements, coverSlide.scene.appState)
+            .catch((err) => console.warn("Falha ao gerar thumbnail da capa:", err));
+        }
+      }
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const activeSlide = slides.find((slide) => slide.id === activeSlideId) ?? slides[0] ?? {
-    id: "",
-    order: 0,
-    title: "",
-    scene: buildEmptyScene(),
   };
 
   const value: AppPresentationsStudioContextProps = {
@@ -267,22 +232,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     createdBy: "",
     isFavorited: false,
     isLoading: isLoadingPresentation || isLoadingSlides,
-    isWaitingSlides: !hasHydrated,
-    slides,
-    activeSlideId,
-    activeSlide,
-    onSelectSlide,
-    onAddSlide,
-    onReorderSlides,
-    onDuplicateSlide,
-    onToggleHiddenSlide,
-    onDeleteSlide,
-    registerExcalidrawApi,
-    isSaving,
     onSave,
-    activePanel,
-    onOpenPanel,
-    onClosePanel,
   };
 
   return (

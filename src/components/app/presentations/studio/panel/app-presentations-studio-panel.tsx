@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import { useStudioActions, useStudioActivePanel } from "@/providers/app/app-presentations-studio-provider";
 
 import { AppPresentationsStudioPanelHistory } from "@/components/app/presentations/studio/panel/app-presentations-studio-panel-history";
 import { AppPresentationsStudioPanelSettings } from "@/components/app/presentations/studio/panel/app-presentations-studio-panel-settings";
@@ -45,7 +45,8 @@ function AppPresentationsStudioPanelBody({ activePanel }: { activePanel: "settin
 
 export function AppPresentationsStudioPanel() {
   const t = useTranslations("app.studio.panel");
-  const { activePanel, onClosePanel } = useAppPresentationsStudio();
+  const activePanel = useStudioActivePanel();
+  const { onClosePanel } = useStudioActions();
   const isMobile = useIsMobile();
 
   if (!activePanel) return null;

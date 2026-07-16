@@ -3,7 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { slideActions } from "@/actions/app/app-slide-actions";
-import type { Slide, SlideRegenerate } from "@/schemas/app/slide-schema";
+import { appPresentationKeys } from "@/hooks/app/use-app-presentation";
+import type { Slide, SlideManualCreate, SlideRegenerate } from "@/schemas/app/slide-schema";
 
 export const appSlideKeys = {
   all: (presentationId: string) => ["slides", presentationId] as const,
@@ -36,6 +37,18 @@ export function useAppSlide() {
     });
   }
 
+  function useCreateManual(presentationId: string) {
+    return useMutation({
+      mutationFn: (input: SlideManualCreate) => slideActions().createManual(presentationId, input),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: appSlideKeys.all(presentationId) });
+        // outlines vivem na query da presentation, não na de slides — sem
+        // isso a próxima hidratação do Studio ainda veria `outlines: []`.
+        queryClient.invalidateQueries({ queryKey: appPresentationKeys.detail(presentationId) });
+      },
+    });
+  }
+
   function useBulkUpdate(presentationId: string) {
     return useMutation({
       mutationFn: slideActions().bulkUpdate.bind(null, presentationId),
@@ -55,5 +68,5 @@ export function useAppSlide() {
     });
   }
 
-  return { useList, useGenerate, useBulkUpdate, useRegenerate };
+  return { useList, useGenerate, useCreateManual, useBulkUpdate, useRegenerate };
 }

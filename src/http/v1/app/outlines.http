@@ -34,7 +34,7 @@ Content-Type: application/json
 
 ###
 
-### POST /presentations/:id/outlines/:outlineId/generate — regenerar outline individual (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id)
+### POST /presentations/:id/outlines/:outlineId/generate — regenerar outline individual (síncrono — resolve dentro da própria request, sem Inngest/polling)
 POST {{baseUrl}}/presentations/{{presentationId}}/outlines/{{outlineId}}/generate
 Content-Type: application/json
 

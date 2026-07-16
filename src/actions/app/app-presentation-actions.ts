@@ -3,8 +3,11 @@ import type {
   Presentation,
   PresentationCreate,
   PresentationCreateResult,
+  PresentationDuplicateResult,
   PresentationGenerate,
   PresentationGenerateResponse,
+  PresentationRename,
+  PresentationRenameResult,
   PresentationWithOutlines,
 } from "@/schemas/app/presentation-schema"
 
@@ -31,6 +34,17 @@ export function presentationActions() {
     await apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" })
   }
 
+  async function rename(id: string, input: PresentationRename) {
+    return apiFetch<PresentationRenameResult>(`${BASE}/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    })
+  }
+
+  async function duplicate(id: string) {
+    return apiFetch<PresentationDuplicateResult>(`${BASE}/${id}/duplicate`, { method: "POST" })
+  }
+
   async function generateOutline(id: string, input: PresentationGenerate) {
     return apiFetch<PresentationGenerateResponse>(`${BASE}/${id}/outlines/generate`, {
       method: "POST",
@@ -38,5 +52,5 @@ export function presentationActions() {
     })
   }
 
-  return { list, findById, create, moveToTrash, generateOutline }
+  return { list, findById, create, moveToTrash, rename, duplicate, generateOutline }
 }

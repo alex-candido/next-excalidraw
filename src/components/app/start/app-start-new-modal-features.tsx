@@ -1,13 +1,22 @@
 import { useTranslations } from "next-intl";
 
-export function AppStartNewModalFeatures() {
+import { PresentationType } from "@/lib/drizzle/schema/presentation";
+
+type PresentationTypeValue = (typeof PresentationType)[keyof typeof PresentationType];
+
+interface AppStartNewModalFeaturesProps {
+  type: PresentationTypeValue;
+}
+
+export function AppStartNewModalFeatures({ type }: AppStartNewModalFeaturesProps) {
   const t = useTranslations("app.new.features");
-  const items = t.raw("items") as string[];
+  const key = type === PresentationType.single ? "single" : "multi";
+  const items = t.raw(`${key}.items`) as string[];
 
   return (
     <div className="app-start-new-modal-features flex flex-col gap-2 rounded-xl bg-muted/50 p-3">
       <span className="app-start-new-modal-features-label text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {t("label")}
+        {t(`${key}.label`)}
       </span>
       <ul className="app-start-new-modal-features-list flex flex-col gap-1.5">
         {items.map((item, i) => (

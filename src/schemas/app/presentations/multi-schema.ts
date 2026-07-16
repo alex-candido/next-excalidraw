@@ -2,7 +2,6 @@ import { z } from "zod"
 import { PresentationLanguage } from "@/lib/drizzle/schema/presentation"
 import { OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { attachmentContextSchema } from "@/schemas/app/attachment-schema"
-import { generationResponseSchema } from "@/schemas/app/generation-schema"
 import { outlineWorkflowOutputSchema } from "@/schemas/app/outline-schema"
 
 export const REPRESENTATION_BY_TYPE: Record<string, string[]> = {
@@ -67,6 +66,4 @@ export const outlineRegenerateResultSchema = z.object({
 
 export type OutlineRegenerateResult = z.infer<typeof outlineRegenerateResultSchema>
 
-export const outlineRegenerateResponseSchema = generationResponseSchema(outlineRegenerateResultSchema)
-
-export type OutlineRegenerateResponse = z.infer<typeof outlineRegenerateResponseSchema>
+export type OutlineRegenerateResponse = OutlineRegenerateResult

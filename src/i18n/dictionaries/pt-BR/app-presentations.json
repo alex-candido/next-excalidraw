@@ -39,6 +39,12 @@
           "deletePermanently": "Excluir permanentemente"
         }
       },
+      "rename": {
+        "modal": {
+          "title": "Renomear apresentação",
+          "confirm": "Salvar"
+        }
+      },
       "trash": {
         "modal": {
           "title": "Mover para a lixeira?",

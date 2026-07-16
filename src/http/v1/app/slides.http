@@ -38,6 +38,18 @@ GET {{baseUrl}}/presentations/{{presentationId}}/slides
 
 ###
 
+### POST /presentations/:id/slides — criar slide(s) manualmente (Studio, onAddSlide persistido só no save) — cria o outline junto (cover se for o 1º da presentation, senão content)
+POST {{baseUrl}}/presentations/{{presentationId}}/slides
+Content-Type: application/json
+
+{
+  "slides": [
+    { "tempId": "temp-1", "order": 0, "title": "Novo slide" }
+  ]
+}
+
+###
+
 ### PATCH /presentations/:id/slides — salvar estado dos slides (editor)
 PATCH {{baseUrl}}/presentations/{{presentationId}}/slides
 Content-Type: application/json
@@ -54,7 +66,7 @@ Content-Type: application/json
 
 ###
 
-### POST /presentations/:id/slides/:slideId/generate — regenerar slide individual (background via Inngest — responde 202 {status:"pending", generationId} na hora; poll em GET /presentations/:id/slides)
+### POST /presentations/:id/slides/:slideId/generate — regenerar slide individual (síncrono — resolve dentro da própria request, sem Inngest/polling)
 POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/generate
 Content-Type: application/json
 
@@ -67,3 +79,9 @@ Content-Type: application/json
   "representation": 1,
   "layout": "two-columns"
 }
+
+###
+
+### POST /presentations/:id/slides/:slideId/thumbnail — upload de thumbnail (multipart, campo "file") — capa da presentation
+# .http não suporta multipart nativamente — testar via curl:
+# curl -X POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/thumbnail -F "file=@thumbnail.png;type=image/png"

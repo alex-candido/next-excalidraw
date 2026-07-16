@@ -53,6 +53,25 @@ export function useAppPresentation() {
     });
   }
 
+  function useRename() {
+    return useMutation({
+      mutationFn: ({ id, title }: { id: string; title: string }) => presentationActions().rename(id, { title }),
+      onSuccess: (_data, { id }) => {
+        queryClient.invalidateQueries({ queryKey: appPresentationKeys.all });
+        queryClient.invalidateQueries({ queryKey: appPresentationKeys.detail(id) });
+      },
+    });
+  }
+
+  function useDuplicate() {
+    return useMutation({
+      mutationFn: presentationActions().duplicate,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: appPresentationKeys.all });
+      },
+    });
+  }
+
   function useGenerateOutline(id: string) {
     return useMutation({
       mutationFn: presentationActions().generateOutline.bind(null, id),
@@ -62,5 +81,5 @@ export function useAppPresentation() {
     });
   }
 
-  return { useList, useDetail, useCreate, useMoveToTrash, useGenerateOutline };
+  return { useList, useDetail, useCreate, useMoveToTrash, useRename, useDuplicate, useGenerateOutline };
 }

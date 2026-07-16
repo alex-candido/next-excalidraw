@@ -25,7 +25,10 @@ type AppPresentationCardProps = {
   createdBy: string;
   actions?: PresentationActionKey[];
   isFavorited?: boolean;
+  thumbnail?: string | null;
   onTrashConfirm?: () => void;
+  onRenameConfirm?: (title: string) => void;
+  onDuplicate?: () => void;
   className?: string;
 } & (
   | { href: string; onSelect?: never }
@@ -42,7 +45,10 @@ export function AppPresentationCard({
   createdBy,
   actions,
   isFavorited,
+  thumbnail,
   onTrashConfirm,
+  onRenameConfirm,
+  onDuplicate,
   className,
   ...rest
 }: AppPresentationCardProps) {
@@ -56,6 +62,15 @@ export function AppPresentationCard({
         className,
       )}
     >
+      {thumbnail && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={thumbnail}
+          alt=""
+          className="app-presentation-card-thumbnail-image absolute inset-0 z-0 size-full object-cover"
+        />
+      )}
+
       {onSelect ? (
         <button
           className="app-presentation-card-thumbnail absolute inset-0 z-0 cursor-pointer"
@@ -114,6 +129,8 @@ export function AppPresentationCard({
           actions={actions}
           isFavorited={isFavorited}
           onTrashConfirm={onTrashConfirm}
+          onRenameConfirm={onRenameConfirm}
+          onDuplicate={onDuplicate}
         />
       </div>
     </div>

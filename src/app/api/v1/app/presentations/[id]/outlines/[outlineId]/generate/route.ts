@@ -3,7 +3,7 @@ import { outlineRegenerateSchema } from "@/schemas/app/presentations/multi-schem
 import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
-import { inngest } from "@/lib/inngest/client"
+import { multiOutlineService } from "@/server/services/app/multi-outline-service"
 
 const DEV_USER_ID = "00000001-0000-4000-8000-000000000001"
 
@@ -32,16 +32,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     status:         GenerationStatus.pending,
   })
 
-  await inngest.send({
-    name: "presentation/outline.regenerate.requested",
-    data: {
-      presentationId: id,
-      outlineId,
-      generationId:   generation.id,
-      userId:         DEV_USER_ID,
-      input:          parsed.data,
-    },
-  })
-
-  return Response.json({ status: "pending", generationId: generation.id }, { status: 202 })
+  try {
+    const result = await multiOutlineService().regenerate(id, outlineId, generation.id, DEV_USER_ID, parsed.data)
+    return Response.json(result, { status: 200 })
+  } catch (err: unknown) {
+    const status = (err as { status?: number }).status ?? 500
+    const message = err instanceof Error ? err.message : "Internal server error"
+    return Response.json({ error: message }, { status })
+  }
 }

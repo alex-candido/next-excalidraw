@@ -102,6 +102,25 @@ export const presentationCreateSchema = z.object({
 
 export type PresentationCreate = z.infer<typeof presentationCreateSchema>
 
+export const presentationRenameSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+})
+
+export type PresentationRename = z.infer<typeof presentationRenameSchema>
+
+export const presentationRenameResultSchema = z.object({
+  id:    z.string().uuid(),
+  title: z.string(),
+})
+
+export type PresentationRenameResult = z.infer<typeof presentationRenameResultSchema>
+
+export const presentationDuplicateResultSchema = z.object({
+  id: z.string().uuid(),
+})
+
+export type PresentationDuplicateResult = z.infer<typeof presentationDuplicateResultSchema>
+
 export const presentationGenerateSchema = z.object({
   userPrompt: z.string().min(1),
   language:   z.number().int().default(PresentationLanguage.en),
@@ -143,6 +162,7 @@ export const presentationSchema = z.object({
   createdAt:    z.string(),
   updatedAt:    z.string(),
   entry:        presentationEntryCoreSchema,
+  thumbnail:    z.string().nullable(),
 })
 
 export type Presentation = z.infer<typeof presentationSchema>

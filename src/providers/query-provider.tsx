@@ -28,7 +28,16 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister }}
+      persistOptions={{
+        persister,
+        // Muda quando o FORMATO da resposta de alguma query cacheada quebra
+        // (não a cada mudança de conteúdo, só quando o shape muda) — busta o
+        // cache de localStorage de qualquer client antigo automaticamente,
+        // em vez de crashar tentando ler campo que não existe mais no cache
+        // persistido. Bump aqui: presentation.entry aninhado (client antigo
+        // tinha type/language/etc soltos na presentation, sem `entry`).
+        buster: "presentation-entry-2026-07-16",
+      }}
     >
       {children}
       {process.env.NODE_ENV === "development" && <ReactQueryDevtools />}

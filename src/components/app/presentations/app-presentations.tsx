@@ -28,7 +28,7 @@ export function AppPresentations({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const t = useTranslations("app.presentations");
-  const { items, trashItems, isTrashView, onMoveToTrash } = useAppPresentationsList();
+  const { items, trashItems, isTrashView, onMoveToTrash, onRename, onDuplicate } = useAppPresentationsList();
 
   const visibleItems = isTrashView ? trashItems : items;
 
@@ -66,8 +66,11 @@ export function AppPresentations({
                   createdAtLabel={item.createdAtLabel}
                   createdBy={item.createdBy}
                   isFavorited={item.isFavorited}
+                  thumbnail={item.thumbnail}
                   actions={isTrashView ? TRASH_VIEW_ACTIONS : undefined}
                   onTrashConfirm={isTrashView ? undefined : () => onMoveToTrash(item.id)}
+                  onRenameConfirm={isTrashView ? undefined : (title) => onRename(item.id, title)}
+                  onDuplicate={isTrashView ? undefined : () => onDuplicate(item.id)}
                 />
               ))}
             </div>

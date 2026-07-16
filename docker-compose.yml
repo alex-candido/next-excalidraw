@@ -12,5 +12,23 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
+  # Emula o Cloudflare R2 localmente — mesmo protocolo S3, mesmo client
+  # (@aws-sdk/client-s3) que fala com o R2 de verdade em produção, só troca
+  # endpoint/credenciais via env var. Ver docs/sdd/1-product/pm/decisions.md.
+  storage:
+    image: minio/minio
+    container_name: nextexcalidraw_storage
+    restart: "no"
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000" # API S3-compatible
+      - "9001:9001" # console web
+    volumes:
+      - storage_data:/data
+
 volumes:
   db_data:
+  storage_data:

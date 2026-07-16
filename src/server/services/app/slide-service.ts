@@ -1,11 +1,16 @@
+import { db } from "@/lib/drizzle"
 import { mastra } from "@/lib/mastra"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
+import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { slideRepository } from "@/server/repositories/app/slide-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
+import { storageService } from "@/server/services/storage-service"
+import { fileUtils } from "@/lib/utils/file"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
 import { SlideStatus } from "@/lib/drizzle/schema/slide"
-import type { SlideGenerate, SlideBulkUpdate, SlideRegenerate } from "@/schemas/app/slide-schema"
+import { StorageRecordType } from "@/lib/drizzle/schema/storage-attachment"
+import type { SlideGenerate, SlideBulkUpdate, SlideRegenerate, SlideManualCreate } from "@/schemas/app/slide-schema"
 import type { SlideWorkflowOutput } from "@/schemas/app/slide-schema"
 
 function toTypeKey(n: number): string {
@@ -143,5 +148,71 @@ export function slideService() {
     }
   }
 
-  return { generate, bulkUpdate, regenerate }
+  async function generateThumbnail(presentationId: string, slideId: string, userId: string, buffer: Buffer) {
+    const presentation = await presentationRepository().findById(presentationId)
+    if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
+    if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
+
+    const slide = await slideRepository().findById(slideId)
+    if (!slide || slide.presentationId !== presentationId) throw Object.assign(new Error("Slide not found"), { status: 404 })
+
+    const { mimeType } = await fileUtils().validate(buffer, "image")
+
+    const url = await storageService().upsertThumbnail({
+      recordType: StorageRecordType.slide,
+      recordId: slideId,
+      buffer,
+      mimeType,
+    })
+
+    return slideRepository().updateThumbnail(slideId, url)
+  }
+
+  // Slide adicionado manualmente no Studio (add-slide) só persiste aqui, no
+  // save — antes disso ele só existe local (isLocal no Zustand). Todo slide
+  // precisa de um outline (FK obrigatória), então cria os dois juntos: o
+  // primeiro outline que a presentation ganhar (do zero ou nesta mesma leva)
+  // é sempre type=cover, os seguintes são content — mesma regra usada em
+  // qualquer presentation (ver findCoverSlide no client).
+  async function createManual(presentationId: string, userId: string, input: SlideManualCreate["slides"]) {
+    const presentation = await presentationRepository().findById(presentationId)
+    if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
+    if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
+
+    const existingOutlines = await outlineRepository().findByPresentationId(presentationId)
+    let hasCover = existingOutlines.some((o) => o.type === OutlineType.cover)
+
+    return db.transaction(async (tx) => {
+      const created: { tempId: string; id: string; outlineId: string; order: number; type: number }[] = []
+
+      for (const item of input) {
+        const type = hasCover ? OutlineType.content : OutlineType.cover
+        hasCover = true
+
+        const [outline] = await outlineRepository().createMany([{
+          presentationId,
+          order: item.order,
+          type,
+          title: item.title,
+          representation: OutlineRepresentation.auto,
+        }], tx)
+
+        const [slide] = await slideRepository().createMany([{
+          presentationId,
+          outlineId: outline.id,
+          order: item.order,
+          elements: [],
+          appState: {},
+          files: {},
+          status: SlideStatus.active,
+        }], tx)
+
+        created.push({ tempId: item.tempId, id: slide.id, outlineId: outline.id, order: slide.order, type })
+      }
+
+      return created
+    })
+  }
+
+  return { generate, bulkUpdate, regenerate, generateThumbnail, createManual }
 }

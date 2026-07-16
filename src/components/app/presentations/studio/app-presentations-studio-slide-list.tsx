@@ -20,19 +20,19 @@ import { AppPresentationsStudioSlideListHeader } from "@/components/app/presenta
 import { AppPresentationsStudioSlideListItem } from "@/components/app/presentations/studio/app-presentations-studio-slide-list-item";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import { useStudioActions, useStudioActiveSlideId, useStudioSlides } from "@/providers/app/app-presentations-studio-provider";
 
 function useSlideListState() {
+  const slides = useStudioSlides();
+  const activeSlideId = useStudioActiveSlideId();
   const {
-    slides,
-    activeSlideId,
     onSelectSlide,
     onAddSlide,
     onReorderSlides,
     onDuplicateSlide,
     onToggleHiddenSlide,
     onDeleteSlide,
-  } = useAppPresentationsStudio();
+  } = useStudioActions();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   );

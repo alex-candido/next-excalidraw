@@ -17,7 +17,7 @@ export function AppStartFormInput() {
   return (
     <div className="app-start-form-input-group flex flex-col gap-1">
       <Textarea
-        className="app-start-form-input min-h-32 resize-none border-0 shadow-none focus-visible:ring-0 text-base"
+        className="app-start-form-input min-h-32 resize-none border-0 shadow-none focus-visible:ring-0 text-base!"
         placeholder={placeholder}
         {...promptField}
         onChange={(e) => {

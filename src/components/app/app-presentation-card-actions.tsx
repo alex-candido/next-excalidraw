@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { AppPresentationTrashModal } from "@/components/app/presentations/app-presentation-trash-modal";
+import { AppPresentationRenameModal } from "@/components/app/presentations/app-presentation-rename-modal";
 
 export type PresentationActionKey =
   | "share"
@@ -69,6 +70,8 @@ interface AppPresentationCardActionsProps {
   actions?: PresentationActionKey[];
   isFavorited?: boolean;
   onTrashConfirm?: () => void;
+  onRenameConfirm?: (title: string) => void;
+  onDuplicate?: () => void;
   className?: string;
 }
 
@@ -79,10 +82,13 @@ export function AppPresentationCardActions({
   actions = DEFAULT_PRESENTATION_ACTIONS,
   isFavorited = false,
   onTrashConfirm,
+  onRenameConfirm,
+  onDuplicate,
   className,
 }: AppPresentationCardActionsProps) {
   const t = useTranslations("app.presentations.card");
   const [trashModalOpen, setTrashModalOpen] = useState(false);
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
 
   const mainActions = MAIN_ACTIONS.filter((k) => actions.includes(k));
   const destructiveActions = DESTRUCTIVE_ACTIONS.filter((k) => actions.includes(k));
@@ -126,6 +132,11 @@ export function AppPresentationCardActions({
                   <DropdownMenuItem
                     key={key}
                     className={`app-presentation-card-actions-${key} gap-2`}
+                    onClick={
+                      key === "rename" ? () => setRenameModalOpen(true) :
+                      key === "duplicate" ? onDuplicate :
+                      undefined
+                    }
                   >
                     <Icon
                       className={cn(
@@ -169,6 +180,15 @@ export function AppPresentationCardActions({
           onOpenChange={setTrashModalOpen}
           title={title}
           onConfirm={onTrashConfirm}
+        />
+      )}
+
+      {actions.includes("rename") && (
+        <AppPresentationRenameModal
+          open={renameModalOpen}
+          onOpenChange={setRenameModalOpen}
+          title={title}
+          onConfirm={onRenameConfirm}
         />
       )}
     </>

@@ -39,3 +39,18 @@ GET {{baseUrl}}/presentations/{{presentationId}}
 
 ### DELETE /presentations/:id — mover pra lixeira (soft-delete, status: trash — exclusão definitiva acontece depois, via job de retenção)
 DELETE {{baseUrl}}/presentations/{{presentationId}}
+
+###
+
+### PATCH /presentations/:id — renomear
+PATCH {{baseUrl}}/presentations/{{presentationId}}
+Content-Type: application/json
+
+{
+  "title": "Novo título"
+}
+
+###
+
+### POST /presentations/:id/duplicate — clonar (presentation_entry + outlines + slides)
+POST {{baseUrl}}/presentations/{{presentationId}}/duplicate

@@ -1,7 +1,10 @@
 import type { DbClient } from "@/lib/drizzle"
 import { presentationEntryRepository } from "@/server/repositories/app/presentation-entry-repository"
+import { cacheService } from "@/server/services/cache-service"
 import { PresentationEntryKind } from "@/lib/drizzle/schema/presentation-entry"
 import type { PresentationEntrySuggestion, PresentationEntrySuggestionList } from "@/schemas/app/presentation-entry-schema"
+
+const SUGGESTIONS_CACHE_TTL_SECONDS = 300
 
 interface PresentationEntryRow {
   id: string
@@ -41,8 +44,15 @@ function toSuggestionResult(row: PresentationEntryRow): PresentationEntrySuggest
 
 export function presentationEntryService() {
   async function listSuggestions(input: PresentationEntrySuggestionList) {
-    const rows = await presentationEntryRepository().findRandomSuggestions(input)
-    return rows.map(toSuggestionResult)
+    const cacheKey = `presentation-suggestions:${input.type}:${input.language}`
+    const rows = await cacheService().getOrSet(cacheKey, SUGGESTIONS_CACHE_TTL_SECONDS, () =>
+      presentationEntryRepository().findActiveSuggestions(input),
+    )
+
+    const exclude = new Set(input.exclude ?? [])
+    const shuffled = rows.filter((r) => !exclude.has(r.id)).sort(() => Math.random() - 0.5)
+
+    return shuffled.slice(0, input.limit).map(toSuggestionResult)
   }
 
   // Chamado por presentationService().create() SEMPRE (não é best-effort/log

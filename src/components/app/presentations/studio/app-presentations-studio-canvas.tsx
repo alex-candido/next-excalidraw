@@ -4,12 +4,13 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { useEffect, useState } from "react";
 
 import { ExcalidrawEditor } from "@/components/excalidraw/excalidraw-editor";
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import { useStudioActions, useStudioActiveSlide } from "@/providers/app/app-presentations-studio-provider";
 
 import { AppPresentationsStudioToolbar } from "@/components/app/presentations/studio/app-presentations-studio-toolbar";
 
 export function AppPresentationsStudioCanvas() {
-  const { activeSlide, registerExcalidrawApi } = useAppPresentationsStudio();
+  const activeSlide = useStudioActiveSlide();
+  const { registerExcalidrawApi } = useStudioActions();
   const [excalidrawApi, setExcalidrawApi] = useState<ExcalidrawImperativeAPI | null>(null);
 
   useEffect(() => {

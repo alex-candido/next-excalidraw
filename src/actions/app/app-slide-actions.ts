@@ -4,6 +4,8 @@ import type {
   SlideBulkUpdate,
   SlideGenerate,
   SlideGenerateResponse,
+  SlideManualCreate,
+  SlideManualCreateResult,
   SlideRegenerate,
   SlideRegenerateResponse,
 } from "@/schemas/app/slide-schema"
@@ -18,6 +20,13 @@ export function slideActions() {
 
   async function generate(presentationId: string, input: SlideGenerate) {
     return apiFetch<SlideGenerateResponse>(`${base(presentationId)}/generate`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+  }
+
+  async function createManual(presentationId: string, input: SlideManualCreate) {
+    return apiFetch<SlideManualCreateResult>(base(presentationId), {
       method: "POST",
       body: JSON.stringify(input),
     })
@@ -38,5 +47,5 @@ export function slideActions() {
     })
   }
 
-  return { list, generate, bulkUpdate, regenerate }
+  return { list, generate, createManual, bulkUpdate, regenerate }
 }

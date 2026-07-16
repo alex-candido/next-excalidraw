@@ -12,6 +12,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Link } from "@/i18n/navigation";
 
 // Conteúdo do modal é placeholder — copy final fica pra depois. O tutorial de
@@ -23,36 +29,52 @@ export function AppStartFormMeta() {
 
   return (
     <div className="app-start-form-meta flex items-center gap-1">
-      <Dialog>
-        <DialogTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="app-start-form-notice-trigger text-muted-foreground"
-              aria-label={t("notice.trigger")}
-            />
-          }
-        >
-          <Info className="size-3" />
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("notice.title")}</DialogTitle>
-            <DialogDescription>{t("notice.description")}</DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-      <Button
-        render={<Link href="/landing/resources/tutorial" />}
-        nativeButton={false}
-        variant="ghost"
-        size="icon-xs"
-        className="app-start-form-tutorial-trigger text-muted-foreground"
-        aria-label={t("tutorial")}
-      >
-        <BookOpen className="size-3" />
-      </Button>
+      <TooltipProvider delay={300}>
+        <Dialog>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <DialogTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="app-start-form-notice-trigger text-muted-foreground"
+                      aria-label={t("notice.trigger")}
+                    />
+                  }
+                />
+              }
+            >
+              <Info className="size-3" />
+            </TooltipTrigger>
+            <TooltipContent>{t("notice.trigger")}</TooltipContent>
+          </Tooltip>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("notice.title")}</DialogTitle>
+              <DialogDescription>{t("notice.description")}</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                render={<Link href="/landing/resources/tutorial" />}
+                nativeButton={false}
+                variant="ghost"
+                size="icon-xs"
+                className="app-start-form-tutorial-trigger text-muted-foreground"
+                aria-label={t("tutorial")}
+              />
+            }
+          >
+            <BookOpen className="size-3" />
+          </TooltipTrigger>
+          <TooltipContent>{t("tutorial")}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

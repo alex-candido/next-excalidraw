@@ -46,6 +46,8 @@
           "single": "Diagrama"
         },
         "controls": {
+          "more": "Mais",
+          "less": "Menos",
           "slideCount": {
             "label": "Slides",
             "items": [
@@ -133,28 +135,7 @@
         "title": "Exemplos para começar",
         "description": "Escolha um exemplo ou descreva sua ideia no formulário acima.",
         "shuffle": "Embaralhar",
-        "types": {
-          "multi": "Apresentação",
-          "single": "Diagrama"
-        },
-        "items": [
-          {
-            "label": "Crie um fluxo de autenticação com login social e recuperação de senha",
-            "type": "multi"
-          },
-          {
-            "label": "Diagrama de arquitetura de microsserviços com API gateway",
-            "type": "single"
-          },
-          {
-            "label": "Roadmap de produto com épicos e marcos para o próximo trimestre",
-            "type": "multi"
-          },
-          {
-            "label": "Fluxo de onboarding de novos usuários do cadastro até a ativação",
-            "type": "multi"
-          }
-        ]
+        "minSlides": "Mín. {count} slides"
       },
       "recents": {
         "title": "Recentes",

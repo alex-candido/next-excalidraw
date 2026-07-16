@@ -35,6 +35,8 @@ import { cn } from "@/lib/utils";
 import { AppPresentationTrashModal } from "@/components/app/presentations/app-presentation-trash-modal";
 import {
   useAppPresentationsStudio,
+  useStudioActions,
+  useStudioIsSaving,
   type StudioPanelKey,
 } from "@/providers/app/app-presentations-studio-provider";
 
@@ -74,8 +76,9 @@ const EXPORT_ACTION_ICON: Record<StudioExportActionKey, React.ElementType> = {
 
 export function AppPresentationsStudioActions() {
   const t = useTranslations("app.studio.header");
-  const { title, createdAtLabel, createdBy, isFavorited, onSave, isSaving, onOpenPanel } =
-    useAppPresentationsStudio();
+  const { title, createdAtLabel, createdBy, isFavorited, onSave } = useAppPresentationsStudio();
+  const isSaving = useStudioIsSaving();
+  const { onOpenPanel } = useStudioActions();
   const { id } = useParams<{ id: string }>();
   const [trashModalOpen, setTrashModalOpen] = useState(false);
 

@@ -1,7 +1,9 @@
 import { db, type DbClient } from "@/lib/drizzle"
-import { presentation } from "@/lib/drizzle/schema/presentation"
+import { presentation, PresentationStatus } from "@/lib/drizzle/schema/presentation"
 import { presentationEntry, PresentationEntryKind } from "@/lib/drizzle/schema/presentation-entry"
-import { and, desc, eq } from "drizzle-orm"
+import { outline, OutlineType } from "@/lib/drizzle/schema/outline"
+import { slide } from "@/lib/drizzle/schema/slide"
+import { and, desc, eq, lt } from "drizzle-orm"
 
 export type PresentationInsert = typeof presentation.$inferInsert
 export type PresentationUpdate = Partial<Pick<PresentationInsert, "title" | "status" | "slug">>
@@ -24,6 +26,12 @@ const ENTRY_COLUMNS = {
 // unique em presentation_entry.presentation_id. Devolvido como `entry`
 // aninhado (não achatado) pra não confundir de onde cada campo veio.
 const ENTRY_JOIN = and(eq(presentationEntry.presentationId, presentation.id), eq(presentationEntry.kind, PresentationEntryKind.custom))
+
+// Capa = outline type=cover (1 por presentation, por convenção) — join extra só
+// pra listagem trazer a thumbnail já pronta, sem N+1 de "buscar slide de capa"
+// por card.
+const COVER_OUTLINE_JOIN = and(eq(outline.presentationId, presentation.id), eq(outline.type, OutlineType.cover))
+const COVER_SLIDE_JOIN = eq(slide.outlineId, outline.id)
 
 export function presentationRepository() {
   // Aceita `client` opcional (db ou tx) — quem cria a presentation junto de
@@ -51,9 +59,12 @@ export function presentationRepository() {
         createdAt:     presentation.createdAt,
         updatedAt:     presentation.updatedAt,
         entry:         ENTRY_COLUMNS,
+        thumbnail:     slide.thumbnail,
       })
       .from(presentation)
       .leftJoin(presentationEntry, ENTRY_JOIN)
+      .leftJoin(outline, COVER_OUTLINE_JOIN)
+      .leftJoin(slide, COVER_SLIDE_JOIN)
       .where(eq(presentation.id, id))
       .limit(1)
 
@@ -87,9 +98,12 @@ export function presentationRepository() {
         createdAt:     presentation.createdAt,
         updatedAt:     presentation.updatedAt,
         entry:         ENTRY_COLUMNS,
+        thumbnail:     slide.thumbnail,
       })
       .from(presentation)
       .leftJoin(presentationEntry, ENTRY_JOIN)
+      .leftJoin(outline, COVER_OUTLINE_JOIN)
+      .leftJoin(slide, COVER_SLIDE_JOIN)
       .where(eq(presentation.userId, userId))
       .orderBy(desc(presentation.createdAt))
 
@@ -117,5 +131,14 @@ export function presentationRepository() {
     await db.delete(presentation).where(eq(presentation.id, id))
   }
 
-  return { create, findById, findMany, update, remove }
+  // Sem escopo por userId de propósito — usado pelo job de retenção, que
+  // varre a lixeira de todos os usuários, não de uma request autenticada.
+  async function findTrashedBefore(cutoff: Date) {
+    return db
+      .select({ id: presentation.id, userId: presentation.userId })
+      .from(presentation)
+      .where(and(eq(presentation.status, PresentationStatus.trash), lt(presentation.updatedAt, cutoff)))
+  }
+
+  return { create, findById, findMany, update, remove, findTrashedBefore }
 }

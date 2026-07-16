@@ -132,6 +132,29 @@ export const slideRegenerateResultSchema = z.object({
 
 export type SlideRegenerateResult = z.infer<typeof slideRegenerateResultSchema>
 
-export const slideRegenerateResponseSchema = generationResponseSchema(slideRegenerateResultSchema)
+export type SlideRegenerateResponse = SlideRegenerateResult
 
-export type SlideRegenerateResponse = z.infer<typeof slideRegenerateResponseSchema>
+// Slide adicionado manualmente no Studio (fica só local até o save) — o
+// tempId é o id gerado no client (crypto.randomUUID()), devolvido junto pra
+// o client trocar pelo id real sem precisar adivinhar qual é qual.
+export const slideManualCreateSchema = z.object({
+  slides: z.array(z.object({
+    tempId: z.string(),
+    order:  z.number().int(),
+    title:  z.string(),
+  })).min(1),
+})
+
+export type SlideManualCreate = z.infer<typeof slideManualCreateSchema>
+
+export const slideManualCreateResultSchema = z.object({
+  created: z.array(z.object({
+    tempId:    z.string(),
+    id:        z.string().uuid(),
+    outlineId: z.string().uuid(),
+    order:     z.number().int(),
+    type:      z.number().int(),
+  })),
+})
+
+export type SlideManualCreateResult = z.infer<typeof slideManualCreateResultSchema>

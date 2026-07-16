@@ -5,11 +5,11 @@ import { useTranslations } from "next-intl";
 
 import { ExcalidrawEditor } from "@/components/excalidraw/excalidraw-editor";
 import { useAppPresentationsPresentNavigation } from "@/hooks/app/use-app-presentations-present-navigation";
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import { useStudioActiveSlide } from "@/providers/app/app-presentations-studio-provider";
 
 export function AppPresentationsPresentCanvas() {
   const t = useTranslations("app.present.nav");
-  const { activeSlide } = useAppPresentationsStudio();
+  const activeSlide = useStudioActiveSlide();
   const { hasPrevious, hasNext, onPrevious, onNext } = useAppPresentationsPresentNavigation();
 
   const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useRef, useState } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import type { z } from "zod";
 
@@ -66,6 +66,7 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
   // onSuggestionFieldEdit) — usado no submit só pra decidir se registra um
   // presentation_entry novo (kind=custom), nunca pra validar/bloquear nada.
   const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { register, control, watch, setValue, formState, handleSubmit } = useForm<
     PresentationCreateInput,
@@ -93,7 +94,7 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
     mutationFn: async (data) => {
       const { presentationId } = await create.mutateAsync({
         ...data,
-        sourceEntryId: selectedSuggestionId ?? undefined,
+        sourceSuggestionId: selectedSuggestionId ?? undefined,
       });
 
       // Upload adiado até aqui (presentation só existe agora) — em paralelo, direto
@@ -139,13 +140,29 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
   const language = LOCALE_TO_LANGUAGE[lang] ?? LOCALE_TO_LANGUAGE["pt-BR"];
 
   const onSelectSuggestion = (entry: PresentationEntrySuggestion) => {
-    setValue("userPrompt", entry.prompt);
     setValue("aspectRatio", entry.aspectRatio);
+    setValue("slideCount", entry.slideCount);
     setValue("amount", entry.amount);
     setValue("audience", entry.audience);
     setValue("scenario", entry.scenario);
     setValue("theme", entry.theme);
+    if (entry.keywords?.length) setValue("keywords", entry.keywords);
     setSelectedSuggestionId(entry.id);
+
+    // Efeito de "digitando" no textarea — reforça visualmente que o prompt
+    // veio de uma suggestion. Clicar em outra suggestion no meio da animação
+    // cancela a anterior e começa do zero (por isso o ref, não um simples let).
+    if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    const text = entry.prompt;
+    let i = 0;
+    typingIntervalRef.current = setInterval(() => {
+      i += 3;
+      setValue("userPrompt", text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(typingIntervalRef.current!);
+        typingIntervalRef.current = null;
+      }
+    }, 12);
   };
 
   // Qualquer edição manual num campo que a suggestion preencheu desfaz o

@@ -4,21 +4,26 @@ import { z } from "zod"
 import {
   presentationCreateResultSchema,
   presentationCreateSchema,
+  presentationDuplicateResultSchema,
   presentationGenerateResponseSchema,
   presentationGenerateSchema,
+  presentationRenameResultSchema,
+  presentationRenameSchema,
   presentationSchema,
   presentationWithOutlinesSchema,
 } from "@/schemas/app/presentation-schema"
 import {
   outlineBulkUpdateSchema,
-  outlineRegenerateResponseSchema,
+  outlineRegenerateResultSchema,
   outlineRegenerateSchema,
 } from "@/schemas/app/presentations/multi-schema"
 import {
   slideBulkUpdateSchema,
   slideGenerateResponseSchema,
   slideGenerateSchema,
-  slideRegenerateResponseSchema,
+  slideManualCreateResultSchema,
+  slideManualCreateSchema,
+  slideRegenerateResultSchema,
   slideRegenerateSchema,
   slideSchema,
 } from "@/schemas/app/slide-schema"
@@ -96,6 +101,29 @@ export const openApiDocument = createDocument({
           "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
         },
       },
+      patch: {
+        tags: ["Presentations"],
+        summary: "Renomear apresentação",
+        requestParams: { path: presentationIdParams },
+        requestBody: { content: { "application/json": { schema: presentationRenameSchema } } },
+        responses: {
+          "200": { description: "Título atualizado", content: { "application/json": { schema: presentationRenameResultSchema } } },
+          "403": { description: "Apresentação de outro usuário", content: { "application/json": { schema: errorResponseSchema } } },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
+        },
+      },
+    },
+    "/presentations/{id}/duplicate": {
+      post: {
+        tags: ["Presentations"],
+        summary: "Duplicar apresentação (presentation_entry + outlines + slides, com IDs novos)",
+        requestParams: { path: presentationIdParams },
+        responses: {
+          "201": { description: "Clone criado", content: { "application/json": { schema: presentationDuplicateResultSchema } } },
+          "403": { description: "Apresentação de outro usuário", content: { "application/json": { schema: errorResponseSchema } } },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
+        },
+      },
     },
     "/presentations/{id}/outlines/generate": {
       post: {
@@ -129,14 +157,15 @@ export const openApiDocument = createDocument({
     "/presentations/{id}/outlines/{outlineId}/generate": {
       post: {
         tags: ["Outlines"],
-        summary: "Regenerar um outline individual (background job via Inngest)",
+        summary: "Regenerar um outline individual (síncrono)",
         requestParams: { path: outlineIdParams },
         requestBody: { content: { "application/json": { schema: outlineRegenerateSchema } } },
         responses: {
-          "202": {
-            description: "Processamento iniciado em background — sempre `{status: \"pending\", generationId}`. Poll em GET /presentations/:id",
-            content: { "application/json": { schema: outlineRegenerateResponseSchema } },
+          "200": {
+            description: "Outline regenerado — item único, resolvido dentro da própria request (sem Inngest/polling)",
+            content: { "application/json": { schema: outlineRegenerateResultSchema } },
           },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
         },
       },
     },
@@ -150,6 +179,20 @@ export const openApiDocument = createDocument({
             description: "Lista de slides",
             content: { "application/json": { schema: z.object({ slides: z.array(slideSchema) }) } },
           },
+        },
+      },
+      post: {
+        tags: ["Slides"],
+        summary: "Criar slide(s) manualmente — cria o outline junto (cover se for o 1º da presentation, senão content)",
+        requestParams: { path: presentationIdParams },
+        requestBody: { content: { "application/json": { schema: slideManualCreateSchema } } },
+        responses: {
+          "201": {
+            description: "Slides criados — tempId devolvido junto pro client trocar pelo id real",
+            content: { "application/json": { schema: slideManualCreateResultSchema } },
+          },
+          "403": { description: "Apresentação de outro usuário", content: { "application/json": { schema: errorResponseSchema } } },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
         },
       },
       patch: {
@@ -182,14 +225,38 @@ export const openApiDocument = createDocument({
     "/presentations/{id}/slides/{slideId}/generate": {
       post: {
         tags: ["Slides"],
-        summary: "Regenerar um slide individual (background job via Inngest)",
+        summary: "Regenerar um slide individual (síncrono)",
         requestParams: { path: slideIdParams },
         requestBody: { content: { "application/json": { schema: slideRegenerateSchema } } },
         responses: {
-          "202": {
-            description: "Processamento iniciado em background — sempre `{status: \"pending\", generationId}`. Poll em GET /presentations/:id/slides",
-            content: { "application/json": { schema: slideRegenerateResponseSchema } },
+          "200": {
+            description: "Slide regenerado — item único, resolvido dentro da própria request (sem Inngest/polling)",
+            content: { "application/json": { schema: slideRegenerateResultSchema } },
           },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
+        },
+      },
+    },
+    "/presentations/{id}/slides/{slideId}/thumbnail": {
+      post: {
+        tags: ["Slides"],
+        summary: "Upload de thumbnail do slide (usado como capa da presentation quando o slide é do outline type=cover)",
+        requestParams: { path: slideIdParams },
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: z.object({ file: z.file() }),
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "URL pública do thumbnail (R2/MinIO), já persistida em slide.thumbnail",
+            content: { "application/json": { schema: z.object({ thumbnail: z.string().nullable() }) } },
+          },
+          "400": { description: "Arquivo ausente ou não é uma imagem válida", content: { "application/json": { schema: errorResponseSchema } } },
+          "403": { description: "Apresentação de outro usuário", content: { "application/json": { schema: errorResponseSchema } } },
+          "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
         },
       },
     },

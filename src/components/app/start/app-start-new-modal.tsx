@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
 import {
   PresentationAmount,
@@ -85,7 +85,14 @@ export function AppStartNewModal({
 
           <AppStartNewModalEngine />
           <AppStartNewModalType value={type} onChange={setType} />
-          <AppStartNewModalFeatures />
+          <AppStartNewModalFeatures type={type} />
+
+          <p className="app-start-new-modal-blank-notice text-xs text-muted-foreground">
+            {t("blank.cta")}{" "}
+            <Link href="/app/start" onClick={() => onOpenChange(false)} className="underline underline-offset-2 hover:text-foreground">
+              {t("blank.link")}
+            </Link>
+          </p>
         </div>
 
         <AppStartNewModalActions

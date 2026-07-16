@@ -1,56 +1,32 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutSection } from "@/components/layouts/layout-section";
 import { Muted } from "@/components/ui/typography";
-import {
-  PresentationLanguage,
-  PresentationType,
-} from "@/lib/drizzle/schema/presentation";
+import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
+import { useAppPresentationsList } from "@/providers/app/app-presentations-list-provider";
 
 import { AppPresentationCard } from "@/components/app/app-presentation-card";
+import { AppPresentationCardSkeleton } from "@/components/app/app-presentation-card-skeleton";
 import { AppStartRecentsHeader } from "@/components/app/start/recents/app-start-recents-header";
 
 const TYPE_KEY = Object.fromEntries(
   Object.entries(PresentationType).map(([k, v]) => [v, k]),
 ) as Record<number, keyof typeof PresentationType>;
 
-const ITEMS = [
-  {
-    id: "1",
-    title: "Fluxo de autenticação com login social",
-    type: PresentationType.multi,
-    language: PresentationLanguage.ptBR,
-    slideCount: 8,
-    createdAtLabel: "há 2 dias",
-    createdBy: "Alex C.",
-  },
-  {
-    id: "2",
-    title: "Arquitetura de microsserviços com API gateway",
-    type: PresentationType.single,
-    language: PresentationLanguage.en,
-    slideCount: 1,
-    createdAtLabel: "há 5 dias",
-    createdBy: "Alex C.",
-  },
-  {
-    id: "3",
-    title: "Roadmap Q3 — Produto e Entregas",
-    type: PresentationType.multi,
-    language: PresentationLanguage.ptBR,
-    slideCount: 12,
-    createdAtLabel: "há 1 semana",
-    createdBy: "Alex C.",
-  },
-];
+const RECENTS_LIMIT = 6;
+const SKELETON_COUNT = 3;
 
-export async function AppStartRecents({
+export function AppStartRecents({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const t = await getTranslations("app.start.recents");
+  const t = useTranslations("app.start.recents");
+  const { items, isLoading, onMoveToTrash, onRename, onDuplicate } = useAppPresentationsList();
+  const recentItems = items.slice(0, RECENTS_LIMIT);
 
   return (
     <LayoutSection className="first:pt-6 md:first:pt-8 md:pb-16">
@@ -64,13 +40,19 @@ export async function AppStartRecents({
         >
           <AppStartRecentsHeader />
 
-          {ITEMS.length === 0 ? (
+          {isLoading ? (
+            <div className="app-start-recents-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+                <AppPresentationCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : recentItems.length === 0 ? (
             <div className="app-start-recents-empty">
               <Muted className="text-sm">{t("empty")}</Muted>
             </div>
           ) : (
             <div className="app-start-recents-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ITEMS.map((item) => (
+              {recentItems.map((item) => (
                 <AppPresentationCard
                   key={item.id}
                   title={item.title}
@@ -81,6 +63,11 @@ export async function AppStartRecents({
                   href={`/app/presentations/${item.id}/studio`}
                   createdAtLabel={item.createdAtLabel}
                   createdBy={item.createdBy}
+                  isFavorited={item.isFavorited}
+                  thumbnail={item.thumbnail}
+                  onTrashConfirm={() => onMoveToTrash(item.id)}
+                  onRenameConfirm={(title) => onRename(item.id, title)}
+                  onDuplicate={() => onDuplicate(item.id)}
                 />
               ))}
             </div>

@@ -25,10 +25,10 @@ export function AppStartFormAttachments() {
           <Badge
             key={attachment.id}
             variant="secondary"
-            className="app-start-form-attachment gap-1.5 rounded-full pr-1"
+            className="app-start-form-attachment gap-1.5 rounded-full py-3 pr-1"
           >
             <Icon className="size-3" />
-            <span className="max-w-32 truncate">{attachment.name}</span>
+            <span className="max-w-24 truncate">{attachment.name}</span>
             <Button
               variant="ghost"
               size="icon"

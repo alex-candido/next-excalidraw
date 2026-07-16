@@ -20,6 +20,7 @@ import * as logSchema from './schema/log'
 import * as attachmentSchema from './schema/attachment'
 import * as storageBlobSchema from './schema/storage-blob'
 import * as storageAttachmentSchema from './schema/storage-attachment'
+import * as cacheSchema from './schema/cache'
 import * as relationsSchema from './schema/relations'
 
 const schema = {
@@ -42,6 +43,7 @@ const schema = {
   ...attachmentSchema,
   ...storageBlobSchema,
   ...storageAttachmentSchema,
+  ...cacheSchema,
   ...relationsSchema,
 }
 
