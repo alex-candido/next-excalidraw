@@ -91,19 +91,9 @@ erDiagram
         text code UK
         text slug UK
         text user_id FK
-        smallint type
         text title
-        text user_prompt
         text system_prompt
-        smallint language
-        smallint aspect_ratio
-        smallint slide_count
-        smallint amount
-        smallint audience
-        smallint scenario
-        smallint theme
         smallint engine
-        array keywords
         smallint visibility
         smallint status
         integer views_count
@@ -159,6 +149,28 @@ erDiagram
         smallint status
         timestamp created_at
         timestamp updated_at
+    }
+
+    PRESENTATION_ENTRY {
+        uuid id PK
+        smallint kind
+        uuid presentation_id FK
+        uuid source_suggestion_id FK
+        smallint type
+        smallint language
+        text icon
+        text title
+        text description
+        text prompt
+        smallint aspect_ratio
+        smallint slide_count
+        smallint amount
+        smallint audience
+        smallint scenario
+        smallint theme
+        array keywords
+        smallint status
+        timestamp created_at
     }
 
     ATTACHMENT {
@@ -238,6 +250,8 @@ erDiagram
     PRESENTATION ||--o{ SLIDE               : "presentation_id"
     PRESENTATION ||--o{ GENERATION          : "presentation_id"
     PRESENTATION ||--o{ ATTACHMENT          : "presentation_id"
+    PRESENTATION ||--o{ PRESENTATION_ENTRY  : "presentation_id"
+    PRESENTATION_ENTRY ||--o{ PRESENTATION_ENTRY : "source_suggestion_id"
     OUTLINE      ||--||  SLIDE              : "outline_id"
     GENERATION   ||--o{ LOG                 : "generation_id"
     STORAGE_BLOB ||--o{ STORAGE_ATTACHMENT  : "blob_id"
@@ -250,15 +264,8 @@ erDiagram
 | Tabela | Campo | Valores |
 |---|---|---|
 | `user_permission` | `type` | `0` grant · `1` deny |
-| `presentation` | `type` | `0` single · `1` multi |
 | `presentation` | `status` | `0` draft · `1` active · `2` inactive · `3` trash |
 | `presentation` | `visibility` | `0` public · `1` private |
-| `presentation` | `language` | `0` en · `1` es · `2` fr · `3` de · `4` it · `5` pt-BR · `6` ru · `7` zh · `8` ja · `9` ko |
-| `presentation` | `aspect_ratio` | `0` 16:9 · `1` 4:3 · `2` 9:16 · `3` 1:1 · `4` A4 · `5` custom |
-| `presentation` | `amount` | `0` auto · `1` minimal (4–6) · `2` concise (7–10) · `3` detailed (11–15) · `4` extensive (16–20) |
-| `presentation` | `audience` | `0` general · `1` business · `2` investor · `3` teacher · `4` student |
-| `presentation` | `scenario` | `0` auto · `1` promotional · `2` teaching · `3` analytical · `4` report |
-| `presentation` | `theme` | `0` daktilo · `1` noir · `2` cornflower · `3` indigo · `4` orbit · `5` cosmos · `6` sunset · `7` forest · `8` piano · `9` ebony |
 | `presentation` | `engine` | `0` excalidraw |
 | `presentation_member` | `role` | `0` viewer · `1` editor |
 | `invite_token` | `role` | `0` viewer · `1` editor |
@@ -272,13 +279,23 @@ erDiagram
 | `log` | `level` | `0` debug · `1` info · `2` warn · `3` error |
 | `attachment` | `type` | `0` image · `1` file · `2` link |
 | `storage_attachment` | `record_type` | `0` presentation · `1` slide · `2` user |
+| `presentation_entry` | `kind` | `0` suggestion · `1` custom |
+| `presentation_entry` | `status` | `0` active · `1` inactive |
+| `presentation_entry` | `type` | `0` single · `1` multi |
+| `presentation_entry` | `language` | `0` en · `1` es · `2` fr · `3` de · `4` it · `5` pt-BR · `6` ru · `7` zh · `8` ja · `9` ko |
+| `presentation_entry` | `aspect_ratio` | `0` 16:9 · `1` 4:3 · `2` 9:16 · `3` 1:1 · `4` A4 · `5` custom |
+| `presentation_entry` | `amount` | `0` auto · `1` minimal (4–6) · `2` concise (7–10) · `3` detailed (11–15) · `4` extensive (16–20) |
+| `presentation_entry` | `audience` | `0` general · `1` business · `2` investor · `3` teacher · `4` student |
+| `presentation_entry` | `scenario` | `0` auto · `1` promotional · `2` teaching · `3` analytical · `4` report |
+| `presentation_entry` | `theme` | `0` daktilo · `1` noir · `2` cornflower · `3` indigo · `4` orbit · `5` cosmos · `6` sunset · `7` forest · `8` piano · `9` ebony |
 
 ---
 
 ## Regras de negócio
 
-- `presentation.type = 0 (single)` → máximo 1 outline + 1 slide
-- `presentation.type = 1 (multi)` → N outlines + N slides
+- `presentation_entry.type = 0 (single)` → máximo 1 outline + 1 slide na presentation associada
+- `presentation_entry.type = 1 (multi)` → N outlines + N slides
+- Toda `presentation` tem exatamente 1 `presentation_entry` com `kind=custom` associada (`presentation_id` único) — nunca 0, nunca mais de 1. Criados juntos em `presentationService().create()`
 - Owner da presentation é sempre `presentation.user_id` — role `owner` não existe em `presentation_member`
 - `invite_token` — Ciclo 5 (Colaboração); token para `/invite/[token]`
 
@@ -291,3 +308,4 @@ erDiagram
 - `presentation.engine` — 1 engine por presentation inteira; só `excalidraw` implementada (ver docs/sdd/1-product/pm/decisions.md, "Engine de renderização plugável")
 - `attachment` — tabela `UNLOGGED` (sem WAL, mais rápida em escrita, sem garantia de durabilidade — aceitável porque é material de referência efêmero, apagado logo após a geração consumir); `content` é `bytea`, não `jsonb`
 - `storage_blob`/`storage_attachment` — par ainda sem consumidor (nenhuma feature grava blob de verdade ainda); `storage_attachment.record_type`/`record_id` é FK polimórfica (não é uma foreign key de banco de verdade, resolvida em código conforme `record_type`)
+- `presentation_entry` — tabela híbrida catálogo+log de "receitas" (prompt+parâmetros) pra criar presentation. **Única fonte** de `type`/`language`/`aspect_ratio`/`slide_count`/`amount`/`audience`/`scenario`/`theme`/`keywords`/`prompt` — `presentation` não duplica mais esses campos (removidos numa migration posterior à criação da tabela). `kind=suggestion`: conteúdo curado subido via seed (`drizzle/data/`), nunca gerado em runtime — `icon`/`title`/`description` só fazem sentido aqui, `presentation_id` fica `null` (reusável, não amarrado a 1 presentation). `kind=custom`: registrado **sempre** que uma presentation é criada (usuário digitou do zero OU clicou numa suggestion sem editar — os dois casos criam uma entry nova, nunca reaproveitam a de `kind=suggestion` diretamente) — `presentation_id` preenchido e único (1:1), `icon`/`title`/`description` ficam `null`. `source_suggestion_id` (auto-FK) só preenche em `kind=custom`, apontando pra qual suggestion originou — existe só pra métrica de popularidade (quais suggestions mais viram presentation de verdade), nunca gate de comportamento. `presentationRepository().findById()`/`findMany()` fazem o join e devolvem `entry` aninhado (não achatado) no resultado. Ver `docs/sdd/1-product/pm/decisions.md`

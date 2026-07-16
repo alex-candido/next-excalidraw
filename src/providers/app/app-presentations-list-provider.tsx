@@ -35,9 +35,9 @@ function toListItem(p: Presentation, lang: string): AppPresentationsListItem {
   return {
     id: p.id,
     title: p.title || "Untitled",
-    type: p.type,
-    language: p.language,
-    slideCount: p.slideCount,
+    type: p.entry.type,
+    language: p.entry.language,
+    slideCount: p.entry.slideCount,
     createdAtLabel: formatRelativeDate(p.createdAt, lang),
     // Sem infra de nome de usuário ainda (só temos userId) — gap conhecido, ver pm.md Backlog.
     createdBy: "",

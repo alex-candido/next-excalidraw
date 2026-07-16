@@ -61,6 +61,26 @@ export const LANGUAGE_NAMES: Record<number, string> = {
   [PresentationLanguage.ko]:   "Korean",
 }
 
+export const LANGUAGE_CODE: Record<number, string> = {
+  [PresentationLanguage.en]:   "EN",
+  [PresentationLanguage.es]:   "ES",
+  [PresentationLanguage.fr]:   "FR",
+  [PresentationLanguage.de]:   "DE",
+  [PresentationLanguage.it]:   "IT",
+  [PresentationLanguage.ptBR]: "PT",
+  [PresentationLanguage.ru]:   "RU",
+  [PresentationLanguage.zh]:   "ZH",
+  [PresentationLanguage.ja]:   "JA",
+  [PresentationLanguage.ko]:   "KO",
+}
+
+// Locale do next-intl (routing.ts) -> enum PresentationLanguage — usado pra
+// filtrar suggestions pelo idioma atual do app. Só pt-BR ativo hoje, mas o
+// mapa já nasce pronto pra mais locales (ver feedback_multilang_by_default).
+export const LOCALE_TO_LANGUAGE: Record<string, number> = {
+  "pt-BR": PresentationLanguage.ptBR,
+}
+
 export const presentationCreateSchema = z.object({
   type:        z.number().int().default(PresentationType.multi),
   title:       z.string().optional(),
@@ -73,6 +93,11 @@ export const presentationCreateSchema = z.object({
   scenario:    z.number().int().default(PresentationScenario.auto),
   theme:       z.number().int().default(PresentationTheme.daktilo),
   keywords:    z.array(z.string()).optional(),
+  // Preenchido quando a criação veio de uma suggestion (kind=suggestion) sem
+  // edição do usuário — vira presentation_entry.source_suggestion_id, só pra
+  // métrica de popularidade; nunca gate de comportamento/validação. A entry
+  // custom é criada de qualquer jeito, com ou sem esse campo.
+  sourceSuggestionId: z.string().uuid().optional(),
 })
 
 export type PresentationCreate = z.infer<typeof presentationCreateSchema>
@@ -86,30 +111,38 @@ export const presentationGenerateSchema = z.object({
 
 export type PresentationGenerate = z.infer<typeof presentationGenerateSchema>
 
+// Parâmetros de geração (prompt+parâmetros) vêm sempre da presentation_entry
+// (kind=custom) associada 1:1 — presentation não os duplica mais. Aninhado
+// (não achatado) pra deixar claro de onde vem cada campo.
+export const presentationEntryCoreSchema = z.object({
+  id:          z.string().uuid(),
+  type:        z.number().int(),
+  language:    z.number().int(),
+  prompt:      z.string(),
+  aspectRatio: z.number().int(),
+  slideCount:  z.number().int(),
+  amount:      z.number().int(),
+  audience:    z.number().int(),
+  scenario:    z.number().int(),
+  theme:       z.number().int(),
+  keywords:    z.array(z.string()).nullable(),
+})
+
 export const presentationSchema = z.object({
   id:           z.string().uuid(),
   code:         z.string(),
   slug:         z.string(),
   userId:       z.string(),
-  type:         z.number().int(),
   title:        z.string(),
-  userPrompt:   z.string().nullable(),
   systemPrompt: z.string().nullable(),
-  language:     z.number().int(),
-  aspectRatio:  z.number().int(),
-  slideCount:   z.number().int(),
-  amount:       z.number().int(),
-  audience:     z.number().int(),
-  scenario:     z.number().int(),
-  theme:        z.number().int(),
   engine:       z.number().int(),
-  keywords:     z.array(z.string()).nullable(),
   visibility:   z.number().int(),
   status:       z.number().int(),
   viewsCount:   z.number().int(),
   usage:        z.record(z.string(), z.unknown()).nullable(),
   createdAt:    z.string(),
   updatedAt:    z.string(),
+  entry:        presentationEntryCoreSchema,
 })
 
 export type Presentation = z.infer<typeof presentationSchema>

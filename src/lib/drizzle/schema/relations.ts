@@ -8,6 +8,7 @@ import { log } from "./log";
 import { outline } from "./outline";
 import { permission } from "./permission";
 import { presentation } from "./presentation";
+import { presentationEntry } from "./presentation-entry";
 import { presentationMember } from "./presentation-member";
 import { session } from "./session";
 import { slide } from "./slide";
@@ -74,10 +75,20 @@ export const presentationRelations = relations(presentation, ({ one, many }) => 
   slides: many(slide),
   generations: many(generation),
   attachments: many(attachment),
+  entries: many(presentationEntry),
 }));
 
 export const attachmentRelations = relations(attachment, ({ one }) => ({
   presentation: one(presentation, { fields: [attachment.presentationId], references: [presentation.id] }),
+}));
+
+export const presentationEntryRelations = relations(presentationEntry, ({ one }) => ({
+  presentation: one(presentation, { fields: [presentationEntry.presentationId], references: [presentation.id] }),
+  sourceSuggestion: one(presentationEntry, {
+    fields: [presentationEntry.sourceSuggestionId],
+    references: [presentationEntry.id],
+    relationName: "presentation_entry_source_suggestion",
+  }),
 }));
 
 export const storageBlobRelations = relations(storageBlob, ({ many }) => ({

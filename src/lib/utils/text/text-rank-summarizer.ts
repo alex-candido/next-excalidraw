@@ -2,7 +2,7 @@ import { hasEnoughSignal, splitSentences, tokenize } from "./tokenize"
 
 // TextRank (Mihalcea & Tarau, 2004) — ideia aproveitada do `node-summarizer`
 // (achado ao pesquisar libs prontas, mas ele depende de `natural`, que quebra
-// no nosso ambiente — ver lib/gist/index.ts). Reimplementado do zero, sem
+// no nosso ambiente — ver lib/utils/text/index.ts). Reimplementado do zero, sem
 // dependência: cada frase é um nó de um
 // grafo, o peso da aresta é o quão parecidas duas frases são (palavras em
 // comum), e a pontuação final vem de um algoritmo iterativo tipo PageRank —

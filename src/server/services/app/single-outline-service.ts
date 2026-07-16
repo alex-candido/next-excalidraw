@@ -1,5 +1,5 @@
 import { mastra } from "@/lib/mastra"
-import { buildAttachmentContext } from "@/lib/attachments/build-context"
+import { attachmentUtils } from "@/lib/utils/attachment"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { slideRepository } from "@/server/repositories/app/slide-repository"
@@ -43,7 +43,7 @@ export function singleOutlineService() {
         // Processado aqui dentro (não antes do try) — se um anexo corrompido
         // quebrar a extração, cai no catch abaixo como falha normal do step 1,
         // em vez de nunca marcar o generationId como failed.
-        const attachments = await buildAttachmentContext(attachmentRows)
+        const attachments = await attachmentUtils().buildContext(attachmentRows)
 
         const workflow   = mastra.getWorkflow("singleOutlineWorkflow")
         const run        = await workflow.createRun()
@@ -109,11 +109,11 @@ export function singleOutlineService() {
             representation: outlineRep,
             layout:         outlineItem.layout,
             language:       input.language,
-            aspectRatio:    presentation.aspectRatio,
-            amount:         presentation.amount,
-            audience:       presentation.audience,
-            scenario:       presentation.scenario,
-            theme:          presentation.theme,
+            aspectRatio:    presentation.entry.aspectRatio,
+            amount:         presentation.entry.amount,
+            audience:       presentation.entry.audience,
+            scenario:       presentation.entry.scenario,
+            theme:          presentation.entry.theme,
           },
         }) as { result: SlideWorkflowOutput }
 

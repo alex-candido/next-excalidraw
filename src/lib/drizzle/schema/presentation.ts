@@ -6,19 +6,9 @@
 //  code                        :text              not null, unique
 //  slug                        :text              not null, unique
 //  user_id                     :text              not null
-//  type                        :smallint          default(1), not null
 //  title                       :text              not null
-//  user_prompt                 :text
 //  system_prompt               :text
-//  language                    :smallint          default(0), not null
-//  aspect_ratio                :smallint          default(0), not null
-//  slide_count                 :smallint          default(0), not null
-//  amount                      :smallint          default(0), not null
-//  audience                    :smallint          default(0), not null
-//  scenario                    :smallint          default(0), not null
-//  theme                       :smallint          default(0), not null
 //  engine                      :smallint          default(0), not null
-//  keywords                    :text[]
 //  visibility                  :smallint          default(1), not null
 //  status                      :smallint          default(0), not null
 //  views_count                 :integer           default(0), not null
@@ -33,6 +23,11 @@
 // Foreign Keys
 //
 //  presentation.user_id => user.id
+//
+// Nota: type/language/aspectRatio/slideCount/amount/audience/scenario/theme/
+// keywords/userPrompt saíram daqui — são parâmetros de geração, não da
+// presentation em si, e ficam em presentation_entry (kind=custom, 1:1 via
+// presentation_id) pra não duplicar dado. Ver docs/sdd/1-product/pm/decisions.md.
 //
 
 import { index, integer, jsonb, pgTable, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
@@ -50,6 +45,9 @@ export const PresentationVisibility = {
   private: 1,
 } as const;
 
+// Enums abaixo descrevem valores de presentation_entry (type/language/aspectRatio/
+// amount/audience/scenario/theme) — mantidos aqui só pra não quebrar as dezenas
+// de imports já existentes; a coluna de verdade vive em presentation-entry.ts.
 export const PresentationLanguage = {
   en: 0,
   es: 1,
@@ -130,19 +128,9 @@ export const presentation = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    type: smallint("type").default(1).notNull(),
     title: text("title").notNull(),
-    userPrompt: text("user_prompt"),
     systemPrompt: text("system_prompt"),
-    language: smallint("language").default(0).notNull(),
-    aspectRatio: smallint("aspect_ratio").default(0).notNull(),
-    slideCount: smallint("slide_count").default(0).notNull(),
-    amount:     smallint("amount").default(0).notNull(),
-    audience:   smallint("audience").default(0).notNull(),
-    scenario:   smallint("scenario").default(0).notNull(),
-    theme:      smallint("theme").default(0).notNull(),
-    engine:     smallint("engine").default(0).notNull(),
-    keywords: text("keywords").array(),
+    engine: smallint("engine").default(0).notNull(),
     visibility: smallint("visibility").default(1).notNull(),
     status: smallint("status").default(0).notNull(),
     viewsCount: integer("views_count").default(0).notNull(),

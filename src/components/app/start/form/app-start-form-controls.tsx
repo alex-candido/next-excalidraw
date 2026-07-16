@@ -23,9 +23,14 @@ const ALL_KEYS = [
 
 type ControlKey = (typeof ALL_KEYS)[number];
 
+// Campos que uma suggestion clicada preenche (ver AppStartProvider.onSelectSuggestion)
+// — mudar qualquer um manualmente desfaz o vínculo. slideCount/language ficam
+// de fora: a suggestion não define esses dois.
+const SUGGESTION_FIELDS = new Set<ControlKey>(["aspectRatio", "amount", "audience", "scenario", "theme"]);
+
 export function AppStartFormControls() {
   const t = useTranslations("app.start.form.controls");
-  const { type, control } = useAppStart();
+  const { type, control, onSuggestionFieldEdit } = useAppStart();
 
   const keys = ALL_KEYS.filter(
     (key) => key !== "slideCount" || type === PresentationType.multi,
@@ -47,7 +52,10 @@ export function AppStartFormControls() {
         render={({ field }) => (
           <Select
             value={String(field.value)}
-            onValueChange={(v) => field.onChange(Number(v))}
+            onValueChange={(v) => {
+              field.onChange(Number(v));
+              if (SUGGESTION_FIELDS.has(key)) onSuggestionFieldEdit();
+            }}
           >
             <SelectTrigger size="sm" className="shrink-0 h-7 text-xs gap-1">
               <span className="text-muted-foreground shrink-0">{label}:</span>

@@ -17,7 +17,8 @@ import {
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
 import { MAX_ATTACHMENTS_PER_PRESENTATION } from "@/schemas/app/attachment-schema";
-import { presentationCreateSchema, type PresentationCreate } from "@/schemas/app/presentation-schema";
+import { LOCALE_TO_LANGUAGE, presentationCreateSchema, type PresentationCreate } from "@/schemas/app/presentation-schema";
+import type { PresentationEntrySuggestion } from "@/schemas/app/presentation-entry-schema";
 
 // presentationCreateSchema tem campo com `.default()` (type, language, amount...)
 // — entrada (o que o form guarda enquanto o usuário digita, antes do resolver
@@ -40,11 +41,15 @@ interface AppStartContextProps {
   control: Control<PresentationCreateInput>;
   errors: FieldErrors<PresentationCreateInput>;
   type: PresentationCreateInput["type"];
+  language: number;
   prompt: string;
   attachments: AppStartAttachment[];
   isSubmitting: boolean;
+  selectedSuggestionId: string | null;
   onAddAttachment: (type: AppStartAttachmentType, value: File | string) => void;
   onRemoveAttachment: (id: string) => void;
+  onSelectSuggestion: (entry: PresentationEntrySuggestion) => void;
+  onSuggestionFieldEdit: () => void;
   onSubmit: () => void;
 }
 
@@ -57,8 +62,12 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
   const create = useCreate();
 
   const [attachments, setAttachments] = useState<AppStartAttachment[]>([]);
+  // Presente só enquanto a suggestion clicada não foi editada (ver
+  // onSuggestionFieldEdit) — usado no submit só pra decidir se registra um
+  // presentation_entry novo (kind=custom), nunca pra validar/bloquear nada.
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
 
-  const { register, control, watch, formState, handleSubmit } = useForm<
+  const { register, control, watch, setValue, formState, handleSubmit } = useForm<
     PresentationCreateInput,
     { presentationId: string },
     PresentationCreate
@@ -82,7 +91,10 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
       theme: PresentationTheme.daktilo,
     },
     mutationFn: async (data) => {
-      const { presentationId } = await create.mutateAsync(data);
+      const { presentationId } = await create.mutateAsync({
+        ...data,
+        sourceEntryId: selectedSuggestionId ?? undefined,
+      });
 
       // Upload adiado até aqui (presentation só existe agora) — em paralelo, direto
       // pro Postgres (não é R2, ver pm/decisions.md). Falha de anexo não deve travar
@@ -121,6 +133,25 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
 
   const type = watch("type");
   const prompt = watch("userPrompt") ?? "";
+  // Idioma do app (rota [lang]) -> enum PresentationLanguage, usado pra filtrar
+  // suggestions. Só pt-BR ativo hoje, mas o mapa já é multi-idioma (ver
+  // presentation-schema.ts).
+  const language = LOCALE_TO_LANGUAGE[lang] ?? LOCALE_TO_LANGUAGE["pt-BR"];
+
+  const onSelectSuggestion = (entry: PresentationEntrySuggestion) => {
+    setValue("userPrompt", entry.prompt);
+    setValue("aspectRatio", entry.aspectRatio);
+    setValue("amount", entry.amount);
+    setValue("audience", entry.audience);
+    setValue("scenario", entry.scenario);
+    setValue("theme", entry.theme);
+    setSelectedSuggestionId(entry.id);
+  };
+
+  // Qualquer edição manual num campo que a suggestion preencheu desfaz o
+  // vínculo — sem isso, um submit editado ainda seria contado como "veio de
+  // suggestion sem edição" e nunca viraria um presentation_entry (kind=custom).
+  const onSuggestionFieldEdit = () => setSelectedSuggestionId(null);
 
   // Fica só em memória até o submit — presentation ainda não existe nesse
   // momento (upload adiado, ver pm/decisions.md "Anexos do /app/start").
@@ -148,11 +179,15 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
     control,
     errors: formState.errors,
     type,
+    language,
     prompt,
     attachments,
     isSubmitting: formState.isSubmitting,
+    selectedSuggestionId,
     onAddAttachment,
     onRemoveAttachment,
+    onSelectSuggestion,
+    onSuggestionFieldEdit,
     onSubmit: handleSubmit,
   };
 

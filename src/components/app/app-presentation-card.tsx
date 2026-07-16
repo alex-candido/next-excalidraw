@@ -7,25 +7,13 @@ import {
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
+import { LANGUAGE_CODE } from "@/schemas/app/presentation-schema";
 
 import {
   AppPresentationCardActions,
   type PresentationActionKey,
 } from "@/components/app/app-presentation-card-actions";
 import { AppPresentationCardFavorite } from "@/components/app/app-presentation-card-favorite";
-
-const LANGUAGE_CODE: Record<number, string> = {
-  [PresentationLanguage.en]: "EN",
-  [PresentationLanguage.es]: "ES",
-  [PresentationLanguage.fr]: "FR",
-  [PresentationLanguage.de]: "DE",
-  [PresentationLanguage.it]: "IT",
-  [PresentationLanguage.ptBR]: "PT",
-  [PresentationLanguage.ru]: "RU",
-  [PresentationLanguage.zh]: "ZH",
-  [PresentationLanguage.ja]: "JA",
-  [PresentationLanguage.ko]: "KO",
-};
 
 type AppPresentationCardProps = {
   title: string;

@@ -1,5 +1,5 @@
 import { attachment, AttachmentType } from "@/lib/drizzle/schema/attachment"
-import { isSafeAttachmentUrl, validateAttachmentFile } from "@/lib/attachments/validate-file"
+import { fileUtils } from "@/lib/utils/file"
 import { attachmentRepository } from "@/server/repositories/app/attachment-repository"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { MAX_ATTACHMENTS_PER_PRESENTATION } from "@/schemas/app/attachment-schema"
@@ -41,7 +41,7 @@ export function attachmentService() {
     await assertOwnership(presentationId, userId)
     await assertAttachmentLimit(presentationId)
 
-    const { mimeType, size } = await validateAttachmentFile(buffer, kind)
+    const { mimeType, size } = await fileUtils().validate(buffer, kind)
 
     const row = await attachmentRepository().create({
       presentationId,
@@ -58,7 +58,7 @@ export function attachmentService() {
     await assertOwnership(presentationId, userId)
     await assertAttachmentLimit(presentationId)
 
-    if (!isSafeAttachmentUrl(url)) {
+    if (!fileUtils().isSafeUrl(url)) {
       throw Object.assign(new Error("URL inválida ou esquema não permitido"), { status: 400 })
     }
 

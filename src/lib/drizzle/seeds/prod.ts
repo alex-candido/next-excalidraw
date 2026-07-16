@@ -1,6 +1,7 @@
 import { seedGroups } from "./groups";
 import { seedPermissions } from "./permissions";
 import { seedGroupPermissions } from "./group-permissions";
+import { seedPresentationEntries } from "./presentation-entries";
 
 async function main() {
   console.log("Seeding prod...\n");
@@ -8,6 +9,7 @@ async function main() {
   await seedGroups();
   await seedPermissions();
   await seedGroupPermissions();
+  await seedPresentationEntries();
 
   console.log("\nDone.");
 }

@@ -1,5 +1,5 @@
 import { mastra } from "@/lib/mastra"
-import { buildAttachmentContext } from "@/lib/attachments/build-context"
+import { attachmentUtils } from "@/lib/utils/attachment"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
@@ -33,7 +33,7 @@ export function multiOutlineService() {
     const attachmentRows = await attachmentRepository().findByPresentationId(presentationId)
 
     try {
-      const attachments = await buildAttachmentContext(attachmentRows)
+      const attachments = await attachmentUtils().buildContext(attachmentRows)
 
       const workflow = mastra.getWorkflow("multiOutlineWorkflow")
       const run      = await workflow.createRun()

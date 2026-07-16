@@ -105,8 +105,9 @@ Parte do `pm.md` — ver `../pm.md` pro índice (ciclos, prioridades, como retom
 
 **Modalidades — Ciclo 5**
 - [ ] `P3` Modalidade **Single: prompt → diagrama** — workflow simplificado sem outline; tipo e representação definidos pelo usuário
-- [ ] `P3` Modalidade **Single: imagem → Excalidraw** — upload de imagem como referência; vision model gera skeleton baseado no conteúdo visual
+- [ ] `P3` Modalidade **Single: imagem → Excalidraw** — upload de imagem como referência; vision model gera skeleton baseado no conteúdo visual. Reaproveita infra já existente: multimodal de imagem (`lib/mastra/mappers/attachment-message-mapper.ts`) + pipeline `slideStructureTool` → `lib/excalidraw/{parse,normalize,serialize}`; falta só agent/prompt de "ler estrutura visual" em vez de "ler outline de texto"
 - [ ] `P3` Modalidade **Single: foto de quadro branco → digitalização** — vision model lê anotações e gera ilustração Excalidraw fiel
+- [ ] `P3` SEO — landing pages por caso de uso da modalidade imagem→Excalidraw (quadro branco, esboço à mão, screenshot de arquitetura, diagrama de brainstorming, fluxograma desenhado, captura de fluxograma) — mesma feature técnica, 1 landing por intenção de busca (ver `decisions.md`, "SEO — fundação técnica")
 - [ ] `P3` Modalidade **Multi** — renomear fluxo atual para "multi" explicitamente na UI/rotas
 - [ ] `P3` Visualização versátil no Single — modos: editor, fullscreen, embed (iframe exportável)
 

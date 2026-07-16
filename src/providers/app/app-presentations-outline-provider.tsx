@@ -100,15 +100,15 @@ export const AppPresentationsOutlineProvider = ({ children }: { children: ReactN
         updatedAt: o.updatedAt,
       })),
     );
-    setPrompt(presentation.userPrompt ?? "");
+    setPrompt(presentation.entry.prompt ?? "");
     setParams({
-      language: presentation.language,
-      aspectRatio: presentation.aspectRatio,
-      slideCount: presentation.slideCount,
-      audience: presentation.audience,
-      scenario: presentation.scenario,
-      amount: presentation.amount,
-      theme: presentation.theme,
+      language: presentation.entry.language,
+      aspectRatio: presentation.entry.aspectRatio,
+      slideCount: presentation.entry.slideCount,
+      audience: presentation.entry.audience,
+      scenario: presentation.entry.scenario,
+      amount: presentation.entry.amount,
+      theme: presentation.entry.theme,
     });
     setHasHydrated(true);
   }, [presentation, hasHydrated]);

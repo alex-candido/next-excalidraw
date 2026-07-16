@@ -1,6 +1,7 @@
 import { seedGroups } from "./groups";
 import { seedPermissions } from "./permissions";
 import { seedGroupPermissions } from "./group-permissions";
+import { seedPresentationEntries } from "./presentation-entries";
 import { seedUsers } from "./users";
 import { USER_ID } from "./users";
 import { seedUserGroups } from "./user-groups";
@@ -15,6 +16,7 @@ async function main() {
   await seedGroupPermissions(USER_ID.admin);
   await seedUserGroups();
   await seedUserPermissions();
+  await seedPresentationEntries();
 
   console.log("\nDone.");
 }

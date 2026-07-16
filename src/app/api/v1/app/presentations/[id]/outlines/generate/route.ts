@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       presentationId:   id,
       generationId:     generation.id,
       userId:           DEV_USER_ID,
-      presentationType: presentation.type,
+      presentationType: presentation.entry.type,
       input:            parsed.data,
     },
   })
