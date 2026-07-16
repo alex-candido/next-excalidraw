@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { PresentationLanguage } from "@/lib/drizzle/schema/presentation"
 import { OutlineRepresentation } from "@/lib/drizzle/schema/outline"
+import { attachmentContextSchema } from "@/schemas/app/attachment-schema"
 import { generationResponseSchema } from "@/schemas/app/generation-schema"
 import { outlineWorkflowOutputSchema } from "@/schemas/app/outline-schema"
 
@@ -26,6 +27,7 @@ export const multiWorkflowInputSchema = z.object({
   scenario:   z.number().int().default(0),
   theme:      z.number().int().default(0),
   keywords:   z.array(z.string()).optional(),
+  attachments: z.array(attachmentContextSchema).optional(),
 })
 
 export const multiWorkflowOutputSchema = outlineWorkflowOutputSchema

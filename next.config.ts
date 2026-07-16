@@ -1,6 +1,9 @@
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { routing } from "./src/i18n/routing";
+
+const lang = `:lang(${routing.locales.join("|")})`;
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
@@ -10,40 +13,40 @@ const nextConfig: NextConfig = {
     return [
       // Landing
       {
-        source: "/:lang(pt-BR|en-US|es)",
+        source: `/${lang}`,
         destination: "/:lang/landing/home",
         permanent: false,
       },
       {
-        source: "/:lang(pt-BR|en-US|es)/landing",
+        source: `/${lang}/landing`,
         destination: "/:lang/landing/home",
         permanent: false,
       },
       // Auth
       {
-        source: "/:lang(pt-BR|en-US|es)/auth",
+        source: `/${lang}/auth`,
         destination: "/:lang/auth/sign-in",
         permanent: false,
       },
       // App
       {
-        source: "/:lang(pt-BR|en-US|es)/app",
+        source: `/${lang}/app`,
         destination: "/:lang/app/start",
         permanent: false,
       },
       {
-        source: "/:lang(pt-BR|en-US|es)/app/settings",
+        source: `/${lang}/app/settings`,
         destination: "/:lang/app/settings/profile",
         permanent: false,
       },
       // Admin
       {
-        source: "/:lang(pt-BR|en-US|es)/admin",
+        source: `/${lang}/admin`,
         destination: "/:lang/admin/dashboard",
         permanent: false,
       },
       {
-        source: "/:lang(pt-BR|en-US|es)/admin/settings",
+        source: `/${lang}/admin/settings`,
         destination: "/:lang/admin/settings/profile",
         permanent: false,
       },

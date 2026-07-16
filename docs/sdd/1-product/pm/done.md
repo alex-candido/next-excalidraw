@@ -1,0 +1,74 @@
+# Done
+
+Parte do `pm.md` — ver `../pm.md` pro índice (ciclos, prioridades, como retomar).
+
+---
+
+- [x] **App module — presentations/[id]/present — mapeamento de components completo, modo apresentação fullbleed** (i18n · dados mock · sem lógica dinâmica)
+  - `AppPresentationsPresentView` — sem provider de dados próprio, lê `slides`/`activeSlideId`/`onSelectSlide` direto do `AppPresentationsStudioProvider` (global) via `useAppPresentationsPresentNavigation()` (`src/hooks/app/`) — navegar aqui atualiza o mesmo `activeSlideId` do Studio, então voltar mantém o slide certo. Listener global de teclado (`←`/`→` navega, `Esc` sai) — ver ADR-008
+  - `AppPresentationsPresentCanvas` — `ExcalidrawEditor` em `viewModeEnabled + zenModeEnabled`, remontado por `key={activeSlide.id}` (mesmo padrão do Studio/ADR-004) · overlay transparente dividido em metade esquerda/direita pra navegação por clique (bloqueia pan/zoom do Excalidraw durante a apresentação, ref: `excalidraw-slides`) · tamanho medido via `window.innerWidth/innerHeight` com listener de `resize`, não `height:100%`/`flex-1` — ver ADR-008 (motivo)
+  - `AppPresentationsPresentNav` — pill flutuante única (`bottom-4`, sempre visível): sair da apresentação · anterior/contador/próximo · tela cheia (Fullscreen API real via `containerRef`) · tema (botão único cicla light→dark→system, sem dropdown)
+  - Chrome nativo do Excalidraw (menu, toolbar, footer/zoom/undo-redo, botão de sair do zen mode, context menu) escondido via CSS em `globals.css`, escopado a `.app-presentations-present-canvas .excalidraw` — não afeta o Studio
+  - `AppPresentationsPresentProvider` (`providers/app/`) — só estado de UI da própria página (`isFullscreen`, `containerRef`, `onToggleFullscreen`); nunca guarda slides
+  - Novo dicionário `app-present.json`, registrado em `i18n/request.ts`
+- [x] **App module — presentations/[id]/studio — mapeamento de components completo, incluindo responsividade mobile e painéis** (i18n · dados mock · sem lógica dinâmica)
+  - **Layout responsivo** — `page.tsx` usa `flex` (desktop) / `grid grid-rows-[1fr_auto]` (mobile): Canvas preenche o espaço restante (`1fr`) sem precisar calcular altura da faixa de slides manualmente
+  - `AppPresentationsStudioSlideList` (desktop, aside `w-56` com `ScrollArea` customizada) e `AppPresentationsStudioSlideListMobile` (faixa horizontal fixa no rodapé) — mesmo estado/handlers do provider, dnd-kit alternando `verticalListSortingStrategy`/`horizontalListSortingStrategy` conforme o eixo
+  - `AppPresentationsStudioSlideListItem` — redesenhado: drag handle como botão pequeno (`self-start`, tamanho de ícone) na lateral esquerda, sem bloquear o scroll horizontal no mobile · menu ⋮ com header mostrando o título (título não é mais exibido no corpo do card) · ações duplicar/ocultar/copiar link/ver detalhes do outline/excluir
+  - `AppPresentationsStudioToolbar` — nova seção com `AppPresentationsStudioActions` (save · export · present · ⋮), posicionada dentro do `AppPresentationsStudioCanvas`, acima do editor — mesma composição em mobile e desktop
+  - `AppPresentationsStudioPanel` (Configurações/Source/Histórico) — aside fixo no desktop (`hidden md:flex`), `Sheet` lateral direita no mobile via `useIsMobile()` (mesmo padrão do `ui/sidebar.tsx`) — ver ADR-007
+  - `ExcalidrawEditor` sincroniza tema com `next-themes` (`resolvedTheme` → prop `theme` do Excalidraw, reativa) — ver ADR-006
+  - `AppPresentationsStudioCanvas` — encapsula `ExcalidrawEditor` existente, remonta via `key={activeSlide.id}` (ADR-004: slides separados, sem frames) · `scrollToContent({ fitToViewport: true })` ao trocar de slide
+  - `AppPresentationsStudioProvider` — mock de slides, captura elementos ativos via `excalidrawAPI.getSceneElements()` ao trocar/salvar · `title` é mock local (schema real deriva de `outline.title` via `outline_id`, relação 1:1)
+  - Fix: import de `skeletonSerializer` (`@excalidraw/excalidraw`) adiado para `useEffect` client-only — provider é global (montado em `providers/index.tsx`) e o pacote toca `window` na avaliação do módulo, quebrando SSR de qualquer rota
+  - Novo dicionário `app-studio.json`, registrado em `i18n/request.ts`
+- [x] **App module — presentations/[id]/outline — mapeamento de components completo** (i18n · dados mock · sem lógica dinâmica)
+  - `hero/`: AppPresentationsOutlineHero (colapsa título → textarea de prompt editável + controls-bar de idioma/aspectRatio/slideCount/audience/scenario) · AppPresentationsOutlineHeroTags (badges dos parâmetros no estado colapsado) · AppPresentationsOutlineHeroControls · AppPresentationsOutlineHeroPrompt
+  - `outline/`: AppPresentationsOutlineList (drag reorder via `@dnd-kit` · delete · add manual · summary) · AppPresentationsOutlineCard (regenerate individual · title/description/representation editáveis) · AppPresentationsOutlineBody · AppPresentationsOutlineBottomBar (ação "Gerar", separada do "Regenerar" do Hero)
+  - `parameters/`: AppPresentationsOutlineParameters · AppPresentationsOutlineThemePicker/Card · AppPresentationsOutlineAmountPicker/Card (cards seletáveis para `theme`/`amount`, em vez de select dropdown)
+  - Estado compartilhado extraído para `AppPresentationsOutlineProvider` (Context, `src/providers/app/`) — `page.tsx` só compõe as sections, sem prop-drilling
+  - `src/providers/` reorganizado por módulo: `app/index.tsx` e `admin/index.tsx` agregam os providers de cada módulo (um arquivo por provider), registrados uma única vez em `src/app/layout.tsx`
+  - Novo primitivo `SelectableCard` em `components/ui/blocks/`
+- [x] **App module — app/(shell) — mapeamento de components completo** (i18n · dados mock · sem lógica dinâmica)
+  - `presentations/`: AppPresentationsHero · AppPresentationsHeader (trash toggle · badge count) · AppPresentationsToolbar · AppPresentationsTrashToolbar · AppPresentationsEmpty · AppPresentationCard (isFavorited · href|onSelect · overlay pointer-events-none) · AppPresentationCardFavorite · AppPresentationCardActions (DEFAULT + TRASH_VIEW_ACTIONS · favorite toggle · trash confirm) · AppPresentationTrashModal
+  - `templates/`: AppTemplatesHero · AppTemplatesHeader · AppTemplatesToolbar · AppTemplatesFilters · AppTemplates (grid · empty · AppTemplateUseModal)
+  - `community/`: AppCommunityHero · AppCommunityHeader · AppCommunityToolbar · AppCommunityFilters · AppCommunityTags · AppCommunity (grid · empty) · AppCommunityModal (view state: duplicate ↔ author) · AppCommunityModalDuplicateView (carousel · pagination · meta · footer) · AppCommunityModalAuthorView (identity · scroll grid · footer autônomo)
+  - `criação manual`: AppDashboardNewModal wired em AppNavRail · AppDashboardRecentsHeader · AppPresentationsHeader
+- [x] **App module — dashboard — mapeamento de components completo** (organisms · i18n)
+  - `app/dashboard/hero/`: Hero (tagline com Sparkles · grid de features)
+  - `app/dashboard/form/`: Form com engine-bar (Engine · Options responsivos) · body (Input · hint · Actions com Paperclip inline) · controls-bar (slideCount · language · aspectRatio)
+  - `app/dashboard/suggestions/`: Suggestions (header com shuffle · grid 3 colunas) · SuggestionCard (ícone + badge na mesma linha · label)
+  - `app/dashboard/recents/`: Recents (header com view-all button · grid 3 colunas · empty state) · RecentCard (full-bleed · badges flutuantes · overlay com título + seta)
+  - Shell: Header · NavRail responsivo (bottom fixo mobile · lateral desktop · tooltips) · Footer · `next.config.ts` com redirects para todos os route groups · redirect server-side em `presentations/[id]/` → `/editor`
+  - Nota: form de criação está no dashboard — não existe rota `/presentations/new`
+- [x] **Landing module — mapeamento de components completo** (pages, organisms, molecules, atoms · i18n)
+  - `landing/home`: Hero · Product · Features · Pricing · Testimonials · Cta · Faq
+  - `landing/product/[slug]`: multi (Hero · HowItWorks · Modalities · Audience · Capabilities · Cta) · single (Hero · Inputs · Versions · Cta)
+  - `landing/institutional/about`: Hero · Mission · Story
+  - `landing/resources/blog`: Hero · Feed (empty state por categoria)
+  - `landing/resources/blog/[slug]`: Hero · Content (empty state) · Suggestions (empty state)
+  - `landing/resources/contact`: Hero · Info
+  - `landing/transparency/legal/privacy-policy`: Hero · Content
+  - `landing/transparency/legal/terms`: Hero · Content
+  - Layout: Header (NavBrand · NavMenu · NavLanguageSwitcher · NavCta · NavMobile) · Footer (FooterBrand · FooterNav · FooterCopyright)
+- [x] **i18n** — dicionários separados por domínio (`common`, `landing-nav`, `landing-home`, `landing-product`, `landing-resources`, `landing-institutional`, `landing-transparency`), carregamento paralelo via `Promise.all` em `request.ts`
+- [x] **Navegação landing** — paths legais corrigidos, `whatsNew` → blog, footer produto atualizado com `multi` e `single`
+- [x] Scaffold completo — auth, i18n, DB schema, rotas, providers
+- [x] `outlineWorkflow` funcional com tool call estruturada
+- [x] `slideWorkflow` funcional com prompt dinâmico por tipo/representação
+- [x] Schema Zod completo do Excalidraw
+- [x] `normalizeArrows` — recálculo de coordenadas de setas vinculadas
+- [x] `validateSkeletons` + `parseSkeletons` — parser robusto de output LLM
+- [x] `skeleton-serializer` — integração com `convertToExcalidrawElements`
+- [x] Sandbox de elementos Excalidraw (`/dev/sandbox`)
+- [x] Documentação inicial — briefing, adr, tasks, config, diagrams
+- [x] Schemas enriquecidos — `outlineId`/`order` no slide input, `REPRESENTATION_BY_TYPE`, validação com fallback
+- [x] `buildWorkflowMetadata` — utilitário compartilhado em `lib/mastra/utils/`
+- [x] Metadata tipada nos outputs de `outlineWorkflow` e `slideWorkflow`
+- [x] Flows documentados — `outline-generation-flow.md`, `slide-generation-flow.md`, `excalidraw-flow.md`
+- [x] Flows de integração documentados — `presentation-creation-flow.md`, `outline-page-flow.md`, `editor-flow.md`, `present-flow.md`
+- [x] `slide-creator-prompt.v2.ts` — reescrita com filosofia "argue not display", paleta semântica, container discipline, anti-patterns
+- [x] Análise de repositórios de referência — `docs/reports/references-analysis.md`
+- [x] Workflow sandbox (`/dev/sandbox/workflow`) — teste visual de `outlineWorkflow` e `slideWorkflow` com ExcalidrawEditor integrado
+- [x] `slide-creator-prompt` — regras de posicionamento: `textAlign:center` usa x como centro, `{{CENTER_X}}`/`{{CENTER_Y}}` como âncoras, proibição de markdown, limites de largura de texto, padding de contêineres
+- [x] `slide-boundary` — retângulo de delimitação dinâmico por `aspectRatio`, centralizado via `scrollToContent` no sandbox

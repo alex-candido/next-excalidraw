@@ -46,6 +46,10 @@ export function slideService() {
             layout:         item.layout,
             language:       presentation.language,
             aspectRatio:    presentation.aspectRatio,
+            amount:         presentation.amount,
+            audience:       presentation.audience,
+            scenario:       presentation.scenario,
+            theme:          presentation.theme,
           },
         }) as { result: SlideWorkflowOutput }
 
@@ -110,6 +114,10 @@ export function slideService() {
           layout:         input.layout,
           language:       presentation.language,
           aspectRatio:    presentation.aspectRatio,
+          amount:         presentation.amount,
+          audience:       presentation.audience,
+          scenario:       presentation.scenario,
+          theme:          presentation.theme,
         },
       }) as { result: SlideWorkflowOutput }
 

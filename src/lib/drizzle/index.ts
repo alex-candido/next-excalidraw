@@ -16,6 +16,9 @@ import * as outlineSchema from './schema/outline'
 import * as slideSchema from './schema/slide'
 import * as generationSchema from './schema/generation'
 import * as logSchema from './schema/log'
+import * as attachmentSchema from './schema/attachment'
+import * as storageBlobSchema from './schema/storage-blob'
+import * as storageAttachmentSchema from './schema/storage-attachment'
 import * as relationsSchema from './schema/relations'
 
 const schema = {
@@ -34,6 +37,9 @@ const schema = {
   ...slideSchema,
   ...generationSchema,
   ...logSchema,
+  ...attachmentSchema,
+  ...storageBlobSchema,
+  ...storageAttachmentSchema,
   ...relationsSchema,
 }
 

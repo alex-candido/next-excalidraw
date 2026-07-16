@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
 import type { Locale } from "@/i18n/dictionaries";
+import { routing } from "@/i18n/routing";
 
 export default async function LangLayout({
   children,
@@ -23,5 +24,5 @@ export default async function LangLayout({
 }
 
 export async function generateStaticParams() {
-  return [{ lang: "pt-BR" }, { lang: "en-US" }];
+  return routing.locales.map((lang) => ({ lang }));
 }

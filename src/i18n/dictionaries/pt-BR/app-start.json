@@ -16,10 +16,27 @@
         }
       },
       "form": {
-        "placeholder": "Descreva o fluxo, estrutura ou diagrama que você quer criar...",
+        "placeholder": {
+          "multi": "Descreva o tema, o público e o que você quer comunicar na apresentação...",
+          "single": "Descreva o fluxo, a arquitetura ou o diagrama que você quer criar..."
+        },
         "send": "Criar",
-        "upload": "Enviar imagem",
         "hint": "Enter para criar · Shift + Enter para nova linha",
+        "attachments": {
+          "image": "Anexar imagem",
+          "file": "Anexar arquivo",
+          "link": "Anexar link",
+          "linkPlaceholder": "https://...",
+          "linkConfirm": "Adicionar"
+        },
+        "meta": {
+          "notice": {
+            "trigger": "Aviso sobre conteúdo gerado por IA",
+            "title": "Aviso",
+            "description": "Conteúdo gerado por IA pode conter imprecisões. Revise antes de usar."
+          },
+          "tutorial": "Tutorial"
+        },
         "engine": {
           "label": "Engine",
           "name": "Excalidraw"
@@ -32,7 +49,6 @@
           "slideCount": {
             "label": "Slides",
             "items": [
-              "Automático",
               "5",
               "8",
               "10",
@@ -43,16 +59,16 @@
           "language": {
             "label": "Idioma",
             "items": [
-              "Português",
-              "English",
-              "Español",
-              "Français",
-              "Deutsch",
+              "Inglês",
+              "Espanhol",
+              "Francês",
+              "Alemão",
               "Italiano",
-              "日本語",
-              "中文",
-              "العربية",
-              "हिंदी"
+              "Português",
+              "Russo",
+              "Chinês",
+              "Japonês",
+              "Coreano"
             ]
           },
           "aspectRatio": {
@@ -60,10 +76,10 @@
             "items": [
               "16:9",
               "4:3",
-              "1:1",
               "9:16",
+              "1:1",
               "A4",
-              "Carta"
+              "Personalizado"
             ]
           },
           "amount": {
@@ -94,6 +110,21 @@
               "Educacional",
               "Analítico",
               "Relatório"
+            ]
+          },
+          "theme": {
+            "label": "Tema",
+            "items": [
+              "Daktilo",
+              "Noir",
+              "Cornflower",
+              "Indigo",
+              "Orbit",
+              "Cosmos",
+              "Sunset",
+              "Forest",
+              "Piano",
+              "Ebony"
             ]
           }
         }

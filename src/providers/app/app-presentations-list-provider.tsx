@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
+import { routing } from "@/i18n/routing";
 import { PresentationStatus } from "@/lib/drizzle/schema/presentation";
 import { formatRelativeDate } from "@/lib/utils";
 import type { Presentation } from "@/schemas/app/presentation-schema";
@@ -55,10 +56,10 @@ export const AppPresentationsListProvider = ({ children }: { children: ReactNode
   const all = data ?? [];
   const items = all
     .filter((p) => p.status !== PresentationStatus.trash)
-    .map((p) => toListItem(p, lang ?? "en-US"));
+    .map((p) => toListItem(p, lang ?? routing.defaultLocale));
   const trashItems = all
     .filter((p) => p.status === PresentationStatus.trash)
-    .map((p) => toListItem(p, lang ?? "en-US"));
+    .map((p) => toListItem(p, lang ?? routing.defaultLocale));
 
   const value: AppPresentationsListContextProps = {
     items,

@@ -144,3 +144,13 @@
 .app-presentations-present-canvas .excalidraw .context-menu {
   display: none !important;
 }
+
+/* ref: animata.design/docs/button/ai-button — usado no botão "Criar" do AppStartForm */
+@keyframes sparkle {
+  0%, 100% { opacity: 0.75; scale: 0.9; }
+  50% { opacity: 1; scale: 1; }
+}
+
+@theme inline {
+  --animate-sparkle: sparkle 2s ease-in-out infinite;
+}

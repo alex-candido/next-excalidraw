@@ -17,6 +17,7 @@
 //  audience                    :smallint          default(0), not null
 //  scenario                    :smallint          default(0), not null
 //  theme                       :smallint          default(0), not null
+//  engine                      :smallint          default(0), not null
 //  keywords                    :text[]
 //  visibility                  :smallint          default(1), not null
 //  status                      :smallint          default(0), not null
@@ -113,6 +114,13 @@ export const PresentationTheme = {
   ebony:      9,
 } as const;
 
+// 1 engine por presentation inteira. Só `excalidraw` implementada por ora —
+// campo existe pra não fechar a porta de engine plugável, sem UI de seleção
+// ainda (ver docs/sdd/1-product/pm/decisions.md).
+export const PresentationEngine = {
+  excalidraw: 0,
+} as const;
+
 export const presentation = pgTable(
   "presentation",
   {
@@ -133,6 +141,7 @@ export const presentation = pgTable(
     audience:   smallint("audience").default(0).notNull(),
     scenario:   smallint("scenario").default(0).notNull(),
     theme:      smallint("theme").default(0).notNull(),
+    engine:     smallint("engine").default(0).notNull(),
     keywords: text("keywords").array(),
     visibility: smallint("visibility").default(1).notNull(),
     status: smallint("status").default(0).notNull(),

@@ -8,6 +8,7 @@ import { createContext, ReactNode, useContext, useEffect, useRef, useState } fro
 
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
 import { useAppSlide } from "@/hooks/app/use-app-slide";
+import { routing } from "@/i18n/routing";
 import { SlideStatus } from "@/lib/drizzle/schema/slide";
 import { formatRelativeDate } from "@/lib/utils";
 
@@ -82,7 +83,7 @@ export const useAppPresentationsStudio = () => {
 export const AppPresentationsStudioProvider = ({ children }: { children: ReactNode }) => {
   const routeParams = useParams<{ id?: string; lang?: string }>();
   const presentationId = routeParams.id ?? "";
-  const lang = routeParams.lang ?? "en-US";
+  const lang = routeParams.lang ?? routing.defaultLocale;
 
   const { useDetail } = useAppPresentation();
   const { useList, useBulkUpdate } = useAppSlide();

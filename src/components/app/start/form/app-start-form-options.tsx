@@ -2,35 +2,34 @@
 
 import { GalleryVerticalEnd, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import { useAppStart } from "@/providers/app/app-start-provider";
 
 export function AppStartFormOptions() {
   const t = useTranslations("app.start.form.options");
-  const { type, onTypeChange } = useAppStart();
+  const { control } = useAppStart();
 
   return (
-    <div className="app-start-form-options flex items-center gap-1.5">
-      <Button
-        variant={type === PresentationType.multi ? "outline" : "ghost"}
-        size="sm"
-        className="gap-1.5"
-        onClick={() => onTypeChange(PresentationType.multi)}
-      >
-        <GalleryVerticalEnd className="size-3.5" />
-        <span className="hidden sm:inline">{t("multi")}</span>
-      </Button>
-      <Button
-        variant={type === PresentationType.single ? "outline" : "ghost"}
-        size="sm"
-        className="gap-1.5 text-muted-foreground"
-        onClick={() => onTypeChange(PresentationType.single)}
-      >
-        <PenLine className="size-3.5" />
-        <span className="hidden sm:inline">{t("single")}</span>
-      </Button>
-    </div>
+    <Controller
+      control={control}
+      name="type"
+      render={({ field }) => (
+        <Tabs value={field.value} onValueChange={field.onChange} className="app-start-form-options">
+          <TabsList>
+            <TabsTrigger value={PresentationType.multi} className="gap-1.5">
+              <GalleryVerticalEnd className="size-3.5" />
+              <span className="hidden sm:inline">{t("multi")}</span>
+            </TabsTrigger>
+            <TabsTrigger value={PresentationType.single} className="gap-1.5">
+              <PenLine className="size-3.5" />
+              <span className="hidden sm:inline">{t("single")}</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
+    />
   );
 }

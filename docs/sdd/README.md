@@ -127,5 +127,5 @@ Adicione entrada em `2-architecture/adr.md`.
 
 - Bugs e fixes pontuais (ficam no commit message)
 - Refatorações sem impacto de design
-- Estado temporário de implementação (ficam em tasks no `1-product/pm.md`)
+- Estado temporário de implementação (ficam em tasks no `1-product/pm.md` e `1-product/pm/`)
 - Código — a documentação descreve design, não implementação linha a linha

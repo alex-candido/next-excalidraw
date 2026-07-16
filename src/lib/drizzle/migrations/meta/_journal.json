@@ -15,6 +15,20 @@
       "when": 1783906502013,
       "tag": "0001_bizarre_speed_demon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784161934521,
+      "tag": "0002_spotty_sabra",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784168023886,
+      "tag": "0003_smooth_luckman",
+      "breakpoints": true
     }
   ]
 }

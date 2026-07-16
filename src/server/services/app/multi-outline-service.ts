@@ -1,7 +1,9 @@
 import { mastra } from "@/lib/mastra"
+import { buildAttachmentContext } from "@/lib/attachments/build-context"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
+import { attachmentRepository } from "@/server/repositories/app/attachment-repository"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { PresentationStatus } from "@/lib/drizzle/schema/presentation"
 import { GenerationStatus } from "@/lib/drizzle/schema/generation"
@@ -24,10 +26,18 @@ export function multiOutlineService() {
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
 
+    // Anexos são material de referência de uso único — buscados aqui (não fazem
+    // parte do input da rota) e apagados no final, sucesso ou falha (ver finally).
+    // Busca + processamento ficam DENTRO do try: se algo inesperado quebrar aqui,
+    // a geração ainda é marcada como falha e os anexos ainda são limpos.
+    const attachmentRows = await attachmentRepository().findByPresentationId(presentationId)
+
     try {
+      const attachments = await buildAttachmentContext(attachmentRows)
+
       const workflow = mastra.getWorkflow("multiOutlineWorkflow")
       const run      = await workflow.createRun()
-      const { result } = await run.start({ inputData: input }) as { result: OutlineWorkflowOutput }
+      const { result } = await run.start({ inputData: { ...input, attachments } }) as { result: OutlineWorkflowOutput }
 
       const outlines = await outlineRepository().createMany(
         result.outlines.map((item, i) => ({
@@ -75,6 +85,10 @@ export function multiOutlineService() {
         completedAt: new Date(),
       })
       throw err
+    } finally {
+      if (attachmentRows.length > 0) {
+        await attachmentRepository().deleteByPresentationId(presentationId).catch(() => {})
+      }
     }
   }
 

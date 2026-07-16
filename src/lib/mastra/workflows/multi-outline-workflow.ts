@@ -6,6 +6,7 @@ import {
 import { multiWorkflowInputSchema } from "@/schemas/app/presentations/multi-schema"
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema"
 import { createStep, createWorkflow } from "@mastra/core/workflows"
+import { attachmentMessageMapper } from "../mappers/attachment-message-mapper"
 import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper"
 import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer"
 
@@ -29,8 +30,10 @@ const generateMultiOutlineStep = createStep({
       parts.push(`Palavras-chave: ${inputData.keywords.join(", ")}`)
     }
 
+    const content = attachmentMessageMapper().buildContent(parts.join("\n"), inputData.attachments)
+
     const response = await agent.stream([
-      { role: "user", content: parts.join("\n") },
+      { role: "user", content },
     ])
 
     const [toolResults, usage] = await Promise.all([

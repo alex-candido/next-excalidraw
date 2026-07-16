@@ -6,9 +6,11 @@ import { Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
 import { AppStartFormActions } from "@/components/app/start/form/app-start-form-actions";
+import { AppStartFormAttachments } from "@/components/app/start/form/app-start-form-attachments";
 import { AppStartFormControls } from "@/components/app/start/form/app-start-form-controls";
 import { AppStartFormEngine } from "@/components/app/start/form/app-start-form-engine";
 import { AppStartFormInput } from "@/components/app/start/form/app-start-form-input";
+import { AppStartFormMeta } from "@/components/app/start/form/app-start-form-meta";
 import { AppStartFormOptions } from "@/components/app/start/form/app-start-form-options";
 
 export async function AppStartForm({
@@ -33,10 +35,14 @@ export async function AppStartForm({
           </div>
           <div className="app-start-form-body flex flex-col p-3">
             <AppStartFormInput />
+            <AppStartFormAttachments />
             <div className="app-start-form-body-footer mt-2 flex items-center justify-between px-1">
-              <Muted className="app-start-form-hint text-xs">
-                {t("hint")}
-              </Muted>
+              <div className="flex items-center gap-1.5">
+                <Muted className="app-start-form-hint text-xs">
+                  {t("hint")}
+                </Muted>
+                <AppStartFormMeta />
+              </div>
               <AppStartFormActions />
             </div>
           </div>

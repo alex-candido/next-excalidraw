@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { account } from "./account";
+import { attachment } from "./attachment";
 import { generation } from "./generation";
 import { group } from "./group";
 import { groupPermission } from "./group-permission";
@@ -10,6 +11,8 @@ import { presentation } from "./presentation";
 import { presentationMember } from "./presentation-member";
 import { session } from "./session";
 import { slide } from "./slide";
+import { storageAttachment } from "./storage-attachment";
+import { storageBlob } from "./storage-blob";
 import { user } from "./user";
 import { userGroup } from "./user-group";
 import { userPermission } from "./user-permission";
@@ -70,6 +73,19 @@ export const presentationRelations = relations(presentation, ({ one, many }) => 
   outlines: many(outline),
   slides: many(slide),
   generations: many(generation),
+  attachments: many(attachment),
+}));
+
+export const attachmentRelations = relations(attachment, ({ one }) => ({
+  presentation: one(presentation, { fields: [attachment.presentationId], references: [presentation.id] }),
+}));
+
+export const storageBlobRelations = relations(storageBlob, ({ many }) => ({
+  attachments: many(storageAttachment),
+}));
+
+export const storageAttachmentRelations = relations(storageAttachment, ({ one }) => ({
+  blob: one(storageBlob, { fields: [storageAttachment.blobId], references: [storageBlob.id] }),
 }));
 
 export const presentationMemberRelations = relations(presentationMember, ({ one }) => ({

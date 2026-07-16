@@ -102,6 +102,7 @@ export const presentationSchema = z.object({
   audience:     z.number().int(),
   scenario:     z.number().int(),
   theme:        z.number().int(),
+  engine:       z.number().int(),
   keywords:     z.array(z.string()).nullable(),
   visibility:   z.number().int(),
   status:       z.number().int(),

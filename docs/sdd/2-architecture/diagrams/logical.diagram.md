@@ -102,6 +102,7 @@ erDiagram
         smallint audience
         smallint scenario
         smallint theme
+        smallint engine
         array keywords
         smallint visibility
         smallint status
@@ -160,6 +161,37 @@ erDiagram
         timestamp updated_at
     }
 
+    ATTACHMENT {
+        uuid id PK
+        uuid presentation_id FK
+        smallint type
+        text name
+        bytea content
+        text url
+        text mime_type
+        integer size
+        timestamp created_at
+    }
+
+    STORAGE_BLOB {
+        uuid id PK
+        text storage_key UK
+        text filename
+        text mime_type
+        integer size
+        text checksum
+        timestamp created_at
+    }
+
+    STORAGE_ATTACHMENT {
+        uuid id PK
+        uuid blob_id FK
+        smallint record_type
+        uuid record_id
+        text name
+        timestamp created_at
+    }
+
     GENERATION {
         uuid id PK
         uuid presentation_id FK
@@ -205,8 +237,10 @@ erDiagram
     PRESENTATION ||--o{ OUTLINE             : "presentation_id"
     PRESENTATION ||--o{ SLIDE               : "presentation_id"
     PRESENTATION ||--o{ GENERATION          : "presentation_id"
+    PRESENTATION ||--o{ ATTACHMENT          : "presentation_id"
     OUTLINE      ||--||  SLIDE              : "outline_id"
     GENERATION   ||--o{ LOG                 : "generation_id"
+    STORAGE_BLOB ||--o{ STORAGE_ATTACHMENT  : "blob_id"
 ```
 
 ---
@@ -225,6 +259,7 @@ erDiagram
 | `presentation` | `audience` | `0` general · `1` business · `2` investor · `3` teacher · `4` student |
 | `presentation` | `scenario` | `0` auto · `1` promotional · `2` teaching · `3` analytical · `4` report |
 | `presentation` | `theme` | `0` daktilo · `1` noir · `2` cornflower · `3` indigo · `4` orbit · `5` cosmos · `6` sunset · `7` forest · `8` piano · `9` ebony |
+| `presentation` | `engine` | `0` excalidraw |
 | `presentation_member` | `role` | `0` viewer · `1` editor |
 | `invite_token` | `role` | `0` viewer · `1` editor |
 | `outline` | `type` | `0` cover · `1` content · `2` closing |
@@ -235,6 +270,8 @@ erDiagram
 | `generation` | `type` | `0` outline · `1` slide |
 | `generation` | `status` | `0` pending · `1` running · `2` completed · `3` failed |
 | `log` | `level` | `0` debug · `1` info · `2` warn · `3` error |
+| `attachment` | `type` | `0` image · `1` file · `2` link |
+| `storage_attachment` | `record_type` | `0` presentation · `1` slide · `2` user |
 
 ---
 
@@ -251,3 +288,6 @@ erDiagram
 
 - `presentation.system_prompt` — reservado para uso futuro; não usado nos workflows atuais
 - `presentation.usage` — legado; rastreamento de uso consolidado via `generation.usage`
+- `presentation.engine` — 1 engine por presentation inteira; só `excalidraw` implementada (ver docs/sdd/1-product/pm/decisions.md, "Engine de renderização plugável")
+- `attachment` — tabela `UNLOGGED` (sem WAL, mais rápida em escrita, sem garantia de durabilidade — aceitável porque é material de referência efêmero, apagado logo após a geração consumir); `content` é `bytea`, não `jsonb`
+- `storage_blob`/`storage_attachment` — par ainda sem consumidor (nenhuma feature grava blob de verdade ainda); `storage_attachment.record_type`/`record_id` é FK polimórfica (não é uma foreign key de banco de verdade, resolvida em código conforme `record_type`)

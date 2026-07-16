@@ -6,6 +6,7 @@ import {
 import { type OutlineToolOutput } from "@/schemas/app/outline-schema"
 import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema"
 import { createStep, createWorkflow } from "@mastra/core/workflows"
+import { attachmentMessageMapper } from "../mappers/attachment-message-mapper"
 import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper"
 import { outlineSemanticScorer } from "../scorers/outline-semantic-scorer"
 
@@ -19,11 +20,13 @@ const generateSingleOutlineStep = createStep({
     const agent     = mastra.getAgent("singleOutlineCreatorAgent")
     const language  = LANGUAGE_NAMES[inputData.language] ?? "English"
 
+    const content = attachmentMessageMapper().buildContent(
+      `Prompt do usuário: ${inputData.userPrompt}\nIdioma: ${language}`,
+      inputData.attachments,
+    )
+
     const response = await agent.stream([
-      {
-        role:    "user",
-        content: `Prompt do usuário: ${inputData.userPrompt}\nIdioma: ${language}`,
-      },
+      { role: "user", content },
     ])
 
     const [toolResults, usage] = await Promise.all([
