@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useAppPresentationsOutline } from "@/providers/app/app-presentations-outline-provider";
+import { useAppPresentationsOutline, useOutlineOutlines } from "@/providers/app/app-presentations-outline-provider";
 
 interface AppPresentationsOutlineBottomBarProps {
   className?: string;
@@ -13,8 +13,8 @@ interface AppPresentationsOutlineBottomBarProps {
 
 export function AppPresentationsOutlineBottomBar({ className }: AppPresentationsOutlineBottomBarProps) {
   const t = useTranslations("app.outline.hero");
-  const { outlines, onGenerate, isGenerating } = useAppPresentationsOutline();
-  const count = outlines.length;
+  const { onGenerate, isGenerating } = useAppPresentationsOutline();
+  const count = useOutlineOutlines().length;
 
   return (
     <div

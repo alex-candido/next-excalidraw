@@ -20,6 +20,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { OutlineRepresentation, OutlineType } from "@/lib/drizzle/schema/outline";
 import { cn } from "@/lib/utils";
+import {
+  useAppPresentationsOutline,
+  useOutlineActions,
+  useOutlineCard,
+  useOutlineRegeneratingIds,
+} from "@/providers/app/app-presentations-outline-provider";
 
 const TYPE_CONFIG = {
   [OutlineType.cover]: {
@@ -100,34 +106,30 @@ export interface AppPresentationsOutlineCardItem {
 }
 
 interface AppPresentationsOutlineCardProps {
-  item: AppPresentationsOutlineCardItem;
-  onTitleChange: (id: string, value: string) => void;
-  onDescriptionChange: (id: string, value: string) => void;
-  onRepresentationChange: (id: string, value: number) => void;
-  onRegenerate: (id: string) => void;
-  onDelete: (id: string) => void;
-  isRegenerating?: boolean;
+  id: string;
 }
 
-export function AppPresentationsOutlineCard({
-  item,
-  onTitleChange,
-  onDescriptionChange,
-  onRepresentationChange,
-  onRegenerate,
-  onDelete,
-  isRegenerating = false,
-}: AppPresentationsOutlineCardProps) {
+// Lê os próprios dados via useOutlineCard(id) em vez de receber o item
+// inteiro como prop — digitar num campo deste card não recria a prop de
+// nenhum outro (a store preserva a referência dos itens não afetados), então
+// os outros cards não re-renderizam. Ver store/app-outline-store.ts.
+export function AppPresentationsOutlineCard({ id }: AppPresentationsOutlineCardProps) {
   const t = useTranslations("app.outline.card");
+  const item = useOutlineCard(id);
+  const { onTitleChange, onDescriptionChange, onRepresentationChange, onDelete } = useOutlineActions();
+  const { onRegenerateCard } = useAppPresentationsOutline();
+  const isRegenerating = useOutlineRegeneratingIds().has(id);
+  // useSortable precisa ser chamado sempre, antes de qualquer return condicional
+  // (regra de hooks) — por isso vem antes da checagem de `item`.
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  if (!item) return null;
+
   const config = TYPE_CONFIG[item.type as keyof typeof TYPE_CONFIG];
   const isRestricted = item.type === OutlineType.cover || item.type === OutlineType.closing;
   const visibleGroups = isRestricted
     ? ALL_GROUPS.filter((g) => g.key === "general")
     : ALL_GROUPS;
-
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.id,
-  });
 
   return (
     <div
@@ -169,7 +171,7 @@ export function AppPresentationsOutlineCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onRegenerate(item.id)}
+              onClick={() => onRegenerateCard(item.id)}
               disabled={isRegenerating}
               className="app-outline-card-regenerate h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >

@@ -5,15 +5,13 @@ import { useEffect } from "react";
 
 import { AppPresentationsPresentCanvas } from "@/components/app/presentations/present/app-presentations-present-canvas";
 import { AppPresentationsPresentNav } from "@/components/app/presentations/present/app-presentations-present-nav";
-import { useAppPresentationsPresentNavigation } from "@/hooks/app/use-app-presentations-present-navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useAppPresentationsPresent } from "@/providers/app/app-presentations-present-provider";
 
 export function AppPresentationsPresentView() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { containerRef } = useAppPresentationsPresent();
-  const { onPrevious, onNext } = useAppPresentationsPresentNavigation();
+  const { containerRef, onPrevious, onNext } = useAppPresentationsPresent();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

@@ -1,13 +1,19 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { createContext, ReactNode, useContext, useRef, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import type { z } from "zod";
 
 import { attachmentActions } from "@/actions/app/attachment-actions";
 import { presentationActions } from "@/actions/app/app-presentation-actions";
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
+import {
+  useAppStartAttachments,
+  type AppStartAttachment,
+  type AppStartAttachmentType,
+} from "@/hooks/app/start/use-app-start-attachments";
+import { useAppStartSuggestionFill } from "@/hooks/app/start/use-app-start-suggestion-fill";
 import { useForm } from "@/hooks/use-form";
 import {
   PresentationAmount,
@@ -16,9 +22,10 @@ import {
   PresentationTheme,
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
-import { MAX_ATTACHMENTS_PER_PRESENTATION } from "@/schemas/app/attachment-schema";
 import { LOCALE_TO_LANGUAGE, presentationCreateSchema, type PresentationCreate } from "@/schemas/app/presentation-schema";
 import type { PresentationEntrySuggestion } from "@/schemas/app/presentation-entry-schema";
+
+export type { AppStartAttachment, AppStartAttachmentType } from "@/hooks/app/start/use-app-start-attachments";
 
 // presentationCreateSchema tem campo com `.default()` (type, language, amount...)
 // — entrada (o que o form guarda enquanto o usuário digita, antes do resolver
@@ -26,15 +33,6 @@ import type { PresentationEntrySuggestion } from "@/schemas/app/presentation-ent
 // (`PresentationCreate`, sempre `number`). register/control/errors trabalham
 // sobre a entrada; mutationFn recebe a saída já validada (ver hooks/use-form.ts).
 type PresentationCreateInput = z.input<typeof presentationCreateSchema>;
-
-export type AppStartAttachmentType = "image" | "file" | "link";
-
-export interface AppStartAttachment {
-  id: string;
-  type: AppStartAttachmentType;
-  name: string;
-  value: File | string;
-}
 
 interface AppStartContextProps {
   register: UseFormRegister<PresentationCreateInput>;
@@ -55,18 +53,18 @@ interface AppStartContextProps {
 
 const AppStartContext = createContext<AppStartContextProps | undefined>(undefined);
 
+// Provider fica só composição — anexos (hooks/app/start/use-app-start-attachments.ts)
+// e seleção de suggestion + animação de digitação
+// (hooks/app/start/use-app-start-suggestion-fill.ts) são hooks próprios. O form em
+// si e a orquestração do submit ficam aqui porque são genuinamente acoplados
+// (mutationFn é config do próprio useForm) — ver docs/sdd/1-product/pm/decisions.md.
 export const AppStartProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const { lang } = useParams<{ lang: string }>();
   const { useCreate } = useAppPresentation();
   const create = useCreate();
 
-  const [attachments, setAttachments] = useState<AppStartAttachment[]>([]);
-  // Presente só enquanto a suggestion clicada não foi editada (ver
-  // onSuggestionFieldEdit) — usado no submit só pra decidir se registra um
-  // presentation_entry novo (kind=custom), nunca pra validar/bloquear nada.
-  const [selectedSuggestionId, setSelectedSuggestionId] = useState<string | null>(null);
-  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { attachments, onAddAttachment, onRemoveAttachment } = useAppStartAttachments();
 
   const { register, control, watch, setValue, formState, handleSubmit } = useForm<
     PresentationCreateInput,
@@ -132,64 +130,14 @@ export const AppStartProvider = ({ children }: { children: ReactNode }) => {
     },
   });
 
+  const { selectedSuggestionId, onSelectSuggestion, onSuggestionFieldEdit } = useAppStartSuggestionFill(setValue);
+
   const type = watch("type");
   const prompt = watch("userPrompt") ?? "";
   // Idioma do app (rota [lang]) -> enum PresentationLanguage, usado pra filtrar
   // suggestions. Só pt-BR ativo hoje, mas o mapa já é multi-idioma (ver
   // presentation-schema.ts).
   const language = LOCALE_TO_LANGUAGE[lang] ?? LOCALE_TO_LANGUAGE["pt-BR"];
-
-  const onSelectSuggestion = (entry: PresentationEntrySuggestion) => {
-    setValue("aspectRatio", entry.aspectRatio);
-    setValue("slideCount", entry.slideCount);
-    setValue("amount", entry.amount);
-    setValue("audience", entry.audience);
-    setValue("scenario", entry.scenario);
-    setValue("theme", entry.theme);
-    if (entry.keywords?.length) setValue("keywords", entry.keywords);
-    setSelectedSuggestionId(entry.id);
-
-    // Efeito de "digitando" no textarea — reforça visualmente que o prompt
-    // veio de uma suggestion. Clicar em outra suggestion no meio da animação
-    // cancela a anterior e começa do zero (por isso o ref, não um simples let).
-    if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
-    const text = entry.prompt;
-    let i = 0;
-    typingIntervalRef.current = setInterval(() => {
-      i += 3;
-      setValue("userPrompt", text.slice(0, i));
-      if (i >= text.length) {
-        clearInterval(typingIntervalRef.current!);
-        typingIntervalRef.current = null;
-      }
-    }, 12);
-  };
-
-  // Qualquer edição manual num campo que a suggestion preencheu desfaz o
-  // vínculo — sem isso, um submit editado ainda seria contado como "veio de
-  // suggestion sem edição" e nunca viraria um presentation_entry (kind=custom).
-  const onSuggestionFieldEdit = () => setSelectedSuggestionId(null);
-
-  // Fica só em memória até o submit — presentation ainda não existe nesse
-  // momento (upload adiado, ver pm/decisions.md "Anexos do /app/start").
-  // Limite é checagem de UX só — quem vale de verdade é o servidor
-  // (attachment-service.ts), que rejeitaria mesmo se isso aqui não existisse.
-  const onAddAttachment = (type: AppStartAttachmentType, value: File | string) =>
-    setAttachments((prev) => {
-      if (prev.length >= MAX_ATTACHMENTS_PER_PRESENTATION) return prev;
-      return [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          type,
-          name: value instanceof File ? value.name : value,
-          value,
-        },
-      ];
-    });
-
-  const onRemoveAttachment = (id: string) =>
-    setAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
 
   const value: AppStartContextProps = {
     register,

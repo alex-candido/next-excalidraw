@@ -7,7 +7,7 @@ import { AppPresentationsPresentExit } from "@/components/app/presentations/pres
 import { AppPresentationsPresentFullscreenToggle } from "@/components/app/presentations/present/app-presentations-present-fullscreen-toggle";
 import { AppPresentationsPresentThemeToggle } from "@/components/app/presentations/present/app-presentations-present-theme-toggle";
 import { Button } from "@/components/ui/button";
-import { useAppPresentationsPresentNavigation } from "@/hooks/app/use-app-presentations-present-navigation";
+import { useAppPresentationsPresent } from "@/providers/app/app-presentations-present-provider";
 
 function AppPresentationsPresentNavDivider() {
   return <div className="app-presentations-present-nav-divider h-4 w-px shrink-0 bg-border" />;
@@ -16,7 +16,7 @@ function AppPresentationsPresentNavDivider() {
 export function AppPresentationsPresentNav() {
   const t = useTranslations("app.present.nav");
   const { currentIndex, totalSlides, hasPrevious, hasNext, onPrevious, onNext } =
-    useAppPresentationsPresentNavigation();
+    useAppPresentationsPresent();
 
   return (
     <div className="app-presentations-present-nav absolute inset-x-0 bottom-4 z-20 flex justify-center">

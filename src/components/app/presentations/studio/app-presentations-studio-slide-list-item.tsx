@@ -14,6 +14,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useStudioSlidePreviewElements } from "@/providers/app/app-presentations-studio-provider";
+
+import { AppPresentationsStudioSlidePreview } from "@/components/app/presentations/studio/app-presentations-studio-slide-preview";
 
 interface AppPresentationsStudioSlideListItemProps {
   id: string;
@@ -41,6 +44,7 @@ export function AppPresentationsStudioSlideListItem({
   onDelete,
 }: AppPresentationsStudioSlideListItemProps) {
   const t = useTranslations("app.studio.slideList.item");
+  const previewElements = useStudioSlidePreviewElements(id);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -76,7 +80,9 @@ export function AppPresentationsStudioSlideListItem({
           onClick={onSelect}
           className="app-presentations-studio-slide-list-item-thumbnail relative z-0 aspect-video w-full overflow-hidden rounded-md border bg-muted"
         >
-          {thumbnail ? (
+          {previewElements.length > 0 ? (
+            <AppPresentationsStudioSlidePreview elements={previewElements} />
+          ) : thumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={thumbnail}

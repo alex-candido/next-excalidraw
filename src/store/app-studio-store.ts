@@ -52,6 +52,13 @@ interface StudioStoreState {
   activePanel: StudioPanelKey | null;
   hasHydrated: boolean;
   excalidrawApi: ExcalidrawImperativeAPI | null;
+  // Elements do slide ativo, atualizado ao vivo pelo onChange do Excalidraw
+  // (throttled) — só existe pra alimentar a prévia da sidebar em tempo real,
+  // sem precisar tocar o array `slides` inteiro a cada edição (isso re-
+  // renderizaria a lista inteira várias vezes por segundo). null enquanto
+  // não houver nenhuma edição ainda nesta troca de slide — nesse caso o
+  // consumidor cai pro scene.elements já capturado.
+  liveActiveElements: readonly ExcalidrawElement[] | null;
 
   // Chamadas pelo provider (orquestração com react-query), não por consumidor de UI.
   resetForPresentation: (presentationId: string) => void;
@@ -61,6 +68,7 @@ interface StudioStoreState {
 
   registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
   captureActiveSlideElements: () => void;
+  setLiveActiveElements: (elements: readonly ExcalidrawElement[] | null) => void;
   onSelectSlide: (id: string) => void;
   onAddSlide: () => void;
   onDuplicateSlide: (id: string) => void;
@@ -83,6 +91,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   activePanel: null,
   hasHydrated: false,
   excalidrawApi: null,
+  liveActiveElements: null,
 
   resetForPresentation: (presentationId) => {
     if (get().presentationId === presentationId) return;
@@ -94,6 +103,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       activePanel: null,
       hasHydrated: false,
       excalidrawApi: null,
+      liveActiveElements: null,
     });
   },
 
@@ -134,10 +144,12 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
     }));
   },
 
+  setLiveActiveElements: (elements) => set({ liveActiveElements: elements }),
+
   onSelectSlide: (id) => {
     if (id === get().activeSlideId) return;
     get().captureActiveSlideElements();
-    set({ activeSlideId: id });
+    set({ activeSlideId: id, liveActiveElements: null });
   },
 
   // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só
@@ -233,6 +245,19 @@ export function useStudioIsWaitingSlides() {
   return useStudioStore((s) => !s.hasHydrated);
 }
 
+// Elements pra prévia de UM slide da sidebar — se for o ativo e já tiver
+// edição ao vivo (liveActiveElements), usa ela; senão cai pro scene.elements
+// já capturado (slides inativos nunca mudam enquanto outro está sendo
+// editado, então não precisam de nada "ao vivo").
+export function useStudioSlidePreviewElements(slideId: string) {
+  return useStudioStore((s) => {
+    const slide = s.slides.find((sl) => sl.id === slideId);
+    if (!slide) return [];
+    if (slideId === s.activeSlideId && s.liveActiveElements) return s.liveActiveElements;
+    return slide.scene.elements;
+  });
+}
+
 // Ações são referências estáveis (definidas 1x na criação do store), mas o
 // objeto que as agrupa é recriado a cada chamada — useShallow evita re-render
 // por causa disso (compara campo a campo, não a referência do objeto todo).
@@ -240,6 +265,7 @@ export function useStudioActions() {
   return useStudioStore(
     useShallow((s) => ({
       registerExcalidrawApi: s.registerExcalidrawApi,
+      setLiveActiveElements: s.setLiveActiveElements,
       onSelectSlide: s.onSelectSlide,
       onAddSlide: s.onAddSlide,
       onDuplicateSlide: s.onDuplicateSlide,

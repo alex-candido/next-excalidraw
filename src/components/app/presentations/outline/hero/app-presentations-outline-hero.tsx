@@ -11,7 +11,13 @@ import { cn } from "@/lib/utils";
 import { AppPresentationsOutlineHeroControls } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-controls";
 import { AppPresentationsOutlineHeroPrompt } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-prompt";
 import { AppPresentationsOutlineHeroTags } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-tags";
-import { useAppPresentationsOutline } from "@/providers/app/app-presentations-outline-provider";
+import {
+  useAppPresentationsOutline,
+  useOutlineActions,
+  useOutlineIsRegeneratingAll,
+  useOutlineParams,
+  useOutlinePrompt,
+} from "@/providers/app/app-presentations-outline-provider";
 
 interface AppPresentationsOutlineHeroProps {
   className?: string;
@@ -20,15 +26,11 @@ interface AppPresentationsOutlineHeroProps {
 export function AppPresentationsOutlineHero({ className }: AppPresentationsOutlineHeroProps) {
   const t = useTranslations("app.outline.hero");
   const [isExpanded, setIsExpanded] = useState(false);
-  const {
-    title,
-    prompt,
-    onPromptChange,
-    params,
-    onParamChange,
-    onRegenerateAll,
-    isRegeneratingAll,
-  } = useAppPresentationsOutline();
+  const { title, onRegenerateAll } = useAppPresentationsOutline();
+  const prompt = useOutlinePrompt();
+  const params = useOutlineParams();
+  const isRegeneratingAll = useOutlineIsRegeneratingAll();
+  const { onPromptChange, onParamChange } = useOutlineActions();
 
   return (
     <div

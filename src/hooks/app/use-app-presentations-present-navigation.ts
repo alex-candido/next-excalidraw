@@ -1,9 +1,15 @@
 "use client";
 
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import {
+  useStudioActions,
+  useStudioActiveSlideId,
+  useStudioSlides,
+} from "@/providers/app/app-presentations-studio-provider";
 
 export function useAppPresentationsPresentNavigation() {
-  const { slides, activeSlideId, onSelectSlide } = useAppPresentationsStudio();
+  const slides = useStudioSlides();
+  const activeSlideId = useStudioActiveSlideId();
+  const { onSelectSlide } = useStudioActions();
 
   const presentableSlides = slides.filter((slide) => !slide.isHidden);
   const currentIndex = presentableSlides.findIndex((slide) => slide.id === activeSlideId);

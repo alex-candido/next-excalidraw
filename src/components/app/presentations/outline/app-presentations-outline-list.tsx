@@ -14,36 +14,14 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { OutlineType } from "@/lib/drizzle/schema/outline";
+import { useOutlineActions, useOutlineOutlines } from "@/providers/app/app-presentations-outline-provider";
 
-import {
-  AppPresentationsOutlineCard,
-  type AppPresentationsOutlineCardItem,
-} from "@/components/app/presentations/outline/app-presentations-outline-card";
+import { AppPresentationsOutlineCard } from "@/components/app/presentations/outline/app-presentations-outline-card";
 
-interface AppPresentationsOutlineListProps {
-  outlines: AppPresentationsOutlineCardItem[];
-  onTitleChange: (id: string, value: string) => void;
-  onDescriptionChange: (id: string, value: string) => void;
-  onRepresentationChange: (id: string, value: number) => void;
-  onReorder: (activeId: string, overId: string) => void;
-  onRegenerate: (id: string) => void;
-  onDelete: (id: string) => void;
-  onAdd: () => void;
-  regeneratingIds?: Set<string>;
-}
-
-export function AppPresentationsOutlineList({
-  outlines,
-  onTitleChange,
-  onDescriptionChange,
-  onRepresentationChange,
-  onReorder,
-  onRegenerate,
-  onDelete,
-  onAdd,
-  regeneratingIds,
-}: AppPresentationsOutlineListProps) {
+export function AppPresentationsOutlineList() {
   const t = useTranslations("app.outline.list");
+  const outlines = useOutlineOutlines();
+  const { onReorder, onAdd } = useOutlineActions();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   );
@@ -87,16 +65,7 @@ export function AppPresentationsOutlineList({
         <SortableContext items={outlines.map((item) => item.id)} strategy={verticalListSortingStrategy}>
           <div className="app-presentations-outline-list-items flex flex-col gap-4">
             {outlines.map((item) => (
-              <AppPresentationsOutlineCard
-                key={item.id}
-                item={item}
-                onTitleChange={onTitleChange}
-                onDescriptionChange={onDescriptionChange}
-                onRepresentationChange={onRepresentationChange}
-                onRegenerate={onRegenerate}
-                onDelete={onDelete}
-                isRegenerating={regeneratingIds?.has(item.id) ?? false}
-              />
+              <AppPresentationsOutlineCard key={item.id} id={item.id} />
             ))}
           </div>
         </SortableContext>
