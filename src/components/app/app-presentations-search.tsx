@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -14,9 +15,11 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAppPresentation } from "@/hooks/app/use-app-presentation";
+import { routing } from "@/i18n/routing";
 import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
-import { useAppPresentationsList } from "@/providers/app/app-presentations-list-provider";
+import { toListItem } from "@/providers/app/app-presentations-list-provider";
 
 const TYPE_KEY = Object.fromEntries(
   Object.entries(PresentationType).map(([k, v]) => [v, k]),
@@ -29,8 +32,15 @@ export function AppPresentationsSearch({
 }: React.ComponentProps<typeof Button>) {
   const t = useTranslations("app.presentations");
   const router = useRouter();
+  const { lang } = useParams<{ lang?: string }>();
   const [open, setOpen] = useState(false);
-  const { items } = useAppPresentationsList();
+  // Independente do estado de filtro de `/app/presentations` — este combobox
+  // é usado em outras pages (community/templates), sempre busca em "todas".
+  const { useList } = useAppPresentation();
+  const { data } = useList({ tab: "all" });
+  const items = (data?.pages.flatMap((page) => page.presentations) ?? []).map((p) =>
+    toListItem(p, lang ?? routing.defaultLocale),
+  );
 
   return (
     <>

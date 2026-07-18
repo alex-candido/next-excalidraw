@@ -1,13 +1,16 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { LayoutContainer } from "@/components/layouts/layout-container";
 import { LayoutSection } from "@/components/layouts/layout-section";
 import { Muted } from "@/components/ui/typography";
+import { useAppPresentation } from "@/hooks/app/use-app-presentation";
+import { routing } from "@/i18n/routing";
 import { PresentationType } from "@/lib/drizzle/schema/presentation";
 import { cn } from "@/lib/utils";
-import { useAppPresentationsList } from "@/providers/app/app-presentations-list-provider";
+import { toListItem } from "@/providers/app/app-presentations-list-provider";
 
 import { AppPresentationCard } from "@/components/app/app-presentation-card";
 import { AppPresentationCardSkeleton } from "@/components/app/app-presentation-card-skeleton";
@@ -25,7 +28,21 @@ export function AppStartRecents({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const t = useTranslations("app.start.recents");
-  const { items, isLoading, onMoveToTrash, onRename, onDuplicate } = useAppPresentationsList();
+  const { lang } = useParams<{ lang?: string }>();
+  // Widget independente do estado de filtro/busca de `/app/presentations` —
+  // sempre "todas" as presentations mais recentes, não o que a tab/busca da
+  // outra page estiver mostrando (mesmo provider global, escopos diferentes).
+  const { useList, useMoveToTrash, useRename, useDuplicate, useFavorite, useUnfavorite } = useAppPresentation();
+  const { data, isLoading } = useList({ tab: "all" });
+  const moveToTrash = useMoveToTrash();
+  const rename = useRename();
+  const duplicate = useDuplicate();
+  const favorite = useFavorite();
+  const unfavorite = useUnfavorite();
+
+  const items = (data?.pages.flatMap((page) => page.presentations) ?? []).map((p) =>
+    toListItem(p, lang ?? routing.defaultLocale),
+  );
   const recentItems = items.slice(0, RECENTS_LIMIT);
 
   return (
@@ -65,9 +82,12 @@ export function AppStartRecents({
                   createdBy={item.createdBy}
                   isFavorited={item.isFavorited}
                   thumbnail={item.thumbnail}
-                  onTrashConfirm={() => onMoveToTrash(item.id)}
-                  onRenameConfirm={(title) => onRename(item.id, title)}
-                  onDuplicate={() => onDuplicate(item.id)}
+                  onTrashConfirm={() => moveToTrash.mutate(item.id)}
+                  onRenameConfirm={(title) => rename.mutate({ id: item.id, title })}
+                  onDuplicate={() => duplicate.mutate(item.id)}
+                  onToggleFavorite={() =>
+                    item.isFavorited ? unfavorite.mutate(item.id) : favorite.mutate(item.id)
+                  }
                 />
               ))}
             </div>

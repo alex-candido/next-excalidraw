@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { AppPresentationTrashModal } from "@/components/app/presentations/app-presentation-trash-modal";
+import { AppPresentationDeletePermanentlyModal } from "@/components/app/presentations/app-presentation-delete-permanently-modal";
 import { AppPresentationRenameModal } from "@/components/app/presentations/app-presentation-rename-modal";
 
 export type PresentationActionKey =
@@ -72,6 +73,9 @@ interface AppPresentationCardActionsProps {
   onTrashConfirm?: () => void;
   onRenameConfirm?: (title: string) => void;
   onDuplicate?: () => void;
+  onRestore?: () => void;
+  onDeletePermanentlyConfirm?: () => void;
+  onToggleFavorite?: () => void;
   className?: string;
 }
 
@@ -84,11 +88,15 @@ export function AppPresentationCardActions({
   onTrashConfirm,
   onRenameConfirm,
   onDuplicate,
+  onRestore,
+  onDeletePermanentlyConfirm,
+  onToggleFavorite,
   className,
 }: AppPresentationCardActionsProps) {
   const t = useTranslations("app.presentations.card");
   const [trashModalOpen, setTrashModalOpen] = useState(false);
   const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [deletePermanentlyModalOpen, setDeletePermanentlyModalOpen] = useState(false);
 
   const mainActions = MAIN_ACTIONS.filter((k) => actions.includes(k));
   const destructiveActions = DESTRUCTIVE_ACTIONS.filter((k) => actions.includes(k));
@@ -135,6 +143,8 @@ export function AppPresentationCardActions({
                     onClick={
                       key === "rename" ? () => setRenameModalOpen(true) :
                       key === "duplicate" ? onDuplicate :
+                      key === "restore" ? onRestore :
+                      key === "favorite" ? onToggleFavorite :
                       undefined
                     }
                   >
@@ -162,7 +172,11 @@ export function AppPresentationCardActions({
                   <DropdownMenuItem
                     key={key}
                     className={`app-presentation-card-actions-${key} gap-2 text-destructive focus:text-destructive`}
-                    onClick={key === "trash" ? () => setTrashModalOpen(true) : undefined}
+                    onClick={
+                      key === "trash" ? () => setTrashModalOpen(true) :
+                      key === "deletePermanently" ? () => setDeletePermanentlyModalOpen(true) :
+                      undefined
+                    }
                   >
                     <Icon className="size-4" />
                     {t(`actions.${key}`)}
@@ -189,6 +203,15 @@ export function AppPresentationCardActions({
           onOpenChange={setRenameModalOpen}
           title={title}
           onConfirm={onRenameConfirm}
+        />
+      )}
+
+      {actions.includes("deletePermanently") && (
+        <AppPresentationDeletePermanentlyModal
+          open={deletePermanentlyModalOpen}
+          onOpenChange={setDeletePermanentlyModalOpen}
+          title={title}
+          onConfirm={onDeletePermanentlyConfirm}
         />
       )}
     </>

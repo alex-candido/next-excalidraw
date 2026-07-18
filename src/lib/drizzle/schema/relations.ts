@@ -9,6 +9,7 @@ import { outline } from "./outline";
 import { permission } from "./permission";
 import { presentation } from "./presentation";
 import { presentationEntry } from "./presentation-entry";
+import { presentationFavorite } from "./presentation-favorite";
 import { presentationMember } from "./presentation-member";
 import { session } from "./session";
 import { slide } from "./slide";
@@ -24,6 +25,7 @@ export const userRelations = relations(user, ({ many }) => ({
   presentations: many(presentation),
   members: many(presentationMember, { relationName: "member_user" }),
   invitations: many(presentationMember, { relationName: "invited_by_user" }),
+  favorites: many(presentationFavorite),
   logs: many(log),
   userGroups: many(userGroup, { relationName: "user_group_user" }),
   assignedUserGroups: many(userGroup, { relationName: "user_group_assigned_by" }),
@@ -71,11 +73,17 @@ export const userPermissionRelations = relations(userPermission, ({ one }) => ({
 export const presentationRelations = relations(presentation, ({ one, many }) => ({
   user: one(user, { fields: [presentation.userId], references: [user.id] }),
   members: many(presentationMember),
+  favorites: many(presentationFavorite),
   outlines: many(outline),
   slides: many(slide),
   generations: many(generation),
   attachments: many(attachment),
   entries: many(presentationEntry),
+}));
+
+export const presentationFavoriteRelations = relations(presentationFavorite, ({ one }) => ({
+  presentation: one(presentation, { fields: [presentationFavorite.presentationId], references: [presentation.id] }),
+  user: one(user, { fields: [presentationFavorite.userId], references: [user.id] }),
 }));
 
 export const attachmentRelations = relations(attachment, ({ one }) => ({

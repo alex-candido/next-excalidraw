@@ -1,5 +1,9 @@
 import { cn } from "@/lib/utils";
 
+// h-16 abaixo, em px — fonte única pra quem precisa descontar essa altura
+// (ex: scrollToElement em conteúdo que fica atrás do header sticky).
+export const LAYOUT_HEADER_HEIGHT_PX = 64;
+
 export function LayoutHeader({
   children,
   className,

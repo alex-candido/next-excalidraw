@@ -22,7 +22,7 @@ export async function AppStartForm({
   return (
     <LayoutSection className="first:pt-6 md:pb-16 md:first:pt-8">
       <LayoutContainer className="justify-center">
-        <div className="app-start-form-wrapper w-full max-w-4xl flex flex-col gap-2">
+        <div id="app-start-form" className="app-start-form-wrapper w-full max-w-4xl flex flex-col gap-2">
           <AppStartFormOptions />
           <div
             className={cn(

@@ -5,21 +5,37 @@
         "title": "Suas apresentações",
         "description": "Gerencie e acesse todas as suas apresentações e diagramas."
       },
-      "header": {
-        "title": "Todas",
-        "trash": "Lixeira",
-        "back": "Voltar",
-        "backToDashboard": "Dashboard"
+      "stats": {
+        "total": {
+          "label": "Total de apresentações"
+        },
+        "multi": {
+          "label": "Apresentações"
+        },
+        "single": {
+          "label": "Diagramas"
+        },
+        "generation": {
+          "label": "Geradas por IA"
+        }
       },
       "toolbar": {
         "search": "Buscar apresentações...",
         "searchTrigger": "Buscar",
         "searchEmpty": "Nenhum resultado encontrado.",
         "filters": {
-          "all": "Todos",
-          "recent": "Vistos recentemente",
-          "mine": "Criados por você",
-          "favorites": "Favoritos"
+          "all": "Todas",
+          "multi": "Apresentações",
+          "single": "Diagramas",
+          "recent": "Recentes",
+          "favorites": "Favoritas",
+          "trash": "Lixeira"
+        },
+        "visibility": {
+          "label": "Visibilidade",
+          "all": "Todas",
+          "public": "Pública",
+          "private": "Privada"
         }
       },
       "card": {
@@ -59,8 +75,26 @@
           "label": "A lixeira está vazia."
         }
       },
+      "deletePermanently": {
+        "modal": {
+          "title": "Excluir permanentemente?",
+          "confirm": "Excluir"
+        }
+      },
+      "list": {
+        "loadMore": "Carregar mais",
+        "loadingMore": "Carregando...",
+        "backToTop": "Voltar ao topo"
+      },
       "empty": {
-        "label": "Nenhuma apresentação ainda."
+        "noData": {
+          "title": "Nenhuma apresentação ainda",
+          "description": "Crie sua primeira apresentação ou diagrama pra começar."
+        },
+        "noResults": {
+          "title": "Nenhum resultado",
+          "description": "Nenhuma apresentação corresponde aos filtros atuais."
+        }
       },
       "types": {
         "multi": "Apresentação",

@@ -34,9 +34,9 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
         // (não a cada mudança de conteúdo, só quando o shape muda) — busta o
         // cache de localStorage de qualquer client antigo automaticamente,
         // em vez de crashar tentando ler campo que não existe mais no cache
-        // persistido. Bump aqui: presentation.entry aninhado (client antigo
-        // tinha type/language/etc soltos na presentation, sem `entry`).
-        buster: "presentation-entry-2026-07-16",
+        // persistido. Bump aqui: metrics passou de generations{completed,failed}
+        // para generation{aiGenerated,total} (client antigo não tinha `generation`).
+        buster: "metrics-generation-2026-07-17",
       }}
     >
       {children}

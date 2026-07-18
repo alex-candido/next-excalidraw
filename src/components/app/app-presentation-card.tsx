@@ -29,6 +29,9 @@ type AppPresentationCardProps = {
   onTrashConfirm?: () => void;
   onRenameConfirm?: (title: string) => void;
   onDuplicate?: () => void;
+  onRestore?: () => void;
+  onDeletePermanentlyConfirm?: () => void;
+  onToggleFavorite?: () => void;
   className?: string;
 } & (
   | { href: string; onSelect?: never }
@@ -49,6 +52,9 @@ export function AppPresentationCard({
   onTrashConfirm,
   onRenameConfirm,
   onDuplicate,
+  onRestore,
+  onDeletePermanentlyConfirm,
+  onToggleFavorite,
   className,
   ...rest
 }: AppPresentationCardProps) {
@@ -131,6 +137,9 @@ export function AppPresentationCard({
           onTrashConfirm={onTrashConfirm}
           onRenameConfirm={onRenameConfirm}
           onDuplicate={onDuplicate}
+          onRestore={onRestore}
+          onDeletePermanentlyConfirm={onDeletePermanentlyConfirm}
+          onToggleFavorite={onToggleFavorite}
         />
       </div>
     </div>

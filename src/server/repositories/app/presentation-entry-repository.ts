@@ -1,5 +1,6 @@
 import { db, type DbClient } from "@/lib/drizzle"
 import { PresentationEntryKind, PresentationEntryStatus, presentationEntry } from "@/lib/drizzle/schema/presentation-entry"
+import { presentation } from "@/lib/drizzle/schema/presentation"
 import { and, eq } from "drizzle-orm"
 
 export type PresentationEntryInsert = typeof presentationEntry.$inferInsert
@@ -29,5 +30,17 @@ export function presentationEntryRepository() {
     return row
   }
 
-  return { findActiveSuggestions, findById, createCustom }
+  // Usado por metricsService() — type (multi/single) e prompt (vazio = criada
+  // em branco, sem IA) de cada presentation do usuário, pra computar os stats
+  // em código em vez de SQL de agregação (poucas linhas por usuário, não vale
+  // a complexidade de um `count() filter (where ...)`).
+  async function findTypeAndPromptByUser(userId: string) {
+    return db
+      .select({ type: presentationEntry.type, prompt: presentationEntry.prompt })
+      .from(presentationEntry)
+      .innerJoin(presentation, eq(presentationEntry.presentationId, presentation.id))
+      .where(and(eq(presentation.userId, userId), eq(presentationEntry.kind, PresentationEntryKind.custom)))
+  }
+
+  return { findActiveSuggestions, findById, createCustom, findTypeAndPromptByUser }
 }

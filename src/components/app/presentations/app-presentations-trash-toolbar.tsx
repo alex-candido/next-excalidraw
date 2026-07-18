@@ -27,7 +27,7 @@ export function AppPresentationsTrashToolbar({
       )}
     >
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         className="app-presentations-trash-toolbar-restore gap-1.5 text-xs"
         onClick={onRestoreAll}
@@ -36,7 +36,7 @@ export function AppPresentationsTrashToolbar({
         {t("restoreAll")}
       </Button>
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         className="app-presentations-trash-toolbar-empty gap-1.5 text-xs text-destructive hover:text-destructive"
         onClick={onEmptyTrash}

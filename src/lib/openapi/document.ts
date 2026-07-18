@@ -27,6 +27,7 @@ import {
   slideRegenerateSchema,
   slideSchema,
 } from "@/schemas/app/slide-schema"
+import { metricsSchema } from "@/schemas/app/metrics-schema"
 
 const errorResponseSchema = z.object({
   error: z.union([z.string(), z.record(z.string(), z.unknown())]),
@@ -73,6 +74,18 @@ export const openApiDocument = createDocument({
           "400": {
             description: "Input inválido",
             content: { "application/json": { schema: errorResponseSchema } },
+          },
+        },
+      },
+    },
+    "/metrics": {
+      get: {
+        tags: ["Metrics"],
+        summary: "Métricas agregadas do usuário (presentations/slides/generations + tendência) — calculado ao vivo, sem cache",
+        responses: {
+          "200": {
+            description: "Métricas agregadas",
+            content: { "application/json": { schema: metricsSchema } },
           },
         },
       },

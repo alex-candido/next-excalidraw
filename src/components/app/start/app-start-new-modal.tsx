@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useAppPresentation } from "@/hooks/app/use-app-presentation";
 import {
   PresentationAmount,
@@ -20,6 +20,10 @@ import {
   PresentationTheme,
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
+import { LAYOUT_HEADER_HEIGHT_PX } from "@/components/layouts/layout-header";
+import { scrollToElement } from "@/lib/utils";
+
+const START_FORM_ANCHOR_ID = "app-start-form";
 
 import { AppStartNewModalActions } from "@/components/app/start/app-start-new-modal-actions";
 import { AppStartNewModalEngine } from "@/components/app/start/app-start-new-modal-engine";
@@ -40,6 +44,7 @@ export function AppStartNewModal({
 }: AppStartNewModalProps) {
   const t = useTranslations("app.new");
   const router = useRouter();
+  const pathname = usePathname();
   const { useCreate } = useAppPresentation();
   const create = useCreate();
 
@@ -89,7 +94,21 @@ export function AppStartNewModal({
 
           <p className="app-start-new-modal-blank-notice text-xs text-muted-foreground">
             {t("blank.cta")}{" "}
-            <Link href="/app/start" onClick={() => onOpenChange(false)} className="underline underline-offset-2 hover:text-foreground">
+            <Link
+              href={`/app/start#${START_FORM_ANCHOR_ID}`}
+              scroll={false}
+              onClick={(e) => {
+                onOpenChange(false);
+                // Já em /app/start: a page não remonta (mesma rota), então o
+                // efeito de scroll de AppStartHashScroll não dispara de novo —
+                // rola direto aqui em vez de depender de uma navegação que não vai acontecer.
+                if (pathname === "/app/start") {
+                  e.preventDefault();
+                  scrollToElement(START_FORM_ANCHOR_ID, { offsetPx: LAYOUT_HEADER_HEIGHT_PX, gapRatio: 0.40 });
+                }
+              }}
+              className="underline underline-offset-2 hover:text-foreground"
+            >
               {t("blank.link")}
             </Link>
           </p>

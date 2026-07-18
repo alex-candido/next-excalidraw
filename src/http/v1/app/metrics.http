@@ -1,0 +1,4 @@
+@baseUrl = http://localhost:3000/api/v1/app
+
+### GET /metrics — métricas agregadas do usuário (presentations/slides/generations + tendência de 30 dias)
+GET {{baseUrl}}/metrics

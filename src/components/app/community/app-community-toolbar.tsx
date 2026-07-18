@@ -9,7 +9,7 @@ export function AppCommunityToolbar({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("app-community-toolbar flex flex-col gap-3", className)}
+      className={cn("app-community-toolbar flex flex-col gap-4", className)}
       {...props}
     >
       <AppCommunityFilters />

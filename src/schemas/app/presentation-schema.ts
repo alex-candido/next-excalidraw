@@ -102,6 +102,18 @@ export const presentationCreateSchema = z.object({
 
 export type PresentationCreate = z.infer<typeof presentationCreateSchema>
 
+// Query params de GET /presentations — paginação por cursor (ver
+// presentation-service.ts). `limit` vem como string da URL, por isso coerce.
+export const presentationListQuerySchema = z.object({
+  tab:        z.enum(["all", "recent", "multi", "single", "favorites", "trash"]).default("all"),
+  visibility: z.enum(["public", "private"]).optional(),
+  q:          z.string().trim().min(1).optional(),
+  cursor:     z.string().optional(),
+  limit:      z.coerce.number().int().min(1).max(100).default(9),
+})
+
+export type PresentationListQuery = z.infer<typeof presentationListQuerySchema>
+
 export const presentationRenameSchema = z.object({
   title: z.string().trim().min(1).max(200),
 })
@@ -163,6 +175,7 @@ export const presentationSchema = z.object({
   updatedAt:    z.string(),
   entry:        presentationEntryCoreSchema,
   thumbnail:    z.string().nullable(),
+  isFavorited:  z.boolean(),
 })
 
 export type Presentation = z.infer<typeof presentationSchema>
