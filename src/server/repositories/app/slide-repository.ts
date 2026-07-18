@@ -3,7 +3,7 @@ import { slide } from "@/lib/drizzle/schema/slide"
 import { eq } from "drizzle-orm"
 
 export type SlideInsert = typeof slide.$inferInsert
-export type SlideUpdate = Partial<Pick<SlideInsert, "elements" | "appState">>
+export type SlideUpdate = Partial<Pick<SlideInsert, "elements" | "appState" | "thumbnail">>
 
 export function slideRepository() {
   async function create(data: SlideInsert) {
@@ -44,10 +44,14 @@ export function slideRepository() {
     return row
   }
 
-  async function bulkUpdate(items: { id: string; elements: unknown[]; appState: Record<string, unknown> }[]) {
+  async function bulkUpdate(items: { id: string; elements: unknown[]; appState: Record<string, unknown>; thumbnail?: string }[]) {
     let count = 0
     for (const item of items) {
-      await db.update(slide).set({ elements: item.elements, appState: item.appState }).where(eq(slide.id, item.id))
+      const data: SlideUpdate = { elements: item.elements, appState: item.appState }
+      // Só a capa manda thumbnail (o SVG calculado no mesmo save) — os demais
+      // itens do lote não têm essa chave, então não sobrescreve com undefined.
+      if (item.thumbnail !== undefined) data.thumbnail = item.thumbnail
+      await db.update(slide).set(data).where(eq(slide.id, item.id))
       count++
     }
     return count

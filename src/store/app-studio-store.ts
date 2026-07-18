@@ -63,6 +63,7 @@ interface StudioStoreState {
   // Chamadas pelo provider (orquestração com react-query), não por consumidor de UI.
   resetForPresentation: (presentationId: string) => void;
   hydrate: (slides: AppPresentationsStudioSlide[]) => void;
+  setHasHydrated: (value: boolean) => void;
   setIsSaving: (isSaving: boolean) => void;
   reconcileCreatedSlides: (created: { tempId: string; id: string; outlineId: string }[]) => void;
 
@@ -107,7 +108,28 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
     });
   },
 
-  hydrate: (slides) => set({ slides, activeSlideId: slides[0]?.id ?? "", hasHydrated: true }),
+  // Merge, nunca substitui — slideService().generate() persiste slide por
+  // slide, em sequência (ver slide-service.ts), então o hook de hidratação
+  // chama isso a cada poll com a lista mais recente do servidor, mesmo antes
+  // de todos os slides existirem. Só adiciona os que ainda não estão na
+  // store; nunca sobrescreve um slide já presente, senão apagaria edição ao
+  // vivo do usuário (ex: ele já começou a editar a capa enquanto os outros
+  // slides ainda geram). `hasHydrated` fica por conta de setHasHydrated —
+  // quem decide que a geração terminou é o hook (compara contagem esperada).
+  hydrate: (incoming) =>
+    set((state) => {
+      const existingIds = new Set(state.slides.map((s) => s.id));
+      const toAdd = incoming.filter((s) => !existingIds.has(s.id));
+      if (toAdd.length === 0) return state;
+
+      const merged = [...state.slides, ...toAdd].sort((a, b) => a.order - b.order);
+      return {
+        slides: merged,
+        activeSlideId: state.activeSlideId || merged[0]?.id || "",
+      };
+    }),
+
+  setHasHydrated: (value) => set({ hasHydrated: value }),
 
   setIsSaving: (isSaving) => set({ isSaving }),
 

@@ -15,6 +15,46 @@ export type ExcalidrawThemeMeta = {
   palette:     ExcalidrawThemePalette
 }
 
+// Papéis semânticos (significado, ex: "isso é um alerta") — ortogonal à
+// paleta decorativa do tema (identidade visual) e ao fillStyle (peso/textura,
+// ver theme-applicator.ts). Compartilhado por todos os temas do mesmo `mode`
+// — verde=sucesso, âmbar=aviso etc. devem significar a mesma coisa
+// independente do tema decorativo escolhido, só ajustado pro contraste do
+// canvas claro/escuro.
+export type SemanticRole = "success" | "warning" | "danger" | "external" | "process" | "trigger" | "neutral"
+
+export type SemanticPair = { fill: string; stroke: string }
+
+const SEMANTIC_LIGHT: Record<SemanticRole, SemanticPair> = {
+  success:  { fill: "#dcfce7", stroke: "#166534" },
+  warning:  { fill: "#fef9c3", stroke: "#854d0e" },
+  danger:   { fill: "#fee2e2", stroke: "#991b1b" },
+  external: { fill: "#f3e8ff", stroke: "#6b21a8" },
+  process:  { fill: "#e0f2fe", stroke: "#0369a1" },
+  trigger:  { fill: "#fed7aa", stroke: "#c2410c" },
+  neutral:  { fill: "#f1f5f9", stroke: "#475569" },
+}
+
+const SEMANTIC_DARK: Record<SemanticRole, SemanticPair> = {
+  success:  { fill: "#14532d", stroke: "#4ade80" },
+  warning:  { fill: "#78350f", stroke: "#fbbf24" },
+  danger:   { fill: "#7f1d1d", stroke: "#f87171" },
+  external: { fill: "#581c87", stroke: "#c084fc" },
+  process:  { fill: "#0c4a6e", stroke: "#38bdf8" },
+  trigger:  { fill: "#7c2d12", stroke: "#fb923c" },
+  neutral:  { fill: "#1e293b", stroke: "#94a3b8" },
+}
+
+const SEMANTIC_ROLE_HINTS: Record<SemanticRole, string> = {
+  success:  "sucesso, dado, estado concluído",
+  warning:  "aviso, decisão, atenção",
+  danger:   "erro, crítico, bloqueio",
+  external: "externo, IA, terceiros",
+  process:  "processo, etapa padrão",
+  trigger:  "gatilho, início, entrada",
+  neutral:  "neutro, container, zona",
+}
+
 export function presentationThemes() {
   const themes: Record<string, ExcalidrawThemeMeta> = {
     daktilo: {
@@ -172,21 +212,27 @@ export function presentationThemes() {
     return themes[key] ?? themes.daktilo
   }
 
-  function buildPalettePrompt(key: string): string {
-    const { name, palette } = getByKey(key)
+  function getSemanticRoles(key: string): Record<SemanticRole, SemanticPair> {
+    const { mode } = getByKey(key)
+    return mode === "dark" ? SEMANTIC_DARK : SEMANTIC_LIGHT
+  }
+
+  // Nomeia os papéis pra IA (sem hex — a cor real é resolvida em código por
+  // theme-applicator.ts, a partir do tema já persistido na Presentation).
+  function buildSemanticRolesPrompt(): string {
+    const roles = Object.keys(SEMANTIC_ROLE_HINTS) as SemanticRole[]
     return [
-      `## Paleta de Cores — Tema ${name}`,
+      `## Papéis Semânticos`,
       ``,
-      `| Papel        | Hex       | Usar em                                       |`,
-      `|--------------|-----------|-----------------------------------------------|`,
-      `| canvas       | ${palette.canvas}  | viewBackgroundColor do appState               |`,
-      `| stroke       | ${palette.stroke}  | strokeColor padrão de shapes                  |`,
-      `| text         | ${palette.text}  | strokeColor de elementos text                 |`,
-      `| primary      | ${palette.primary}  | backgroundColor do elemento principal         |`,
-      `| secondary    | ${palette.secondary}  | backgroundColor de elementos de suporte       |`,
-      `| accent       | ${palette.accent}  | backgroundColor de containers/zonas           |`,
+      `Defina \`role\` no elemento (não hex) — a cor é resolvida automaticamente a partir do tema da apresentação.`,
+      ``,
+      `| role | Uso |`,
+      `|------|-----|`,
+      ...roles.map(role => `| \`${role}\` | ${SEMANTIC_ROLE_HINTS[role]} |`),
+      ``,
+      `Sem \`role\` definido, o elemento cai no papel \`neutral\`.`,
     ].join("\n")
   }
 
-  return { themes, getByKey, buildPalettePrompt }
+  return { themes, getByKey, getSemanticRoles, buildSemanticRolesPrompt }
 }

@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, resolveThumbnailSrc } from "@/lib/utils";
 import { useStudioSlidePreviewElements } from "@/providers/app/app-presentations-studio-provider";
 
 import { AppPresentationsStudioSlidePreview } from "@/components/app/presentations/studio/app-presentations-studio-slide-preview";
@@ -85,7 +85,7 @@ export function AppPresentationsStudioSlideListItem({
           ) : thumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={thumbnail}
+              src={resolveThumbnailSrc(thumbnail)}
               alt={title}
               className="app-presentations-studio-slide-list-item-thumbnail-image size-full object-cover"
             />

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AppPresentationsOutlineHeroControls } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-controls";
 import { AppPresentationsOutlineHeroPrompt } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-prompt";
 import { AppPresentationsOutlineHeroTags } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-tags";
+import { AppPresentationsOutlineRegenerateAllModal } from "@/components/app/presentations/outline/app-presentations-outline-regenerate-all-modal";
 import {
   useAppPresentationsOutline,
   useOutlineActions,
@@ -26,6 +27,7 @@ interface AppPresentationsOutlineHeroProps {
 export function AppPresentationsOutlineHero({ className }: AppPresentationsOutlineHeroProps) {
   const t = useTranslations("app.outline.hero");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isRegenerateAllModalOpen, setIsRegenerateAllModalOpen] = useState(false);
   const { title, onRegenerateAll } = useAppPresentationsOutline();
   const prompt = useOutlinePrompt();
   const params = useOutlineParams();
@@ -81,7 +83,7 @@ export function AppPresentationsOutlineHero({ className }: AppPresentationsOutli
           <Button
             variant="ghost"
             size="sm"
-            onClick={onRegenerateAll}
+            onClick={() => setIsRegenerateAllModalOpen(true)}
             disabled={isRegeneratingAll}
             className="app-presentations-outline-hero-regenerate gap-1.5 text-xs text-muted-foreground hover:text-foreground"
           >
@@ -90,6 +92,12 @@ export function AppPresentationsOutlineHero({ className }: AppPresentationsOutli
           </Button>
         </div>
       </div>
+
+      <AppPresentationsOutlineRegenerateAllModal
+        open={isRegenerateAllModalOpen}
+        onOpenChange={setIsRegenerateAllModalOpen}
+        onConfirm={onRegenerateAll}
+      />
     </div>
   );
 }

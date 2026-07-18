@@ -35,6 +35,7 @@ type AppPresentationsStudioContextProps = {
   createdBy: string;
   isFavorited: boolean;
   isLoading: boolean;
+  expectedSlideCount: number;
   onSave: () => void;
 };
 
@@ -49,7 +50,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
   const presentationId = routeParams.id ?? "";
   const lang = routeParams.lang ?? routing.defaultLocale;
 
-  const { presentation, isLoading } = useAppStudioHydration(presentationId);
+  const { presentation, isLoading, expectedSlideCount } = useAppStudioHydration(presentationId);
   const { onSave } = useAppStudioSave(presentationId, presentation);
 
   const value: AppPresentationsStudioContextProps = {
@@ -58,6 +59,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     createdBy: "",
     isFavorited: false,
     isLoading,
+    expectedSlideCount,
     onSave,
   };
 

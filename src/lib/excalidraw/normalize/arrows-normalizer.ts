@@ -2,13 +2,22 @@ import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/tran
 
 type Edge = "left" | "right" | "top" | "bottom"
 type Rect = { x: number; y: number; width: number; height: number }
+type Point = { x: number; y: number }
+type Raw = Record<string, unknown>
+
+// Usado quando só um lado do binding start/end resolve (a IA esqueceu o
+// outro lado) ou nenhum dos dois ids existe no slide — sem isso a seta fica
+// sem x/y/width/height, que vira NaN assim que alguém tenta desenhá-la
+// (exportToSvg, o próprio editor Excalidraw). Ver docs/adr.md.
+const DEFAULT_ARROW_LENGTH = 150
 
 function getRect(el: ExcalidrawElementSkeleton): Rect {
+  const raw = el as Raw
   return {
-    x: (el as Record<string, unknown>).x as number ?? 0,
-    y: (el as Record<string, unknown>).y as number ?? 0,
-    width: (el as Record<string, unknown>).width as number ?? 100,
-    height: (el as Record<string, unknown>).height as number ?? 100,
+    x: (raw.x as number) ?? 0,
+    y: (raw.y as number) ?? 0,
+    width: (raw.width as number) ?? 100,
+    height: (raw.height as number) ?? 100,
   }
 }
 
@@ -32,7 +41,7 @@ function determineEdges(start: Rect, end: Rect): { startEdge: Edge; endEdge: Edg
   return { startEdge: "right", endEdge: "left" }
 }
 
-function getEdgeCenter(rect: Rect, edge: Edge): { x: number; y: number } {
+function getEdgeCenter(rect: Rect, edge: Edge): Point {
   switch (edge) {
     case "left":   return { x: rect.x,               y: rect.y + rect.height / 2 }
     case "right":  return { x: rect.x + rect.width,  y: rect.y + rect.height / 2 }
@@ -41,44 +50,91 @@ function getEdgeCenter(rect: Rect, edge: Edge): { x: number; y: number } {
   }
 }
 
+function hasFiniteGeometry(raw: Raw): boolean {
+  return Number.isFinite(raw.x) && Number.isFinite(raw.y)
+}
+
+// Number.isFinite(value: unknown) não é um type guard — não estreita
+// `unknown` pra `number` no branch verdadeiro do ternário, por isso o cast
+// explícito aqui em vez de só `Number.isFinite(raw.x) ? raw.x : 0`.
+function finiteOrDefault(value: unknown, fallback: number): number {
+  return Number.isFinite(value) ? (value as number) : fallback
+}
+
+function applyGeometry(el: ExcalidrawElementSkeleton, start: Point, end: Point): ExcalidrawElementSkeleton {
+  const width = end.x - start.x
+  const height = end.y - start.y
+  return {
+    ...el,
+    x: start.x,
+    y: start.y,
+    width: width === 0 ? 1 : width,
+    height,
+  }
+}
+
+function applyFallbackGeometry(el: ExcalidrawElementSkeleton, raw: Raw): ExcalidrawElementSkeleton {
+  return {
+    ...el,
+    x: finiteOrDefault(raw.x, 0),
+    y: finiteOrDefault(raw.y, 0),
+    width: finiteOrDefault(raw.width, DEFAULT_ARROW_LENGTH),
+    height: finiteOrDefault(raw.height, 0),
+  }
+}
+
 export function arrowNormalizer() {
   function normalize(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawElementSkeleton[] {
-  const elementMap = new Map<string, ExcalidrawElementSkeleton>()
-  for (const el of skeletons) {
-    const id = (el as Record<string, unknown>).id as string | undefined
-    if (id) elementMap.set(id, el)
-  }
-
-  return skeletons.map((el) => {
-    const raw = el as Record<string, unknown>
-    if (raw.type !== "arrow" && raw.type !== "line") return el
-
-    const startId = (raw.start as Record<string, unknown> | undefined)?.id as string | undefined
-    const endId   = (raw.end   as Record<string, unknown> | undefined)?.id as string | undefined
-    if (!startId || !endId) return el
-
-    const startEl = elementMap.get(startId)
-    const endEl   = elementMap.get(endId)
-    if (!startEl || !endEl) return el
-
-    const startRect = getRect(startEl)
-    const endRect   = getRect(endEl)
-
-    const { startEdge, endEdge } = determineEdges(startRect, endRect)
-    const startPt = getEdgeCenter(startRect, startEdge)
-    const endPt   = getEdgeCenter(endRect, endEdge)
-
-    const width = endPt.x - startPt.x
-    const height = endPt.y - startPt.y
-
-    return {
-      ...el,
-      x: startPt.x,
-      y: startPt.y,
-      width: width === 0 ? 1 : width,
-      height,
+    const elementMap = new Map<string, ExcalidrawElementSkeleton>()
+    for (const el of skeletons) {
+      const id = (el as Raw).id as string | undefined
+      if (id) elementMap.set(id, el)
     }
-  })
+
+    return skeletons.map((el) => {
+      const raw = el as Raw
+      if (raw.type !== "arrow" && raw.type !== "line") return el
+
+      const startId = (raw.start as Raw | undefined)?.id as string | undefined
+      const endId   = (raw.end   as Raw | undefined)?.id as string | undefined
+
+      // Sem binding nenhum — caso válido de seta solta com geometria
+      // explícita (ver ELEM_ARROW no prompt); a rede de segurança abaixo
+      // cobre o caso raro de vir sem binding E sem x/y.
+      if (!startId && !endId) {
+        return hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw)
+      }
+
+      const startEl = startId ? elementMap.get(startId) : undefined
+      const endEl   = endId ? elementMap.get(endId) : undefined
+
+      if (startEl && endEl) {
+        const startRect = getRect(startEl)
+        const endRect   = getRect(endEl)
+        const { startEdge, endEdge } = determineEdges(startRect, endRect)
+        return applyGeometry(el, getEdgeCenter(startRect, startEdge), getEdgeCenter(endRect, endEdge))
+      }
+
+      // Binding incompleto: só um lado foi informado, ou o id do outro lado
+      // não corresponde a nenhum elemento do slide (referência inválida da
+      // IA). Ancora no lado que resolveu e usa um comprimento padrão na
+      // direção convencional (esquerda→direita) em vez de deixar a seta sem
+      // x/y — nunca propagar NaN pro Excalidraw.
+      const anchorEl = startEl ?? endEl
+      if (anchorEl) {
+        const anchorIsStart = !!startEl
+        const anchorRect = getRect(anchorEl)
+        const anchorPt = getEdgeCenter(anchorRect, anchorIsStart ? "right" : "left")
+        const otherPt: Point = anchorIsStart
+          ? { x: anchorPt.x + DEFAULT_ARROW_LENGTH, y: anchorPt.y }
+          : { x: anchorPt.x - DEFAULT_ARROW_LENGTH, y: anchorPt.y }
+        return applyGeometry(el, anchorIsStart ? anchorPt : otherPt, anchorIsStart ? otherPt : anchorPt)
+      }
+
+      // Nenhum dos ids referenciados existe no slide — não tem como inferir
+      // posição a partir do binding.
+      return hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw)
+    })
   }
 
   return { normalize }

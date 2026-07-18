@@ -6,7 +6,7 @@ import {
   PresentationLanguage,
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
-import { cn } from "@/lib/utils";
+import { cn, resolveThumbnailSrc } from "@/lib/utils";
 import { LANGUAGE_CODE } from "@/schemas/app/presentation-schema";
 
 import {
@@ -71,7 +71,7 @@ export function AppPresentationCard({
       {thumbnail && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={thumbnail}
+          src={resolveThumbnailSrc(thumbnail)}
           alt=""
           className="app-presentation-card-thumbnail-image absolute inset-0 z-0 size-full object-cover"
         />

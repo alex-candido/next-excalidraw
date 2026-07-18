@@ -26,6 +26,7 @@ import {
   slideRegenerateResultSchema,
   slideRegenerateSchema,
   slideSchema,
+  slideThumbnailUpdateSchema,
 } from "@/schemas/app/slide-schema"
 import { metricsSchema } from "@/schemas/app/metrics-schema"
 
@@ -253,21 +254,15 @@ export const openApiDocument = createDocument({
     "/presentations/{id}/slides/{slideId}/thumbnail": {
       post: {
         tags: ["Slides"],
-        summary: "Upload de thumbnail do slide (usado como capa da presentation quando o slide é do outline type=cover)",
+        summary: "Define a capa do slide (texto SVG já renderizado no client — sem upload de arquivo). Usado como capa da presentation quando o slide é do outline type=cover",
         requestParams: { path: slideIdParams },
-        requestBody: {
-          content: {
-            "multipart/form-data": {
-              schema: z.object({ file: z.file() }),
-            },
-          },
-        },
+        requestBody: { content: { "application/json": { schema: slideThumbnailUpdateSchema } } },
         responses: {
           "200": {
-            description: "URL pública do thumbnail (R2/MinIO), já persistida em slide.thumbnail",
+            description: "Texto SVG persistido em slide.thumbnail",
             content: { "application/json": { schema: z.object({ thumbnail: z.string().nullable() }) } },
           },
-          "400": { description: "Arquivo ausente ou não é uma imagem válida", content: { "application/json": { schema: errorResponseSchema } } },
+          "400": { description: "Corpo inválido", content: { "application/json": { schema: errorResponseSchema } } },
           "403": { description: "Apresentação de outro usuário", content: { "application/json": { schema: errorResponseSchema } } },
           "404": { description: "Não encontrada", content: { "application/json": { schema: errorResponseSchema } } },
         },

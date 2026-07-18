@@ -26,7 +26,9 @@ export function useAppOutlineGenerate(presentationId: string, lang: string) {
           id: o.id,
           title: o.title,
           description: o.description,
+          concepts: o.concepts,
           representation: o.representation,
+          layout: o.layout,
         })),
       });
 

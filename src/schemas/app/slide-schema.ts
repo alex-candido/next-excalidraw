@@ -67,10 +67,21 @@ export const slideBulkUpdateItemSchema = z.object({
   id:       z.string().uuid(),
   elements: z.array(z.record(z.string(), z.unknown())),
   appState: z.record(z.string(), z.unknown()).default({}),
+  // Só o slide de capa manda isso — SVG (exportToSvg, serializado em texto)
+  // do próprio slide, calculado no client no mesmo save que persiste
+  // `elements`, nunca separado (evita o campo dessincronizar do conteúdo real).
+  thumbnail: z.string().optional(),
 })
 
 export const slideBulkUpdateSchema = z.object({
   slides: z.array(slideBulkUpdateItemSchema).min(1),
+})
+
+// Endpoint dedicado, separado do bulkUpdate — cobre o caso de já existir
+// capa sem thumbnail e o usuário nunca ter clicado em "Salvar" (elements não
+// mudou, só falta preencher o campo). Ver use-app-studio-hydration.ts.
+export const slideThumbnailUpdateSchema = z.object({
+  thumbnail: z.string().min(1),
 })
 
 export const slideRegenerateSchema = z.object({
@@ -83,14 +94,15 @@ export const slideRegenerateSchema = z.object({
   layout:         z.string(),
 })
 
-export type SlideGenerateItem   = z.infer<typeof slideGenerateItemSchema>
-export type SlideGenerate       = z.infer<typeof slideGenerateSchema>
-export type SlideBulkUpdateItem = z.infer<typeof slideBulkUpdateItemSchema>
-export type SlideBulkUpdate     = z.infer<typeof slideBulkUpdateSchema>
-export type SlideRegenerate     = z.infer<typeof slideRegenerateSchema>
-export type SlideWorkflowInput  = z.infer<typeof slideWorkflowInputSchema>
-export type SlideToolOutput     = z.infer<typeof slideToolOutputSchema>
-export type SlideWorkflowOutput = z.infer<typeof slideWorkflowOutputSchema>
+export type SlideGenerateItem    = z.infer<typeof slideGenerateItemSchema>
+export type SlideGenerate        = z.infer<typeof slideGenerateSchema>
+export type SlideBulkUpdateItem  = z.infer<typeof slideBulkUpdateItemSchema>
+export type SlideThumbnailUpdate = z.infer<typeof slideThumbnailUpdateSchema>
+export type SlideBulkUpdate      = z.infer<typeof slideBulkUpdateSchema>
+export type SlideRegenerate      = z.infer<typeof slideRegenerateSchema>
+export type SlideWorkflowInput   = z.infer<typeof slideWorkflowInputSchema>
+export type SlideToolOutput      = z.infer<typeof slideToolOutputSchema>
+export type SlideWorkflowOutput  = z.infer<typeof slideWorkflowOutputSchema>
 
 export const slideSchema = z.object({
   id:             z.string().uuid(),

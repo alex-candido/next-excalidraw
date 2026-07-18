@@ -1,8 +1,7 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { slideToolOutputSchema, type SlideToolOutput } from "@/schemas/app/slide-schema";
-import { elementParser } from "@/lib/excalidraw/parse/element-parser";
-import { arrowNormalizer } from "@/lib/excalidraw/normalize/arrows-normalizer";
+import { excalidrawSkeleton } from "@/lib/excalidraw";
 
 export const slideStructureTool = createTool({
   id: "slide-structure-tool",
@@ -12,8 +11,10 @@ export const slideStructureTool = createTool({
   }),
   outputSchema: slideToolOutputSchema,
   execute: async (inputData): Promise<SlideToolOutput> => {
-    const validated  = elementParser().validate(inputData.elements)
-    const normalized = arrowNormalizer().normalize(validated)
+    // Sem context (tema/idioma/canvas) aqui dentro — a tool não tem acesso à
+    // Presentation. O enriquecimento completo acontece no fechamento do
+    // step, em slide-workflow.ts, que já tem esse contexto resolvido.
+    const normalized = excalidrawSkeleton().fromAiOutput(inputData.elements)
     return { elements: normalized as Record<string, unknown>[] }
   },
 })

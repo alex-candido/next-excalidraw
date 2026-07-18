@@ -8,6 +8,7 @@ import type {
   SlideManualCreateResult,
   SlideRegenerate,
   SlideRegenerateResponse,
+  SlideThumbnailUpdate,
 } from "@/schemas/app/slide-schema"
 
 const base = (presentationId: string) => `/api/v1/app/presentations/${presentationId}/slides`
@@ -47,5 +48,15 @@ export function slideActions() {
     })
   }
 
-  return { list, generate, createManual, bulkUpdate, regenerate }
+  // Caminho isolado (fora do bulkUpdate) pra preencher a capa quando o
+  // usuário nunca clicou em "Salvar" — elements não mudou, só falta o
+  // thumbnail. Ver use-app-studio-hydration.ts.
+  async function setThumbnail(presentationId: string, slideId: string, input: SlideThumbnailUpdate) {
+    return apiFetch<{ thumbnail: string | null }>(`${base(presentationId)}/${slideId}/thumbnail`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+  }
+
+  return { list, generate, createManual, bulkUpdate, regenerate, setThumbnail }
 }

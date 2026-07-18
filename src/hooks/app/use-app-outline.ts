@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { outlineActions } from "@/actions/app/app-outline-actions";
 import { appPresentationKeys } from "@/hooks/app/use-app-presentation";
-import type { OutlineRegenerate } from "@/schemas/app/presentations/multi-schema";
+import type { OutlineRegenerate, OutlineRegenerateAll } from "@/schemas/app/presentations/multi-schema";
 
 export function useAppOutline() {
   const queryClient = useQueryClient();
@@ -28,5 +28,14 @@ export function useAppOutline() {
     });
   }
 
-  return { useBulkUpdate, useRegenerate };
+  function useRegenerateAll(presentationId: string) {
+    return useMutation({
+      mutationFn: (input: OutlineRegenerateAll) => outlineActions().regenerateAll(presentationId, input),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: appPresentationKeys.detail(presentationId) });
+      },
+    });
+  }
+
+  return { useBulkUpdate, useRegenerate, useRegenerateAll };
 }

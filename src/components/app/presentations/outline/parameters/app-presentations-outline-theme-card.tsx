@@ -22,7 +22,7 @@ export function AppPresentationsOutlineThemeCard({
       onClick={onSelect}
       className="app-presentations-outline-theme-card w-full"
     >
-      <div className="app-presentations-outline-theme-card-swatch flex overflow-hidden rounded-md ring-1 ring-foreground/10">
+      <div className="app-presentations-outline-theme-card-swatch flex w-full overflow-hidden rounded-md ring-1 ring-foreground/10">
         {swatch.map((color, index) => (
           <span
             key={`${color}-${index}`}

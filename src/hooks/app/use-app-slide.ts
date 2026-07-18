@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { slideActions } from "@/actions/app/app-slide-actions";
 import { appPresentationKeys } from "@/hooks/app/use-app-presentation";
-import type { Slide, SlideManualCreate, SlideRegenerate } from "@/schemas/app/slide-schema";
+import type { Slide, SlideBulkUpdate, SlideManualCreate, SlideRegenerate } from "@/schemas/app/slide-schema";
 
 export const appSlideKeys = {
   all: (presentationId: string) => ["slides", presentationId] as const,
@@ -52,8 +52,15 @@ export function useAppSlide() {
   function useBulkUpdate(presentationId: string) {
     return useMutation({
       mutationFn: slideActions().bulkUpdate.bind(null, presentationId),
-      onSuccess: () => {
+      onSuccess: (_data, variables: SlideBulkUpdate) => {
         queryClient.invalidateQueries({ queryKey: appSlideKeys.all(presentationId) });
+        // A capa (slide.thumbnail) aparece no card da listagem/detail de
+        // presentations — sem isso, salvar no Studio atualiza o banco mas o
+        // card fora do Studio continua mostrando a thumbnail antiga até essa
+        // query expirar sozinha (staleTime).
+        if (variables.slides.some((s) => s.thumbnail)) {
+          queryClient.invalidateQueries({ queryKey: appPresentationKeys.all });
+        }
       },
     });
   }

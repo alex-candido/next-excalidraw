@@ -82,6 +82,10 @@ Content-Type: application/json
 
 ###
 
-### POST /presentations/:id/slides/:slideId/thumbnail — upload de thumbnail (multipart, campo "file") — capa da presentation
-# .http não suporta multipart nativamente — testar via curl:
-# curl -X POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/thumbnail -F "file=@thumbnail.png;type=image/png"
+### POST /presentations/:id/slides/:slideId/thumbnail — define a capa (texto SVG já renderizado no client, exportToSvg) — capa da presentation
+POST {{baseUrl}}/presentations/{{presentationId}}/slides/{{slideId}}/thumbnail
+Content-Type: application/json
+
+{
+  "thumbnail": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 800 450\"></svg>"
+}

@@ -1,5 +1,5 @@
 import { presentationThemes } from "@/lib/excalidraw/themes/presentation-themes"
-import { AMOUNT_RANGE, AUDIENCE_HINTS, SCENARIO_HINTS, THEME_KEYS } from "@/schemas/app/presentation-schema"
+import { AMOUNT_RANGE, AUDIENCE_HINTS, SCENARIO_HINTS } from "@/schemas/app/presentation-schema"
 
 // ─── Placeholder replacement ────────────────────────────────────────────────
 
@@ -36,7 +36,6 @@ Chame \`slideStructureTool\` passando o array de ExcalidrawElementSkeleton. Nenh
 - Margem mínima 20px — área útil: x 20–{{XMAX}}, y 20–{{YMAX}}
 - Todo elemento: \`x + width ≤ {{XMAX}}\` e \`y + height ≤ {{YMAX}}\`
 - Planeje coordenadas antes de gerar: sem sobreposições, mínimo 40px entre elementos
-- **Grid 20px**: todas as coordenadas e dimensões devem ser múltiplos de 20
 
 ## Análise do Outline
 
@@ -46,17 +45,18 @@ Chame \`slideStructureTool\` passando o array de ExcalidrawElementSkeleton. Nenh
 ## Regras Críticas
 
 1. **strokeColor em text** = cor do texto — sempre defina, nunca omita
-2. **Setas vinculadas por id**: x/y/width/height calculados automaticamente — não force valores
+2. **Setas vinculadas por id**: x/y/width/height calculados automaticamente — não force valores; **nunca use só um dos dois** (\`start\` sem \`end\`, ou vice-versa)
 3. **IDs descritivos**: "cover_title", "step_inicio", "arrow_a_b" — nunca "r1", "t2"
 4. **Sem texto vinculado em zones grandes** — use texto livre posicionado no topo
 5. **Centralização**: container de largura W → x = ({{WIDTH}} − W) / 2; text com textAlign:center → x = {{CENTER_X}}
-6. **Texto livre longo**: quebre com \\n — não quebra automaticamente, ultrapassa o canvas
+6. **Texto livre muito longo é quebrado automaticamente** — mas prefira \\n deliberado pra títulos/subtítulos curtos e legíveis
 7. **Sem markdown**: nunca use \`**negrito**\`, \`*itálico*\`, \`# heading\` — Excalidraw renderiza literalmente
+8. **Cor por papel**: defina \`role\` (ver Papéis Semânticos) em vez de hex — a cor real vem do tema da apresentação. Hierarquia de texto (título/label/anotação) é por \`fontSize\`/\`opacity\`, não por cor — todo texto usa a mesma cor do tema
 
 ## Anti-Patterns
 
 - ❌ Grade uniforme de caixas iguais com labels — use formas que espelham o conceito
-- ❌ Container sem \`width\` e \`height\` explícitos — texto não quebra e estoura
+- ❌ Container com \`width\`/\`height\` arbitrários que ignoram a hierarquia visual (o Excalidraw expande se o texto não couber, mas isso é uma rede de segurança — não substitui bom senso de tamanho)
 - ❌ Seta com label de >12 caracteres em espaço <120px
 - ❌ Elementos sobrepostos — mínimo 40px entre qualquer par
 `.trim()
@@ -66,20 +66,18 @@ Chame \`slideStructureTool\` passando o array de ExcalidrawElementSkeleton. Nenh
 const ELEM_SHAPES = `
 ### Retângulo / Elipse / Losango (rectangle / ellipse / diamond)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`
-- **Opcional**: \`width\`, \`height\`, \`strokeColor\`, \`backgroundColor\`, \`strokeWidth\`, \`strokeStyle\` (solid|dashed|dotted), \`fillStyle\` (solid|hachure|zigzag|cross-hatch), \`roughness\`, \`opacity\`, \`angle\`, \`roundness\`, \`locked\`
-- **Container com label**: forneça \`label.text\` com \`width\` e \`height\` **sempre explícitos**
-  - Área útil de texto = \`width − 30px\`; quebre manualmente com \\n se necessário
-  - \`height\` = \`linhas × (fontSize × 1.5) + 30\`
-  - Opcionais do label: \`fontSize\`, \`fontFamily\`, \`strokeColor\`, \`textAlign\`, \`verticalAlign\`
+- **Opcional**: \`width\`, \`height\`, \`strokeWidth\`, \`strokeStyle\` (solid|dashed|dotted), \`fillStyle\` (solid|hachure|zigzag|cross-hatch), \`roughness\`, \`opacity\`, \`angle\`, \`roundness\`, \`locked\`
+- **Cor por papel**: defina \`role\` (ver Papéis Semânticos) em vez de \`strokeColor\`/\`backgroundColor\` — a cor real vem do tema da apresentação
+- **Container com label**: forneça \`label.text\` com \`width\`/\`height\` — só uma estimativa razoável (ver Dimensões de Referência), não precisa calcular caracteres/linhas: o Excalidraw expande o container automaticamente se o texto não couber
+  - Opcionais do label: \`fontSize\`, \`fontFamily\`, \`textAlign\`, \`verticalAlign\`
 `.trim()
 
 const ELEM_TEXT = `
 ### Texto livre (text)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`, \`text\`
 - \`width\`/\`height\` calculados automaticamente — não forneça
-- Estimativa de largura: \`chars × 8\` (1 linha) | \`chars × 4 + 20\` (2 linhas)
-- Limite por linha: \`({{XMAX}} − x) ÷ (fontSize × 0.6)\` caracteres
-- **strokeColor** = cor do texto — sempre defina
+- Texto muito longo pra caber na largura disponível é quebrado automaticamente — não precisa calcular caracteres por linha
+- **strokeColor** = cor do texto — sempre defina (todo texto usa a mesma cor do tema; hierarquia é por \`fontSize\`/\`opacity\`, não cor)
 - **textAlign:center**: \`x\` é o centro horizontal — use x = {{CENTER_X}} para centralizar no canvas
 - **Opcional**: \`fontSize\`, \`fontFamily\` (1|2|3), \`strokeColor\`, \`opacity\`, \`angle\`, \`textAlign\`, \`verticalAlign\`
 `.trim()
@@ -87,19 +85,21 @@ const ELEM_TEXT = `
 const ELEM_LINE = `
 ### Linha estrutural (line)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`
-- **Opcional**: \`width\`, \`height\` (padrão 100×0), \`strokeColor\`, \`strokeWidth\`, \`strokeStyle\`
+- **Opcional**: \`width\`, \`height\` (padrão 100×0), \`strokeWidth\`, \`strokeStyle\`
 - Uso: timelines, divisores, árvores — sem vinculação start/end
 `.trim()
 
 const ELEM_ARROW = `
 ### Seta (arrow)
 - **Obrigatório**: \`type\`, \`x\`, \`y\`
-- **Opcional**: \`width\`, \`height\`, \`strokeColor\`, \`strokeWidth\`, \`strokeStyle\`, \`elbowed\`
+- **Opcional**: \`width\`, \`height\`, \`strokeWidth\`, \`strokeStyle\`, \`elbowed\`
+- **Cor por papel**: \`role\` também vale pra seta (ex: \`role: "danger"\` numa dependência crítica) — sem role, usa a cor padrão de stroke do tema
 - **Cabeças**: \`startArrowhead\`/\`endArrowhead\` — valores: arrow, bar, circle, circle_outline, triangle, triangle_outline, diamond, diamond_outline
 - **Vinculação** via \`start\`/\`end\`:
   - Por tipo: \`{ "type": "rectangle" }\` — cria automaticamente
   - Por id: \`{ "id": "step_inicio" }\` — vincula a elemento existente
   - x/y/width/height inferidos automaticamente quando vinculada
+  - **Nunca use só um dos dois** — \`start\` sem \`end\` (ou vice-versa) não tem como ser posicionado
 - \`"elbowed": true\` para ângulos retos automáticos
 - \`label.text\` adiciona texto na seta (máx. 12 caracteres)
 - **Proibido**: não passe \`points\`
@@ -149,25 +149,8 @@ const FILLSTYLE_TABLE = `
 | Elemento secundário | \`hachure\` | suporte, contexto, sub-etapa |
 | Container / zona | \`cross-hatch\` | delimitação sem peso visual |
 | Placeholder / inativo | (transparent) | referência, estado futuro |
-`.trim()
 
-const SEMANTIC_PALETTE = `
-## Paleta de Cores
-
-| Propósito | fill | stroke |
-|-----------|------|--------|
-| Primário / Entrada | \`#dbeafe\` | \`#1e40af\` |
-| Sucesso / Dado | \`#dcfce7\` | \`#166534\` |
-| Aviso / Decisão | \`#fef9c3\` | \`#854d0e\` |
-| Erro / Crítico | \`#fee2e2\` | \`#991b1b\` |
-| Externo / IA | \`#f3e8ff\` | \`#6b21a8\` |
-| Processo / Padrão | \`#e0f2fe\` | \`#0369a1\` |
-| Gatilho / Início | \`#fed7aa\` | \`#c2410c\` |
-| Neutro / Container | \`#f1f5f9\` | \`#475569\` |
-
-**Cores de texto** (strokeColor em text): Título \`#1e293b\` | Label \`#334155\` | Anotação \`#64748b\`
-
-Regra: par fill+stroke sempre da mesma categoria. Use 2–4 cores. 60% neutro, 30% primário, 10% destaque.
+\`fillStyle\` controla peso/textura do preenchimento. \`role\` (ver Papéis Semânticos), quando definido, tem prioridade sobre essa hierarquia pra decidir a cor em si — os dois combinam: \`role: "trigger"\` com \`fillStyle: "solid"\` é um gatilho em destaque forte.
 `.trim()
 
 const REFERENCE_TABLES = `
@@ -232,15 +215,15 @@ const SLIDE_TYPE_GUIDES: Record<string, string> = {
 ## Guia: cover
 
 - Título e subtítulo centrados verticalmente em y≈{{CENTER_Y}}
-- Título: text, fontSize 36–44, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}}−60, strokeColor "#1e293b"
-- Subtítulo: text, fontSize 18–22, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}}+20, strokeColor "#64748b"
+- Título: text, fontSize 36–44, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}}−60
+- Subtítulo: text, fontSize 18–22, textAlign center, x={{CENTER_X}}, y={{CENTER_Y}}+20, opacity 80 (mais discreto que o título)
 - Decoração fora da faixa y=({{CENTER_Y}}−80)–({{CENTER_Y}}+80) — sem setas, sem sobreposição
 - Máximo 5 elementos
 
 \`\`\`json
 [
-  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}, "text": "Título", "fontSize": 36, "textAlign": "center", "strokeColor": "#1e293b" },
-  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}+60, "text": "Subtítulo", "fontSize": 20, "textAlign": "center", "strokeColor": "#64748b" }
+  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}, "text": "Título", "fontSize": 36, "textAlign": "center" },
+  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}+60, "text": "Subtítulo", "fontSize": 20, "textAlign": "center", "opacity": 80 }
 ]
 \`\`\`
 `.trim(),
@@ -248,7 +231,7 @@ const SLIDE_TYPE_GUIDES: Record<string, string> = {
   content: `
 ## Guia: content
 
-- Título no topo: text livre, fontSize 22–26, y=25, strokeColor "#1e293b"
+- Título no topo: text livre, fontSize 22–26, y=25
 - Conteúdo principal: y=70 a y={{YMAX}}−20
 - Use a representação visual indicada
 - Hierarquia visual: elemento principal maior, secundários menores
@@ -257,8 +240,8 @@ const SLIDE_TYPE_GUIDES: Record<string, string> = {
   closing: `
 ## Guia: closing
 
-- Mensagem de impacto centralizada: text livre, fontSize 32–42, strokeColor "#1e293b", y≈170
-- Call to action abaixo: fontSize 18, strokeColor "#64748b", y≈240
+- Mensagem de impacto centralizada: text livre, fontSize 32–42, y≈170
+- Call to action abaixo: fontSize 18, opacity 80, y≈240
 - Elementos decorativos simples de reforço visual
 `.trim(),
 }
@@ -276,9 +259,9 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 
 \`\`\`json
 [
-  { "type": "ellipse",   "id": "start",   "x": 60,  "y": 180, "width": 120, "height": 60, "label": { "text": "Início" }, "backgroundColor": "#fed7aa", "strokeColor": "#c2410c" },
-  { "type": "rectangle", "id": "step_a",  "x": 260, "y": 180, "width": 160, "height": 60, "label": { "text": "Processo" }, "backgroundColor": "#e0f2fe", "strokeColor": "#0369a1" },
-  { "type": "diamond",   "id": "dec_a",   "x": 500, "y": 160, "width": 140, "height": 100, "label": { "text": "OK?" }, "backgroundColor": "#fef9c3", "strokeColor": "#854d0e" },
+  { "type": "ellipse",   "id": "start",   "x": 60,  "y": 180, "width": 120, "height": 60, "label": { "text": "Início" }, "role": "trigger" },
+  { "type": "rectangle", "id": "step_a",  "x": 260, "y": 180, "width": 160, "height": 60, "label": { "text": "Processo" }, "role": "process" },
+  { "type": "diamond",   "id": "dec_a",   "x": 500, "y": 160, "width": 140, "height": 100, "label": { "text": "OK?" }, "role": "warning" },
   { "type": "arrow", "x": 0, "y": 0, "start": { "id": "start"  }, "end": { "id": "step_a" }, "elbowed": true },
   { "type": "arrow", "x": 0, "y": 0, "start": { "id": "step_a" }, "end": { "id": "dec_a"  }, "elbowed": true }
 ]
@@ -288,16 +271,16 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   mindmap: `
 ## Guia: mindmap
 
-- Nó central: rectangle 200×70 com cor Primário em ~({{CENTER_X}}−100, {{CENTER_Y}}−35)
+- Nó central: rectangle 200×70 com \`role: "process"\` em ~({{CENTER_X}}−100, {{CENTER_Y}}−35)
 - Nós filhos: ellipses ou rectangles menores ao redor, conectados por setas ao centro
 - Distribuição radial: 2–3 nós por quadrante
-- Cores diferentes por branch
+- \`role\` diferente por branch (ex: trigger, success, external) pra distinguir ramos
 `.trim(),
 
   orgchart: `
 ## Guia: orgchart
 
-- Nó raiz no topo (rectangle, cor Primário)
+- Nó raiz no topo (rectangle, \`role: "process"\`)
 - Filhos abaixo conectados por setas verticais
 - Mesmo nível: espaçamento horizontal ~180px entre centros
 - groupIds para agrupar nós do mesmo nível
@@ -321,10 +304,10 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 
 \`\`\`json
 [
-  { "type": "rectangle", "id": "p1", "x": 60,  "y": 40, "width": 120, "height": 40, "label": { "text": "Cliente" } },
-  { "type": "rectangle", "id": "p2", "x": 320, "y": 40, "width": 120, "height": 40, "label": { "text": "Servidor" } },
-  { "type": "line",  "x": 120, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted", "strokeColor": "#94a3b8" },
-  { "type": "line",  "x": 380, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted", "strokeColor": "#94a3b8" },
+  { "type": "rectangle", "id": "p1", "x": 60,  "y": 40, "width": 120, "height": 40, "label": { "text": "Cliente" }, "role": "process" },
+  { "type": "rectangle", "id": "p2", "x": 320, "y": 40, "width": 120, "height": 40, "label": { "text": "Servidor" }, "role": "process" },
+  { "type": "line",  "x": 120, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
+  { "type": "line",  "x": 380, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
   { "type": "arrow", "x": 120, "y": 140, "width": 200, "height": 0,   "label": { "text": "POST /data" } },
   { "type": "arrow", "x": 380, "y": 200, "width": -200,"height": 0,   "strokeStyle": "dashed", "label": { "text": "200 OK" } }
 ]
@@ -334,18 +317,18 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   timeline: `
 ## Guia: timeline
 
-- Eixo: line horizontal y={{CENTER_Y}}, x de 60 a {{XMAX}}−60, strokeWidth 2, strokeColor "#1e40af"
-- Marcadores: ellipses 12×12px sobre o eixo, preenchidas com cor Primário
-- Labels abaixo: text fontSize 13, strokeColor "#64748b"
-- Eventos acima: text fontSize 15, strokeColor "#334155"
+- Eixo: line horizontal y={{CENTER_Y}}, x de 60 a {{XMAX}}−60, strokeWidth 2
+- Marcadores: ellipses 12×12px sobre o eixo, \`role: "process"\`
+- Labels abaixo: text fontSize 13, opacity 80
+- Eventos acima: text fontSize 15
 - Distribuição uniforme dos marcadores
 
 \`\`\`json
 [
-  { "type": "line",    "id": "axis",  "x": 60,  "y": 220, "width": 680, "height": 0,  "strokeColor": "#1e40af", "strokeWidth": 2 },
-  { "type": "ellipse", "id": "dot_1", "x": 154, "y": 214, "width": 12,  "height": 12, "backgroundColor": "#1e40af", "strokeColor": "#1e40af" },
-  { "type": "text", "x": 130, "y": 240, "text": "Jan 2024", "fontSize": 13, "strokeColor": "#64748b" },
-  { "type": "text", "x": 120, "y": 190, "text": "Evento A", "fontSize": 15, "strokeColor": "#334155" }
+  { "type": "line",    "id": "axis",  "x": 60,  "y": 220, "width": 680, "height": 0,  "strokeWidth": 2 },
+  { "type": "ellipse", "id": "dot_1", "x": 154, "y": 214, "width": 12,  "height": 12, "role": "process" },
+  { "type": "text", "x": 130, "y": 240, "text": "Jan 2024", "fontSize": 13, "opacity": 80 },
+  { "type": "text", "x": 120, "y": 190, "text": "Evento A", "fontSize": 15 }
 ]
 \`\`\`
 `.trim(),
@@ -356,22 +339,35 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 - Nó central: shape maior em (~{{CENTER_X}}, {{CENTER_Y}})
 - Nós periféricos: shapes menores ao redor
 - Conexões: setas bidirecionais (startArrowhead: "arrow", endArrowhead: "arrow")
-- Cores diferentes para tipos de nó distintos
+- \`role\` diferente por tipo de nó distinto
+- Toda seta precisa de \`start\` **e** \`end\` — nunca só um dos dois
+
+\`\`\`json
+[
+  { "type": "ellipse",   "id": "node_core", "x": 340, "y": 175, "width": 120, "height": 100, "label": { "text": "Core" },   "role": "process" },
+  { "type": "rectangle", "id": "node_a",    "x": 80,  "y": 60,  "width": 100, "height": 60,  "label": { "text": "Node A" }, "role": "external" },
+  { "type": "rectangle", "id": "node_b",    "x": 80,  "y": 300, "width": 100, "height": 60,  "label": { "text": "Node B" }, "role": "external" },
+  { "type": "rectangle", "id": "node_c",    "x": 600, "y": 180, "width": 100, "height": 60,  "label": { "text": "Node C" }, "role": "external" },
+  { "type": "arrow", "x": 0, "y": 0, "start": { "id": "node_core" }, "end": { "id": "node_a" }, "startArrowhead": "arrow", "endArrowhead": "arrow" },
+  { "type": "arrow", "x": 0, "y": 0, "start": { "id": "node_core" }, "end": { "id": "node_b" }, "startArrowhead": "arrow", "endArrowhead": "arrow" },
+  { "type": "arrow", "x": 0, "y": 0, "start": { "id": "node_core" }, "end": { "id": "node_c" }, "startArrowhead": "arrow", "endArrowhead": "arrow" }
+]
+\`\`\`
 `.trim(),
 
   architecture: `
 ## Guia: architecture
 
 - Camadas horizontais de cima para baixo (Apresentação → Negócio → Dados)
-- Cada camada: rectangle de zona (fillStyle: cross-hatch) com label texto livre no topo-esquerdo
-- Componentes internos: rectangles menores com label
+- Cada camada: rectangle de zona (fillStyle: cross-hatch, \`role: "neutral"\`) com label texto livre no topo-esquerdo
+- Componentes internos: rectangles menores com label e \`role\` (ex: "process", "external")
 - Setas entre camadas representam dependências
 
 \`\`\`json
 [
-  { "type": "rectangle", "id": "layer_api", "x": 40, "y": 60, "width": 720, "height": 120, "fillStyle": "cross-hatch", "backgroundColor": "#f1f5f9", "strokeColor": "#475569" },
-  { "type": "text", "x": 60, "y": 70, "text": "API Layer", "fontSize": 14, "strokeColor": "#475569" },
-  { "type": "rectangle", "id": "svc_auth", "x": 80, "y": 100, "width": 140, "height": 60, "label": { "text": "Auth" }, "backgroundColor": "#dbeafe", "strokeColor": "#1e40af" },
+  { "type": "rectangle", "id": "layer_api", "x": 40, "y": 60, "width": 720, "height": 120, "fillStyle": "cross-hatch", "role": "neutral" },
+  { "type": "text", "x": 60, "y": 70, "text": "API Layer", "fontSize": 14 },
+  { "type": "rectangle", "id": "svc_auth", "x": 80, "y": 100, "width": 140, "height": 60, "label": { "text": "Auth" }, "role": "process" },
   { "type": "frame", "children": ["layer_api", "svc_auth"], "name": "Apresentação" }
 ]
 \`\`\`
@@ -380,18 +376,18 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   dataflow: `
 ## Guia: dataflow
 
-- Entidades externas: rectangles nas bordas (cor Externo)
-- Processos: ellipses no centro (cor Processo)
-- Armazenamentos: rectangles cor Sucesso
+- Entidades externas: rectangles nas bordas (\`role: "external"\`)
+- Processos: ellipses no centro (\`role: "process"\`)
+- Armazenamentos: rectangles (\`role: "success"\`)
 - Setas direcionadas com label indicando o dado que flui
 `.trim(),
 
   state: `
 ## Guia: state
 
-- Estados: rectangles com roundness (cor Processo)
-- Estado inicial: ellipse pequena sólida 12×12px (cor Gatilho)
-- Estado final: ellipse cor Sucesso
+- Estados: rectangles com roundness (\`role: "process"\`)
+- Estado inicial: ellipse pequena sólida 12×12px (\`role: "trigger"\`)
+- Estado final: ellipse (\`role: "success"\`)
 - Transições: setas com label indicando evento/condição
 `.trim(),
 
@@ -400,30 +396,30 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 
 - 3–5 rectangles empilhados verticalmente, centralizados em x={{CENTER_X}}
 - Largura decrescente de baixo para cima: base ~600px, topo ~120px
-- Cores do Primário (topo) ao Neutro (base)
+- \`role: "process"\` (topo) a \`role: "neutral"\` (base)
 `.trim(),
 
   venn: `
 ## Guia: venn
 
 - 2–3 ellipses sobrepostas com sobreposição de ~30% do raio
-- Cada ellipse com cor distinta (opacity 70)
+- Cada ellipse com \`role\` distinto (opacity 70)
 - Labels de texto livre identificando cada conjunto e a interseção
 `.trim(),
 
   matrix: `
 ## Guia: matrix
 
-- Headers de linha (topo) e coluna (esquerda): rectangles cor Neutro escuro
-- Células: rectangles com label, cor baseada no valor semântico
+- Headers de linha (topo) e coluna (esquerda): rectangles \`role: "neutral"\`
+- Células: rectangles com label, \`role\` baseado no valor semântico (ex: "success"/"warning"/"danger")
 - Grid com espaçamento consistente entre linhas e colunas
 `.trim(),
 
   swimlane: `
 ## Guia: swimlane
 
-- Raias: rectangles grandes (fillStyle: hachure, cor Neutro) como faixas horizontais ou verticais
-- Label de raia: texto livre no topo-esquerdo (fontSize 16, strokeColor "#475569") — não vincule ao container
+- Raias: rectangles grandes (fillStyle: hachure, \`role: "neutral"\`) como faixas horizontais ou verticais
+- Label de raia: texto livre no topo-esquerdo (fontSize 16) — não vincule ao container
 - Setas cruzam raias nos handoffs
 `.trim(),
 
@@ -439,7 +435,7 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   er: `
 ## Guia: er (Entidade-Relacionamento)
 
-- Entidades: rectangles (cor Primário) com nome centralizado
+- Entidades: rectangles (\`role: "process"\`) com nome centralizado
 - Relacionamentos: diamonds entre entidades
 - Cardinalidade: label na seta (1, N, M)
 - Setas: entidade → relacionamento → entidade
@@ -448,19 +444,19 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
   gantt: `
 ## Guia: gantt
 
-- Header de tempo: rectangles de período no topo (y=40, cor Neutro)
-- Tarefas: texto livre à esquerda (x=20, strokeColor "#334155")
+- Header de tempo: rectangles de período no topo (y=40, \`role: "neutral"\`)
+- Tarefas: texto livre à esquerda (x=20)
 - Barras: rectangles horizontais alinhados ao período
-- Cores: Sucesso (concluído), Primário (em andamento), Neutro (não iniciado)
+- \`role\`: success (concluído), process (em andamento), neutral (não iniciado)
 `.trim(),
 
   fishbone: `
 ## Guia: fishbone (Ishikawa)
 
 - Espinha central: line strokeWidth 3 de x=60 a x={{XMAX}}−60, y={{CENTER_Y}}
-- Problema/efeito: rectangle à direita (cor Erro) com label
+- Problema/efeito: rectangle à direita (\`role: "danger"\`) com label
 - Categorias: setas diagonais a 45° conectando à espinha, alternadas acima e abaixo
-- Causas: texto livre nas pontas (fontSize 13, strokeColor "#334155")
+- Causas: texto livre nas pontas (fontSize 13)
 `.trim(),
 
   funnel: `
@@ -469,7 +465,7 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 - 4–6 rectangles empilhados verticalmente, centralizados em x={{CENTER_X}}
 - Largura decrescente de cima para baixo: topo ~680px, base ~140px
 - Label: texto livre com nome do estágio e percentual/valor ao lado
-- Cores do Gatilho (topo) ao Sucesso (base)
+- \`role: "trigger"\` (topo) a \`role: "success"\` (base)
 `.trim(),
 
   infographic: `
@@ -478,7 +474,7 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 - Use frames para módulos de informação independentes
 - Números em destaque: fontSize 36–48, texto livre + label menor abaixo
 - Containers apenas onde necessário — prefira hierarquia tipográfica
-- 3–4 cores da paleta, regra 60-30-10
+- 3–4 \`role\` diferentes pra distinguir módulos
 `.trim(),
 }
 
@@ -523,13 +519,13 @@ export function buildSlideCreatorPrompt(
   // 4. fillStyle hierarchy — always (server-side normalizer maps fillStyle → palette slot)
   parts.push(FILLSTYLE_TABLE)
 
-  // 5. Color: theme palette when context present, semantic palette otherwise
+  // 5. Contexto da apresentação (audiência/cenário/volume) — cor não depende
+  // mais do tema aqui: `role` é resolvido em código a partir do tema real da
+  // Presentation, depois da geração (ver theme-applicator.ts/skeleton-pipeline.ts)
   if (context) {
-    const themeKey     = THEME_KEYS[context.theme]     ?? "daktilo"
     const [min, max]   = AMOUNT_RANGE[context.amount]  ?? [4, 20]
     const audienceHint = AUDIENCE_HINTS[context.audience] ?? AUDIENCE_HINTS[0]
     const scenarioHint = SCENARIO_HINTS[context.scenario] ?? SCENARIO_HINTS[0]
-    const { buildPalettePrompt } = presentationThemes()
 
     parts.push([
       `## Contexto da Apresentação`,
@@ -537,14 +533,9 @@ export function buildSlideCreatorPrompt(
       `**Audiência**: ${audienceHint}`,
       `**Cenário**: ${scenarioHint}`,
       `**Volume**: ${min}–${max} elementos por slide`,
-      ``,
-      buildPalettePrompt(themeKey),
-      ``,
-      `Use **somente** as cores da paleta acima.`,
     ].join("\n"))
-  } else {
-    parts.push(SEMANTIC_PALETTE)
   }
+  parts.push(presentationThemes().buildSemanticRolesPrompt())
 
   // 6. Dimension, spacing and typography reference
   parts.push(REFERENCE_TABLES)

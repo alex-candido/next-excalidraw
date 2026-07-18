@@ -9,6 +9,23 @@ const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactCompiler: true,
   transpilePackages: ["@excalidraw/excalidraw", "@excalidraw/utils", "@excalidraw/math"],
+  // Chrome restringe o evento `unload` por Permissions-Policy por padrão
+  // (parte da depreciação do evento, quebra o bfcache) — o próprio
+  // @excalidraw/excalidraw ainda usa `window.addEventListener("unload", ...)`
+  // internamente (App.tsx do pacote), gerando "Permissions policy violation:
+  // unload is not allowed in this document" no console/dev overlay. Não dá
+  // pra tirar isso do lado deles sem patch-package; permitir explicitamente
+  // via header silencia o aviso sem mexer na dependência.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Permissions-Policy", value: "unload=(self)" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       // Landing

@@ -28,6 +28,7 @@
         "engine": "Excalidraw",
         "editName": "Editar nome da apresentação",
         "add": "Novo slide",
+        "generating": "Gerando slide {loaded} de {expected}...",
         "item": {
           "dragHandle": "Reordenar slide",
           "hiddenBadge": "Oculto",

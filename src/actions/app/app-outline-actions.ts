@@ -2,6 +2,8 @@ import { apiFetch } from "@/actions/api-client"
 import type {
   OutlineBulkUpdate,
   OutlineRegenerate,
+  OutlineRegenerateAll,
+  OutlineRegenerateAllResponse,
   OutlineRegenerateResponse,
 } from "@/schemas/app/presentations/multi-schema"
 
@@ -23,5 +25,12 @@ export function outlineActions() {
     })
   }
 
-  return { bulkUpdate, regenerate }
+  async function regenerateAll(presentationId: string, input: OutlineRegenerateAll) {
+    return apiFetch<OutlineRegenerateAllResponse>(`${base(presentationId)}/regenerate-all`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+  }
+
+  return { bulkUpdate, regenerate, regenerateAll }
 }

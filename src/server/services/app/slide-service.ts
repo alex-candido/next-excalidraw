@@ -4,12 +4,9 @@ import { presentationRepository } from "@/server/repositories/app/presentation-r
 import { outlineRepository } from "@/server/repositories/app/outline-repository"
 import { slideRepository } from "@/server/repositories/app/slide-repository"
 import { generationRepository } from "@/server/repositories/app/generation-repository"
-import { storageService } from "@/server/services/storage-service"
-import { fileUtils } from "@/lib/utils/file"
 import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
 import { GenerationType, GenerationStatus } from "@/lib/drizzle/schema/generation"
 import { SlideStatus } from "@/lib/drizzle/schema/slide"
-import { StorageRecordType } from "@/lib/drizzle/schema/storage-attachment"
 import type { SlideGenerate, SlideBulkUpdate, SlideRegenerate, SlideManualCreate } from "@/schemas/app/slide-schema"
 import type { SlideWorkflowOutput } from "@/schemas/app/slide-schema"
 
@@ -42,7 +39,7 @@ export function slideService() {
         const { result } = await run.start({
           inputData: {
             outlineId:      item.outlineId,
-            order:          index + 1,
+            order:          index,
             type:           toTypeKey(item.type),
             title:          item.title,
             description:    item.description,
@@ -61,7 +58,7 @@ export function slideService() {
         const slide = await slideRepository().create({
           presentationId,
           outlineId: item.outlineId,
-          order:     index + 1,
+          order:     index,
           elements:  result.elements as unknown[],
           appState:  {},
           files:     {},
@@ -148,7 +145,10 @@ export function slideService() {
     }
   }
 
-  async function generateThumbnail(presentationId: string, slideId: string, userId: string, buffer: Buffer) {
+  // SVG (exportToSvg, serializado em texto) calculado no client — sem
+  // upload/storage/validação de arquivo, só grava o texto direto no campo
+  // `thumbnail` (text). Ver docs/adr.md.
+  async function setThumbnail(presentationId: string, slideId: string, userId: string, thumbnail: string) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
@@ -156,16 +156,7 @@ export function slideService() {
     const slide = await slideRepository().findById(slideId)
     if (!slide || slide.presentationId !== presentationId) throw Object.assign(new Error("Slide not found"), { status: 404 })
 
-    const { mimeType } = await fileUtils().validate(buffer, "image")
-
-    const url = await storageService().upsertThumbnail({
-      recordType: StorageRecordType.slide,
-      recordId: slideId,
-      buffer,
-      mimeType,
-    })
-
-    return slideRepository().updateThumbnail(slideId, url)
+    return slideRepository().updateThumbnail(slideId, thumbnail)
   }
 
   // Slide adicionado manualmente no Studio (add-slide) só persiste aqui, no
@@ -214,5 +205,5 @@ export function slideService() {
     })
   }
 
-  return { generate, bulkUpdate, regenerate, generateThumbnail, createManual }
+  return { generate, bulkUpdate, regenerate, setThumbnail, createManual }
 }

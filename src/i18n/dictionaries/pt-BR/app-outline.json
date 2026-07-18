@@ -8,6 +8,11 @@
         "regenerate": "Regenerar",
         "regenerating": "Regenerando...",
         "subtitle": "{count} seções · revise e ajuste antes de continuar",
+        "regenerateAllModal": {
+          "title": "Regenerar o outline inteiro?",
+          "description": "Isso recria todas as cenas do zero com o prompt e os parâmetros atuais — pode mudar a quantidade de cenas, e qualquer edição manual que você tenha feito nos cards existentes será perdida.",
+          "confirm": "Regenerar tudo"
+        },
         "prompt": {
           "label": "Prompt",
           "placeholder": "Descreva o que essa apresentação deve conter..."
@@ -69,6 +74,10 @@
           }
         }
       },
+      "generating": {
+        "title": "Gerando o storyboard com IA...",
+        "subtitle": "Isso pode levar alguns segundos — a sequência de cenas aparece aqui assim que ficar pronta."
+      },
       "card": {
         "types": {
           "cover": "Capa",
@@ -79,6 +88,7 @@
           "title": "Título",
           "description": "Descrição",
           "representation": "Visualização",
+          "layout": "Layout visual",
           "concepts": "Conceitos"
         },
         "groups": {
@@ -117,6 +127,7 @@
         "dragHandle": "Arrastar para reordenar"
       },
       "list": {
+        "storyboard": "Sequência",
         "summary": "{count} outlines",
         "breakdown": "{cover} capa · {content} conteúdo · {closing} encerramento",
         "add": "Adicionar outline"

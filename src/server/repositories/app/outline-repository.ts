@@ -3,7 +3,7 @@ import { outline } from "@/lib/drizzle/schema/outline"
 import { eq, inArray } from "drizzle-orm"
 
 export type OutlineInsert = typeof outline.$inferInsert
-export type OutlineUpdate = Partial<Pick<OutlineInsert, "title" | "description" | "representation">>
+export type OutlineUpdate = Partial<Pick<OutlineInsert, "title" | "description" | "concepts" | "representation" | "layout">>
 
 export function outlineRepository() {
   async function createMany(data: OutlineInsert[], client: DbClient = db) {
@@ -30,18 +30,26 @@ export function outlineRepository() {
     return db.query.outline.findFirst({ where: eq(outline.id, id) }) ?? null
   }
 
-  async function bulkUpdate(items: { id: string; title: string; description: string; representation: number }[]) {
+  // Usado por "Regenerar tudo" — o outline é recriado do zero (pode mudar de
+  // quantidade), não dá pra só atualizar as linhas existentes.
+  async function deleteByPresentationId(presentationId: string, client: DbClient = db) {
+    await client.delete(outline).where(eq(outline.presentationId, presentationId))
+  }
+
+  async function bulkUpdate(items: { id: string; title: string; description: string; concepts: string[]; representation: number; layout: string }[]) {
     let count = 0
     for (const item of items) {
       await db.update(outline).set({
         title:          item.title,
         description:    item.description,
+        concepts:       item.concepts,
         representation: item.representation,
+        layout:         item.layout,
       }).where(eq(outline.id, item.id))
       count++
     }
     return count
   }
 
-  return { createMany, findById, findByPresentationId, update, bulkUpdate }
+  return { createMany, findById, findByPresentationId, update, bulkUpdate, deleteByPresentationId }
 }

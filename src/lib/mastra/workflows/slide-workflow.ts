@@ -1,4 +1,4 @@
-import { LANGUAGE_NAMES } from "@/schemas/app/presentation-schema";
+import { LANGUAGE_NAMES, THEME_KEYS } from "@/schemas/app/presentation-schema";
 import {
   CANVAS_DIMENSIONS,
   slideWorkflowInputSchema,
@@ -7,10 +7,28 @@ import {
   type SlideWorkflowOutput,
 } from "@/schemas/app/slide-schema";
 import { createStep, createWorkflow } from "@mastra/core/workflows";
-import { elementParser } from "@/lib/excalidraw/parse/element-parser";
+import { excalidrawSkeleton } from "@/lib/excalidraw";
+import { PresentationLanguage } from "@/lib/drizzle/schema/presentation";
 import { workflowMetadataMapper } from "../mappers/workflow-metadata-mapper";
 import { buildSlideCreatorPrompt } from "../prompts/slide-creator-prompt";
 import { slideSemanticScorer } from "../scorers/slide-semantic-scorer";
+
+// elementSizing() (usado pelo text-wrapper) espera os códigos curtos que já
+// usa em seus próprios testes ("ptBR", "es", ...) — diferente do
+// LANGUAGE_CODES de presentation-schema.ts (uppercase, "PT" em vez de
+// "ptBR"), que serve a um propósito diferente (exibição na UI).
+const SIZING_LANGUAGE_CODE: Record<number, string> = {
+  [PresentationLanguage.en]:   "en",
+  [PresentationLanguage.es]:   "es",
+  [PresentationLanguage.fr]:   "fr",
+  [PresentationLanguage.de]:   "de",
+  [PresentationLanguage.it]:   "it",
+  [PresentationLanguage.ptBR]: "ptBR",
+  [PresentationLanguage.ru]:   "ru",
+  [PresentationLanguage.zh]:   "zh",
+  [PresentationLanguage.ja]:   "ja",
+  [PresentationLanguage.ko]:   "ko",
+}
 
 const generateSlideStep = createStep({
   id: "generate-slide",
@@ -45,14 +63,14 @@ const generateSlideStep = createStep({
     const toolResults = await response.toolResults
 
     let elements: SlideToolOutput["elements"]
-    const parser = elementParser()
+    const skeleton = excalidrawSkeleton()
 
     if (toolResults?.length && toolResults[0]?.payload) {
       elements = (toolResults[0].payload.result as SlideToolOutput).elements
     } else {
       const text = await response.text
       if (text?.trim()) {
-        elements = parser.parse(text)
+        elements = skeleton.parse(text)
       } else {
         throw new Error("Agent returned no tool results and no text output")
       }
@@ -60,7 +78,22 @@ const generateSlideStep = createStep({
 
     const usage = await response.usage.catch(() => null)
 
-    const result: SlideToolOutput = { elements: parser.validate(elements as unknown[]) }
+    const themeKey = THEME_KEYS[inputData.theme ?? 0] ?? "daktilo"
+    const enrichmentContext = {
+      palette:       skeleton.theme.getByKey(themeKey).palette,
+      semanticRoles: skeleton.theme.getSemanticRoles(themeKey),
+      canvasWidth:   canvas.width,
+      language:      SIZING_LANGUAGE_CODE[inputData.language] ?? "en",
+    }
+
+    // fromAiOutput roda de novo aqui mesmo pro caminho da tool (que já
+    // normalizou internamente, sem o enrichmentContext) — é idempotente, e
+    // garante que o fallback de texto livre (sem tool call) também passe
+    // pelo pipeline completo (incluindo tema/wrap/grid), não só repair/order/
+    // arrows. Ver skeleton-pipeline.ts.
+    const result: SlideToolOutput = {
+      elements: skeleton.fromAiOutput(elements as unknown[], enrichmentContext),
+    }
     const modelName = process.env.GOOGLE_GENERATIVE_AI_MODEL ?? "gemini-3-flash-preview"
 
     const slideBoundary = {

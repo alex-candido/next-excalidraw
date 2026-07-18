@@ -1,15 +1,21 @@
 "use client";
 
-import { PenLine } from "lucide-react";
+import { Loader2, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAppPresentationsStudio } from "@/providers/app/app-presentations-studio-provider";
+import {
+  useAppPresentationsStudio,
+  useStudioIsWaitingSlides,
+  useStudioSlides,
+} from "@/providers/app/app-presentations-studio-provider";
 
 export function AppPresentationsStudioSlideListHeader() {
   const t = useTranslations("app.studio.slideList");
-  const { title } = useAppPresentationsStudio();
+  const { title, expectedSlideCount } = useAppPresentationsStudio();
+  const isGenerating = useStudioIsWaitingSlides();
+  const loadedSlideCount = useStudioSlides().length;
 
   return (
     <div className="app-presentations-studio-slide-list-header flex flex-col gap-1.5 border-b p-2.5">
@@ -21,12 +27,23 @@ export function AppPresentationsStudioSlideListHeader() {
           <PenLine className="size-3" />
         </Button>
       </div>
-      <Badge
-        variant="secondary"
-        className="app-presentations-studio-slide-list-header-engine h-4.5 w-fit gap-1 rounded-full px-1.5 text-[10px]"
-      >
-        {t("engine")}
-      </Badge>
+      <div className="app-presentations-studio-slide-list-header-badges flex items-center gap-1.5">
+        <Badge
+          variant="secondary"
+          className="app-presentations-studio-slide-list-header-engine h-4.5 w-fit gap-1 rounded-full px-1.5 text-[10px]"
+        >
+          {t("engine")}
+        </Badge>
+        {isGenerating && expectedSlideCount > 0 && (
+          <Badge
+            variant="outline"
+            className="app-presentations-studio-slide-list-header-generating h-4.5 w-fit gap-1 rounded-full px-1.5 text-[10px] text-muted-foreground"
+          >
+            <Loader2 className="size-2.5 animate-spin" />
+            {t("generating", { loaded: loadedSlideCount, expected: expectedSlideCount })}
+          </Badge>
+        )}
+      </div>
     </div>
   );
 }

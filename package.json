@@ -16,7 +16,8 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "inngest:dev": "inngest-cli dev -u http://localhost:3000/api/inngest",
-    "dev:all": "concurrently -n next,inngest,db:studio -c blue,magenta,green \"bun dev\" \"bun inngest:dev\" \"bun db:studio\""
+    "mastra:dev": "mastra dev --dir src/lib/mastra -e .env.local",
+    "dev:all": "concurrently -n next,inngest,db:studio,mastra -c blue,magenta,green,yellow \"bun dev\" \"bun inngest:dev\" \"bun db:studio\" \"bun mastra:dev\""
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.71",
@@ -107,5 +108,8 @@
     "inngest-cli",
     "protobufjs",
     "unrs-resolver"
-  ]
+  ],
+  "patchedDependencies": {
+    "@excalidraw/excalidraw@0.18.1": "patches/@excalidraw%2Fexcalidraw@0.18.1.patch"
+  }
 }
