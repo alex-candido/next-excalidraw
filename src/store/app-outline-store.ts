@@ -172,10 +172,18 @@ export const useOutlineStore = createAppStore<OutlineStoreState>("outline", (set
       };
     }),
 
+  // cover/closing são a garantia estrutural que a IA promete (schema
+  // outline.type + prompt "sempre comece com cover e termine com closing")
+  // — apagáveis, o resto do reorder/guard perde o sentido (mesma trava do
+  // Studio, ver app-studio-store.ts:onDeleteSlide).
   onDelete: (id) =>
-    set((state) => ({
-      outlines: state.outlines.filter((o) => o.id !== id).map((item, index) => ({ ...item, order: index })),
-    })),
+    set((state) => {
+      const target = state.outlines.find((o) => o.id === id);
+      if (target?.type === OutlineType.cover || target?.type === OutlineType.closing) return state;
+      return {
+        outlines: state.outlines.filter((o) => o.id !== id).map((item, index) => ({ ...item, order: index })),
+      };
+    }),
 
   // Insere antes do encerramento (se existir) em vez de sempre no final —
   // senão "Adicionar cena" com um item type=closing já na lista quebrava a

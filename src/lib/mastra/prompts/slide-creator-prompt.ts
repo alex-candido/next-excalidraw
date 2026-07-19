@@ -65,7 +65,7 @@ Chame \`slideStructureTool\` passando o array de ExcalidrawElementSkeleton. Nenh
 
 const ELEM_SHAPES = `
 ### Retângulo / Elipse / Losango (rectangle / ellipse / diamond)
-- **Obrigatório**: \`type\`, \`x\`, \`y\`
+- **Obrigatório**: \`type\`, \`id\`, \`x\`, \`y\`
 - **Opcional**: \`width\`, \`height\`, \`strokeWidth\`, \`strokeStyle\` (solid|dashed|dotted), \`fillStyle\` (solid|hachure|zigzag|cross-hatch), \`roughness\`, \`opacity\`, \`angle\`, \`roundness\`, \`locked\`
 - **Cor por papel**: defina \`role\` (ver Papéis Semânticos) em vez de \`strokeColor\`/\`backgroundColor\` — a cor real vem do tema da apresentação
 - **Container com label**: forneça \`label.text\` com \`width\`/\`height\` — só uma estimativa razoável (ver Dimensões de Referência), não precisa calcular caracteres/linhas: o Excalidraw expande o container automaticamente se o texto não couber
@@ -74,7 +74,7 @@ const ELEM_SHAPES = `
 
 const ELEM_TEXT = `
 ### Texto livre (text)
-- **Obrigatório**: \`type\`, \`x\`, \`y\`, \`text\`
+- **Obrigatório**: \`type\`, \`id\`, \`x\`, \`y\`, \`text\`
 - \`width\`/\`height\` calculados automaticamente — não forneça
 - Texto muito longo pra caber na largura disponível é quebrado automaticamente — não precisa calcular caracteres por linha
 - **strokeColor** = cor do texto — sempre defina (todo texto usa a mesma cor do tema; hierarquia é por \`fontSize\`/\`opacity\`, não cor)
@@ -84,14 +84,14 @@ const ELEM_TEXT = `
 
 const ELEM_LINE = `
 ### Linha estrutural (line)
-- **Obrigatório**: \`type\`, \`x\`, \`y\`
+- **Obrigatório**: \`type\`, \`id\`, \`x\`, \`y\`
 - **Opcional**: \`width\`, \`height\` (padrão 100×0), \`strokeWidth\`, \`strokeStyle\`
 - Uso: timelines, divisores, árvores — sem vinculação start/end
 `.trim()
 
 const ELEM_ARROW = `
 ### Seta (arrow)
-- **Obrigatório**: \`type\`, \`x\`, \`y\`
+- **Obrigatório**: \`type\`, \`id\`, \`x\`, \`y\`
 - **Opcional**: \`width\`, \`height\`, \`strokeWidth\`, \`strokeStyle\`, \`elbowed\`
 - **Cor por papel**: \`role\` também vale pra seta (ex: \`role: "danger"\` numa dependência crítica) — sem role, usa a cor padrão de stroke do tema
 - **Cabeças**: \`startArrowhead\`/\`endArrowhead\` — valores: arrow, bar, circle, circle_outline, triangle, triangle_outline, diamond, diamond_outline
@@ -114,7 +114,7 @@ const ELEM_ARROW = `
 
 const ELEM_FRAME = `
 ### Frame (frame)
-- **Obrigatório**: \`type\`, \`children\` (array de IDs)
+- **Obrigatório**: \`type\`, \`id\`, \`children\` (array de IDs)
 - **Opcional**: \`x\`, \`y\`, \`width\`, \`height\`, \`name\`
 - Coordenadas calculadas pelos children com margem de 10px
 `.trim()
@@ -222,8 +222,8 @@ const SLIDE_TYPE_GUIDES: Record<string, string> = {
 
 \`\`\`json
 [
-  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}, "text": "Título", "fontSize": 36, "textAlign": "center" },
-  { "type": "text", "x": {{CENTER_X}}, "y": {{CENTER_Y}}+60, "text": "Subtítulo", "fontSize": 20, "textAlign": "center", "opacity": 80 }
+  { "type": "text", "id": "cover_title",    "x": {{CENTER_X}}, "y": {{CENTER_Y}}, "text": "Título", "fontSize": 36, "textAlign": "center" },
+  { "type": "text", "id": "cover_subtitle", "x": {{CENTER_X}}, "y": {{CENTER_Y}}+60, "text": "Subtítulo", "fontSize": 20, "textAlign": "center", "opacity": 80 }
 ]
 \`\`\`
 `.trim(),
@@ -306,10 +306,10 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 [
   { "type": "rectangle", "id": "p1", "x": 60,  "y": 40, "width": 120, "height": 40, "label": { "text": "Cliente" }, "role": "process" },
   { "type": "rectangle", "id": "p2", "x": 320, "y": 40, "width": 120, "height": 40, "label": { "text": "Servidor" }, "role": "process" },
-  { "type": "line",  "x": 120, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
-  { "type": "line",  "x": 380, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
-  { "type": "arrow", "x": 120, "y": 140, "width": 200, "height": 0,   "label": { "text": "POST /data" } },
-  { "type": "arrow", "x": 380, "y": 200, "width": -200,"height": 0,   "strokeStyle": "dashed", "label": { "text": "200 OK" } }
+  { "type": "line",  "id": "lifeline_1", "x": 120, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
+  { "type": "line",  "id": "lifeline_2", "x": 380, "y": 80,  "width": 0,   "height": 280, "strokeStyle": "dotted" },
+  { "type": "arrow", "id": "msg_1", "x": 120, "y": 140, "width": 200, "height": 0,   "label": { "text": "POST /data" } },
+  { "type": "arrow", "id": "msg_2", "x": 380, "y": 200, "width": -200,"height": 0,   "strokeStyle": "dashed", "label": { "text": "200 OK" } }
 ]
 \`\`\`
 `.trim(),
@@ -327,8 +327,8 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 [
   { "type": "line",    "id": "axis",  "x": 60,  "y": 220, "width": 680, "height": 0,  "strokeWidth": 2 },
   { "type": "ellipse", "id": "dot_1", "x": 154, "y": 214, "width": 12,  "height": 12, "role": "process" },
-  { "type": "text", "x": 130, "y": 240, "text": "Jan 2024", "fontSize": 13, "opacity": 80 },
-  { "type": "text", "x": 120, "y": 190, "text": "Evento A", "fontSize": 15 }
+  { "type": "text", "id": "label_1", "x": 130, "y": 240, "text": "Jan 2024", "fontSize": 13, "opacity": 80 },
+  { "type": "text", "id": "event_1", "x": 120, "y": 190, "text": "Evento A", "fontSize": 15 }
 ]
 \`\`\`
 `.trim(),
@@ -366,9 +366,9 @@ const REPRESENTATION_GUIDES: Record<string, string> = {
 \`\`\`json
 [
   { "type": "rectangle", "id": "layer_api", "x": 40, "y": 60, "width": 720, "height": 120, "fillStyle": "cross-hatch", "role": "neutral" },
-  { "type": "text", "x": 60, "y": 70, "text": "API Layer", "fontSize": 14 },
+  { "type": "text", "id": "layer_api_label", "x": 60, "y": 70, "text": "API Layer", "fontSize": 14 },
   { "type": "rectangle", "id": "svc_auth", "x": 80, "y": 100, "width": 140, "height": 60, "label": { "text": "Auth" }, "role": "process" },
-  { "type": "frame", "children": ["layer_api", "svc_auth"], "name": "Apresentação" }
+  { "type": "frame", "id": "frame_apresentacao", "children": ["layer_api", "svc_auth"], "name": "Apresentação" }
 ]
 \`\`\`
 `.trim(),

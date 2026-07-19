@@ -95,6 +95,7 @@ export function AppPresentationsStudioSlideList() {
                   title={slide.title}
                   thumbnail={slide.thumbnail}
                   isHidden={slide.isHidden}
+                  outlineType={slide.outlineType}
                   selected={slide.id === activeSlideId}
                   onSelect={() => onSelectSlide(slide.id)}
                   onDuplicate={() => onDuplicateSlide(slide.id)}

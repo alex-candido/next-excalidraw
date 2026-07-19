@@ -83,6 +83,22 @@ function applyFallbackGeometry(el: ExcalidrawElementSkeleton, raw: Raw): Excalid
   }
 }
 
+// O prompt proíbe explicitamente a IA de mandar `points` em arrow/line (ver
+// ELEM_ARROW), mas ela às vezes manda mesmo assim — um array com
+// coordenadas ausentes/inválidas. Se sobrar até convertToExcalidrawElements,
+// o caso "arrow" dele dá prioridade a `points` (spread depois do width/
+// height default) e recalcula width/height A PARTIR dele
+// (getSizeFromPoints), sobrescrevendo em silêncio o x/y/width/height que a
+// gente acabou de calcular certo — width/height voltam a ficar NaN mesmo com
+// o resto do elemento correto. Por isso: nunca deixar `points` sobreviver
+// pra fora daqui, sempre, independente do que a IA mandou.
+function withoutPoints(el: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton {
+  const raw = el as Raw
+  if (!("points" in raw)) return el
+  const { points: _points, ...rest } = raw
+  return rest as ExcalidrawElementSkeleton
+}
+
 export function arrowNormalizer() {
   function normalize(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawElementSkeleton[] {
     const elementMap = new Map<string, ExcalidrawElementSkeleton>()
@@ -102,7 +118,7 @@ export function arrowNormalizer() {
       // explícita (ver ELEM_ARROW no prompt); a rede de segurança abaixo
       // cobre o caso raro de vir sem binding E sem x/y.
       if (!startId && !endId) {
-        return hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw)
+        return withoutPoints(hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw))
       }
 
       const startEl = startId ? elementMap.get(startId) : undefined
@@ -112,7 +128,7 @@ export function arrowNormalizer() {
         const startRect = getRect(startEl)
         const endRect   = getRect(endEl)
         const { startEdge, endEdge } = determineEdges(startRect, endRect)
-        return applyGeometry(el, getEdgeCenter(startRect, startEdge), getEdgeCenter(endRect, endEdge))
+        return withoutPoints(applyGeometry(el, getEdgeCenter(startRect, startEdge), getEdgeCenter(endRect, endEdge)))
       }
 
       // Binding incompleto: só um lado foi informado, ou o id do outro lado
@@ -128,12 +144,12 @@ export function arrowNormalizer() {
         const otherPt: Point = anchorIsStart
           ? { x: anchorPt.x + DEFAULT_ARROW_LENGTH, y: anchorPt.y }
           : { x: anchorPt.x - DEFAULT_ARROW_LENGTH, y: anchorPt.y }
-        return applyGeometry(el, anchorIsStart ? anchorPt : otherPt, anchorIsStart ? otherPt : anchorPt)
+        return withoutPoints(applyGeometry(el, anchorIsStart ? anchorPt : otherPt, anchorIsStart ? otherPt : anchorPt))
       }
 
       // Nenhum dos ids referenciados existe no slide — não tem como inferir
       // posição a partir do binding.
-      return hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw)
+      return withoutPoints(hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw))
     })
   }
 

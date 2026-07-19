@@ -79,6 +79,7 @@ export function useAppStudioHydration(presentationId: string) {
     if (!rawSlides || !isSerializerReady || hasHydrated) return;
 
     const outlineTitleById = new Map(presentation?.outlines.map((o) => [o.id, o.title]) ?? []);
+    const outlineTypeById = new Map(presentation?.outlines.map((o) => [o.id, o.type]) ?? []);
     const serialize = serializeRef.current;
     if (!serialize) return;
 
@@ -97,6 +98,7 @@ export function useAppStudioHydration(presentationId: string) {
         isHidden: s.status === SlideStatus.inactive,
         scene: serialize((s.elements ?? []) as unknown[]),
         outlineId: s.outlineId,
+        outlineType: outlineTypeById.get(s.outlineId),
       }));
 
     hydrate(hydratedBatch);

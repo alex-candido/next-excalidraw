@@ -397,3 +397,74 @@ Inspecionando os dados reais (`slideRepository().findById`): os 3 frames não ti
 - Manter `hydrate()` como substituição total, só chamando com mais frequência — descartado: reescreveria por cima de qualquer edição local feita durante a janela de geração (undo history, seleção, elements não salvos do slide ativo)
 
 **Consequências:** `slide.thumbnail`/demais campos de slides já hidratados nunca são atualizados por um poll subsequente enquanto a store já os tem — se o servidor mudar algo num slide já carregado durante essa janela (não deveria acontecer no fluxo de geração inicial), a store não veria até um reload. Aceitável: essa janela é só durante a geração inicial, antes de qualquer edição do usuário ter side-effect no servidor.
+
+---
+
+## ADR-020 — `arrows-normalizer` remove `points` sempre — a IA viola a proibição do prompt com frequência
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** `NaN` reapareceu em produção (`app-presentations-studio-slide-preview.tsx`) numa presentation cujos dados, checados diretamente no banco, estavam limpos — nenhuma seta com binding incompleto (ADR-014), nenhum frame sem `children` (ADR-018). Um log de debug temporário (mesma técnica dos ADRs anteriores: capturar o elemento exato via `JSON.stringify` no ponto do erro) revelou a causa: dois elementos `arrow` (`growth_line_1`/`growth_line_2`) carregavam um campo `points` com 4 pontos, todos `undefined` (serializados como `null` no `JSON.stringify`, por isso o log inicial parecia mostrar `null` em vez do `undefined` real).
+
+O prompt já proíbe explicitamente isso (`ELEM_ARROW`: "Proibido: não passe `points`"), mas a IA ignora a regra com frequência. O problema não é só a IA desobedecer — é que, se `points` sobrevive até `convertToExcalidrawElements`, o caso `"arrow"` dele faz `{ width, height, points: [default], ...element }` (spread do skeleton **depois** do default) e em seguida `Object.assign(excalidrawElement, getSizeFromPoints(excalidrawElement.points))` — ou seja, um `points` presente tem prioridade sobre o `x`/`y`/`width`/`height` que `arrows-normalizer` computou com cuidado, e é usado pra **recalcular** width/height. Com pontos `undefined`, `Math.max(...undefined)`/`Math.min(...undefined)` viram `NaN`, sobrescrevendo em silêncio a geometria que estava correta.
+
+**Escala do problema:** rodando uma varredura em todos os slides já persistidos (36 no total), **26 tinham `points` num arrow/line** — a violação é sistêmica, não um caso isolado.
+
+**Decisão:** `arrows-normalizer.ts` agora remove (`delete`) o campo `points` de **todo** arrow/line que processa, incondicionalmente — inclusive nos casos em que o resto do elemento já está correto (binding resolvido, geometria finita). Não tenta validar/consertar um `points` malformado; simplesmente nunca deixa esse campo sobreviver, porque não há nenhum cenário legítimo em que a IA deveria estar mandando esse campo (o prompt já proíbe) e código nosso (não a IA) é quem deve ser a única fonte de x/y/width/height de setas.
+
+**Alternativas descartadas:**
+- Validar se `points` tem coordenadas finitas e só remover se inválido — descartado: mais complexo pra zero benefício real, já que o prompt já diz pra IA nunca mandar esse campo; não existe "points válido" que devêssemos preservar
+- Reforçar só o prompt (deixar mais enfático "nunca mande points") — descartado como única medida: já é explícito hoje e mesmo assim 26/36 slides violaram; é exatamente a categoria de coisa que este projeto já decidiu (ADR-014, ADR-018) resolver em código, não confiando na IA seguir instrução
+
+**Consequências:** 26 slides já persistidos corrigidos diretamente no banco (mesma técnica dos ADRs anteriores: reprocessar via `excalidrawSkeleton().normalize()` e regravar só o que mudou). `arrows-normalizer.test.ts` ganhou 3 casos novos (incluindo a reprodução exata do bug de produção). Suite de testes: 125 → 128.
+
+---
+
+## ADR-021 — Varredura proativa da mesma classe de bug do ADR-020: `frame.children` órfão, elemento sem `id`, `text` com `width`/`height`, `frame` sem bounds
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** depois do ADR-020 (arrow `points`), o pedido foi explícito: em vez de esperar o próximo campo quebrar em produção, varrer os outros pontos onde `convertToExcalidrawElements` tem o mesmo padrão — `{ ...computedDefault, ...element }`, onde o spread do skeleton por cima do valor calculado deixa qualquer campo que a IA mandou (mesmo proibido pelo prompt) sobrescrever em silêncio o valor correto. Quatro pontos identificados e corrigidos:
+
+1. **`frame.children` com id inventado/órfão** — `binding-repairer.ts` ganhou um Pass 6: depois dos Passes 1-5 (que só adicionam relações faltantes), remove de `frame.children` qualquer id que não corresponde a nenhum elemento do slide. Sem isso, um id inventado pela IA (ou órfão por outra etapa ter descartado o elemento) sobrevive até `convertToExcalidrawElements`, que **lança** (`Element with X wasn't mapped correctly`) — não é `NaN`, derruba a conversão do slide inteiro.
+2. **Elemento sem `id`** — `skeleton-serializer.ts` chama `convertToExcalidrawElements(..., { regenerateIds: false })`, então um skeleton sem `id` vira `id: undefined` no elemento final; múltiplos elementos assim colidem no mesmo id. Novo módulo `id-generator.ts` (`crypto.randomUUID()` pra qualquer elemento sem id), primeiro passo do Estágio 1 — antes do `binding-repairer`, pra que o Map por id dele já enxergue os ids gerados.
+3. **`text` livre com `width`/`height`** — o prompt proíbe (`ELEM_TEXT`: "calculados automaticamente — não forneça"), mas o caso `"text"` de `convertToExcalidrawElements` tem o mesmo spread-depois-do-cálculo do `points`. `element-parser.ts` (`applyFallbacks`) agora remove `width`/`height` de todo elemento `text` antes de normalizar — escopado ao parser (caminho de geração via IA), não ao `bulkUpdate` do Studio, que nunca passa por aqui.
+4. **`frame` sem `x`/`y`/`width`/`height`** — diferente de shape/arrow, o caso `"frame"` de `convertToExcalidrawElements` **não tem nenhum fallback** pra bounds (nem o `||` que os outros têm). O prompt promete "coordenadas calculadas pelos children com margem de 10px", mas nada implementava isso — confirmado em produção: frame `comparison_matrix` (slide `bd5dc8a4-ab3f-45a2-8191-3169a115a9d3`) sem `id`/`x`/`y`/`width`/`height`, apesar de 8 children reais e válidos. Novo módulo `frame-bounds-resolver.ts`: pra todo frame, calcula a bounding box união dos rects dos children + margem de 10px, e **sempre** recalcula (nunca confia no valor que a IA mandou — mesma lógica do ADR-020 pro `points`), rodando logo depois do `binding-repairer` no Estágio 1.
+
+**Decisão (dado já quebrado):** varredura em todos os slides persistidos, reprocessando via `excalidrawSkeleton().normalize()` (Estágio 1, sem context) e regravando só o que mudou. 33 de N slides mudaram, span 3 presentations. Confirmado o frame `comparison_matrix` corrigido (ganhou `id`, bounds `x:210,y:90,w:560,h:300` a partir dos 8 children). Também apareceu um caso não previsto: um slide com 6 elementos (2 `text`, 4 `arrow`) sem `id` nenhum, agora corrigidos pelo `id-generator`. Setas/frames que já estavam “corretos” também mudaram um pouco na varredura — não é regressão: são âncoras de seta/bounds de frame resincronizando com a posição *atual* dos elementos vinculados (o usuário edita ativamente no Studio), o mesmo comportamento que já existia antes, só reaplicado.
+
+**Por que reaplicar em elementos já convertidos (não só em skeletons novos) é seguro:** o Studio carrega `slide.elements` direto via `initialData` do Excalidraw (`app-presentations-studio-canvas.tsx`), que passa pelo `restoreElement` interno do Excalidraw — não pelo `convertToExcalidrawElements`. Verificado no código vendored (`chunk-4FTI6OG3.js`): pra `arrow`/`line`, se `points` está ausente/inválido, `restoreElement` **recria** a partir de `width`/`height` (`[pointFrom(0,0), pointFrom(width,height)]`) — então remover `points` de um elemento já persistido não quebra o carregamento, só descarta curvas/segmentos customizados (que a IA não gera; sempre são retas entre os pontos vinculados).
+
+**Alternativas descartadas:**
+- Só corrigir os 4 pontos em código, sem varrer o banco — descartado: o `comparison_matrix` já estava quebrado (lançaria erro ao converter), esperar o usuário reportar de novo contraria o pedido explícito de resolver proativamente.
+- Rodar a varredura só nos slides conhecidos como quebrados (via log/relato do usuário) — descartado: o próprio objetivo era achar violações *ainda não reportadas*; escopar a poucos slides reintroduziria o problema original (esperar o bug aparecer).
+
+**Consequências:** `id-generator.test.ts` (4 casos) e `frame-bounds-resolver.test.ts` (6 casos) novos; `element-parser.test.ts` ganhou 3 casos (`width`/`height` de texto); `binding-repairer.test.ts` já tinha os 2 casos do Pass 6 (implementados numa sessão anterior sem ADR correspondente — este ADR também documenta retroativamente esse Pass 6, que o ADR-018 não cobria). Suite de testes: 128 → 143. `normalizeSkeletons()` (Estágio 1) passou a ter 5 passos em vez de 3: `id-generator` → `binding-repairer` → `frame-bounds-resolver` → `element-orderer` → `arrows-normalizer`.
+
+---
+
+## ADR-022 — `presentation_entry.origin` (blank/prompt): presentation criada sem prompt nasce com a estrutura mínima (capa/conteúdo/encerramento), sem tentar IA
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** usuário criou uma presentation em branco (`88d0580b-f659-4aa5-a352-f227b83b5ca7`) esperando que ela já viesse com capa/conteúdo/encerramento — veio vazia (0 outlines, 0 slides). Investigando: existem **dois caminhos de criação distintos**, e o bug real estava em qual deles o usuário tinha usado.
+
+- `app-start-provider.tsx` (formulário principal, `/app/start`): `presentationCreateSchema.userPrompt` já é `z.string().min(1)` quando presente — esse fluxo sempre tem prompt real e sempre chama `generateOutline()` depois de criar. Nunca fica "em branco" de verdade.
+- `app-start-new-modal.tsx` (modal "Nova presentation", criação rápida): **nunca** manda `userPrompt` nem chama `generateOutline()` — vai direto pro Studio. Esse é o fluxo genuinamente "em branco", e é o que o usuário usou. Como nada nunca cria outline/slide pra ele, a presentation ficava presa pra sempre com 0 de cada.
+
+Minha primeira tentativa de correção inferia "é em branco" pela ausência de `userPrompt` no input de `presentationService().create()`. O usuário rejeitou essa abordagem: inferir por um campo que existe por outro motivo (o prompt em si) é frágil — quebra se o formulário principal um dia permitir prompt opcional por outro motivo, e não deixa claro na leitura do código qual é a decisão real sendo tomada. Pediu um campo explícito; ao ver a primeira versão (booleano `blank` só no payload da request, não persistido), sugeriu ir mais longe: um enumerador de verdade, seguindo o padrão já usado em todo o resto do schema (`PresentationType`, `PresentationEntryKind`, `OutlineType` etc. — todos `smallint` com objeto de constantes, nunca booleano).
+
+**Decisão:** nova coluna `presentation_entry.origin` (`smallint`, default `1`), enum `PresentationEntryOrigin = { blank: 0, prompt: 1 }`. `presentationCreateSchema` ganha `origin` (default `prompt`); `app-start-new-modal.tsx` manda `origin: PresentationEntryOrigin.blank` explicitamente. `presentationService().create()` decide semear a estrutura mínima com base nisso (`input.origin === PresentationEntryOrigin.blank`), não mais na ausência de `userPrompt`.
+
+Estrutura semeada (`seedBlankStructure`, dentro da mesma transação de `create()`): 3 outlines (`cover`/`content`/`closing`, `title: ""`) + 3 slides vazios (`elements: []`, mesmo padrão de `createManual` em `slide-service.ts`) — pronto pro usuário editar direto no Studio, sem esperar geração nenhuma.
+
+**Bônus:** `metrics-service.ts` calculava "presentations geradas por IA" via `entry.prompt.trim().length > 0` — a mesma classe de inferência frágil que o usuário rejeitou, resolvendo o mesmo problema. Trocado por `entry.origin === PresentationEntryOrigin.prompt`, já que o campo certo agora existe.
+
+**Alternativas descartadas:**
+- Inferir de `userPrompt === undefined` no input de `create()` — rejeitada pelo usuário: campo errado pra decisão errada, mesmo funcionando por coincidência hoje.
+- Booleano `blank` só na request (não persistido) — descartada em favor do enum: menos consistente com o resto do schema, e fecha a porta pra futuras variações de origem (ex: duplicada, importada) sem quebrar a API.
+
+**Consequências:** migration `0008_gray_talisman.sql` (`ALTER TABLE presentation_entry ADD COLUMN origin smallint DEFAULT 1 NOT NULL`), aplicada. `presentation-repository.ts`'s `ENTRY_COLUMNS` ganhou `origin` (senão `source.entry.origin` fica `undefined` em `duplicate()`). Presentation `88d0580b-...` corrigida manualmente (mesma técnica de backfill pontual dos ADRs anteriores): `origin` setado pra `blank`, 3 outlines + 3 slides inseridos direto.

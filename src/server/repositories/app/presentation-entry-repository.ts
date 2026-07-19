@@ -49,13 +49,13 @@ export function presentationEntryRepository() {
   // em branco, sem IA) de cada presentation do usuário, pra computar os stats
   // em código em vez de SQL de agregação (poucas linhas por usuário, não vale
   // a complexidade de um `count() filter (where ...)`).
-  async function findTypeAndPromptByUser(userId: string) {
+  async function findTypeAndOriginByUser(userId: string) {
     return db
-      .select({ type: presentationEntry.type, prompt: presentationEntry.prompt })
+      .select({ type: presentationEntry.type, origin: presentationEntry.origin })
       .from(presentationEntry)
       .innerJoin(presentation, eq(presentationEntry.presentationId, presentation.id))
       .where(and(eq(presentation.userId, userId), eq(presentationEntry.kind, PresentationEntryKind.custom)))
   }
 
-  return { findActiveSuggestions, findById, createCustom, findTypeAndPromptByUser, updateParamsByPresentationId }
+  return { findActiveSuggestions, findById, createCustom, findTypeAndOriginByUser, updateParamsByPresentationId }
 }

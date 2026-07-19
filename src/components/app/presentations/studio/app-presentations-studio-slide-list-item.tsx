@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { OutlineType } from "@/lib/drizzle/schema/outline";
 import { cn, resolveThumbnailSrc } from "@/lib/utils";
 import { useStudioSlidePreviewElements } from "@/providers/app/app-presentations-studio-provider";
 
@@ -24,6 +25,7 @@ interface AppPresentationsStudioSlideListItemProps {
   title: string;
   thumbnail?: string;
   isHidden?: boolean;
+  outlineType?: number;
   selected: boolean;
   onSelect: () => void;
   onDuplicate: () => void;
@@ -37,6 +39,7 @@ export function AppPresentationsStudioSlideListItem({
   title,
   thumbnail,
   isHidden = false,
+  outlineType,
   selected,
   onSelect,
   onDuplicate,
@@ -46,8 +49,14 @@ export function AppPresentationsStudioSlideListItem({
   const t = useTranslations("app.studio.slideList.item");
   const previewElements = useStudioSlidePreviewElements(id);
 
+  // cover/closing têm posição fixa — mesma trava do Outline (ver
+  // app-presentations-outline-card.tsx), agora replicada aqui. Arrastar e
+  // excluir ficam desabilitados visualmente, não só rejeitados em silêncio
+  // pela store (ver app-studio-store.ts:onReorderSlides/onDeleteSlide).
+  const isRestricted = outlineType === OutlineType.cover || outlineType === OutlineType.closing;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
+    disabled: isRestricted,
   });
 
   return (
@@ -63,10 +72,11 @@ export function AppPresentationsStudioSlideListItem({
     >
       <button
         type="button"
+        disabled={isRestricted}
         {...attributes}
         {...listeners}
         aria-label={t("dragHandle")}
-        className="app-presentations-studio-slide-list-item-drag-handle flex size-5 shrink-0 cursor-grab touch-none items-center justify-center self-start text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
+        className="app-presentations-studio-slide-list-item-drag-handle flex size-5 shrink-0 cursor-grab touch-none items-center justify-center self-start text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
       >
         <GripVertical className="size-3.5" />
       </button>
@@ -140,6 +150,7 @@ export function AppPresentationsStudioSlideListItem({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={onDelete}
+              disabled={isRestricted}
               className="app-presentations-studio-slide-list-item-delete gap-2 text-destructive focus:text-destructive"
             >
               <Trash2 className="size-4" />

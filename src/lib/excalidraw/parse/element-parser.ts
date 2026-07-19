@@ -17,8 +17,22 @@ function normalizeTextContent(value: unknown): unknown {
   return value.replace(/\\n/g, "\n")
 }
 
+// convertToExcalidrawElements calcula width/height de texto livre a partir da
+// métrica da fonte e depois faz `{ width: metrics.width, ...element }` — o
+// spread do skeleton por cima do valor calculado sobrescreve silenciosamente
+// se a IA fornecer o campo (mesmo padrão do `points` em arrows-normalizer.ts).
+// O prompt já proíbe ("não forneça"), isso só garante em código.
+function stripTextDimensions(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton {
+  const el = skeleton as Record<string, unknown>
+  if (el.type !== "text") return skeleton
+  if (!("width" in el) && !("height" in el)) return skeleton
+  const { width: _width, height: _height, ...rest } = el
+  return rest as ExcalidrawElementSkeleton
+}
+
 function applyFallbacks(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton {
-  const el      = skeleton as Record<string, unknown>
+  const stripped = stripTextDimensions(skeleton)
+  const el      = stripped as Record<string, unknown>
   const patches: Record<string, unknown> = {}
 
   if (typeof el.text === "string") patches.text = normalizeTextContent(el.text)
@@ -37,7 +51,7 @@ function applyFallbacks(skeleton: ExcalidrawElementSkeleton): ExcalidrawElementS
     patches.backgroundColor = "transparent"
   }
 
-  return Object.keys(patches).length ? { ...skeleton, ...patches } : skeleton
+  return Object.keys(patches).length ? { ...stripped, ...patches } : stripped
 }
 
 export function elementParser() {

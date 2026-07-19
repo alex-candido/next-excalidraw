@@ -7,6 +7,7 @@
 //  presentation_id             :uuid              unique
 //  source_suggestion_id        :uuid
 //  type                        :smallint          not null
+//  origin                      :smallint          default(1), not null
 //  language                    :smallint          not null
 //  icon                        :text
 //  title                       :text
@@ -55,6 +56,16 @@ export const PresentationEntryStatus = {
   inactive: 1,
 } as const;
 
+// blank: criada pelo modal de criação rápida ("Nova presentation em branco",
+// ver app-start-new-modal.tsx) — nunca dispara geração via IA,
+// presentationService().create() semeia a estrutura mínima (capa/conteúdo/
+// encerramento) direto. prompt: fluxo principal (/app/start), sempre com
+// userPrompt exigido — generateOutline() roda logo em seguida.
+export const PresentationEntryOrigin = {
+  blank: 0,
+  prompt: 1,
+} as const;
+
 export const presentationEntry = pgTable(
   "presentation_entry",
   {
@@ -70,6 +81,7 @@ export const presentationEntry = pgTable(
     // kind=suggestion que originou (métrica de popularidade).
     sourceSuggestionId: uuid("source_suggestion_id").references((): AnyPgColumn => presentationEntry.id),
     type: smallint("type").notNull(),
+    origin: smallint("origin").default(1).notNull(),
     language: smallint("language").notNull(),
     // Código semântico (ex: "chart"), não o glyph — app converte via icon-map
     // (react-icons/fc), trocável sem tocar no dado. Só kind=suggestion.

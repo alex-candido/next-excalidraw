@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bug,
   Code2,
   Download,
   FileImage,
@@ -33,6 +34,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AppPresentationTrashModal } from "@/components/app/presentations/app-presentation-trash-modal";
+import { useAppStudioDebugExport } from "@/hooks/app/studio/use-app-studio-debug-export";
 import {
   useAppPresentationsStudio,
   useStudioActions,
@@ -81,6 +83,7 @@ export function AppPresentationsStudioActions() {
   const { onOpenPanel } = useStudioActions();
   const { id } = useParams<{ id: string }>();
   const [trashModalOpen, setTrashModalOpen] = useState(false);
+  const { exportAll: onDebugExport, isExporting: isDebugExporting } = useAppStudioDebugExport(id);
 
   return (
     <div className="app-presentations-studio-actions flex items-center gap-1.5">
@@ -88,6 +91,22 @@ export function AppPresentationsStudioActions() {
         <Save className="size-3.5" />
         {isSaving ? t("saving") : t("save")}
       </Button>
+
+      {/* Só em dev — ferramenta de debug (screenshot real do canvas salvo
+          local no projeto), não é feature de produto. Ver
+          use-app-studio-debug-export.ts. */}
+      {process.env.NODE_ENV === "development" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDebugExport}
+          disabled={isDebugExporting}
+          className="app-presentations-studio-actions-debug-export gap-1.5"
+        >
+          <Bug className="size-3.5" />
+          {isDebugExporting ? "Exportando…" : "Exportar (debug)"}
+        </Button>
+      )}
 
       <DropdownMenu>
         <DropdownMenuTrigger

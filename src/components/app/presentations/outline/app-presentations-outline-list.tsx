@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { OutlineType } from "@/lib/drizzle/schema/outline";
 import { cn } from "@/lib/utils";
 import { useOutlineActions, useOutlineOutlines } from "@/providers/app/app-presentations-outline-provider";
@@ -64,30 +65,36 @@ export function AppPresentationsOutlineList() {
       {outlines.length > 0 && (
         <div className="app-presentations-outline-storyboard flex flex-col gap-2">
           <span className="text-xs font-medium text-muted-foreground">{t("storyboard")}</span>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {outlines.map((item) => {
-              const meta = REPRESENTATION_META[item.representation];
-              const style = FAMILY_STYLE[meta.family];
-              const Icon = meta.icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleStoryboardClick(item.id)}
-                  className={cn(
-                    "app-presentations-outline-storyboard-item flex shrink-0 flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors",
-                    expandedId === item.id ? "border-foreground/30 bg-muted/40" : "border-transparent hover:bg-muted/30",
-                  )}
-                >
-                  <div className={cn("flex size-9 items-center justify-center rounded-full ring-1", style.bg, style.ring)}>
-                    <Icon className={cn("size-4", style.icon)} />
-                  </div>
-                  <span className="w-16 truncate text-center text-[0.65rem] text-muted-foreground">
-                    {item.title || String(item.order + 1)}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="app-presentations-outline-storyboard-carousel-wrapper relative">
+            <Carousel opts={{ align: "start", dragFree: true }}>
+              <CarouselContent className="-ml-2 cursor-grab pb-1 active:cursor-grabbing">
+                {outlines.map((item) => {
+                  const meta = REPRESENTATION_META[item.representation];
+                  const style = FAMILY_STYLE[meta.family];
+                  const Icon = meta.icon;
+                  return (
+                    <CarouselItem key={item.id} className="basis-auto pl-2">
+                      <button
+                        type="button"
+                        onClick={() => handleStoryboardClick(item.id)}
+                        className={cn(
+                          "app-presentations-outline-storyboard-item flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-colors",
+                          expandedId === item.id ? "border-foreground/30 bg-muted/40" : "border-transparent hover:bg-muted/30",
+                        )}
+                      >
+                        <div className={cn("flex size-9 items-center justify-center rounded-full ring-1", style.bg, style.ring)}>
+                          <Icon className={cn("size-4", style.icon)} />
+                        </div>
+                        <span className="w-16 truncate text-center text-[0.65rem] text-muted-foreground">
+                          {item.title || String(item.order + 1)}
+                        </span>
+                      </button>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+            </Carousel>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent" />
           </div>
         </div>
       )}

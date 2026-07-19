@@ -1,11 +1,10 @@
 "use client";
 
-import { ArrowLeft, ChevronDown, RefreshCw } from "lucide-react";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { AppPresentationsOutlineHeroControls } from "@/components/app/presentations/outline/hero/app-presentations-outline-hero-controls";
@@ -42,22 +41,11 @@ export function AppPresentationsOutlineHero({ className }: AppPresentationsOutli
       )}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          render={<Link href="/app/presentations" />}
-          nativeButton={false}
-          className="app-presentations-outline-hero-back -ml-2 w-fit gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-3.5" />
-          {t("back")}
-        </Button>
-
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
           aria-expanded={isExpanded}
-          className="app-presentations-outline-hero-toggle flex w-fit items-center gap-1.5 text-left"
+          className="app-presentations-outline-hero-toggle flex w-fit cursor-pointer items-center gap-1.5 text-left"
         >
           <h2 className="app-presentations-outline-hero-title truncate text-xl font-semibold tracking-tight">
             {title}

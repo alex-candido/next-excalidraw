@@ -282,6 +282,7 @@ export function AppPresentationsOutlineCard({ id, isExpanded, onToggleExpand, ca
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => onDelete(item.id)}
+                disabled={isRestricted}
                 aria-label={t("delete")}
                 className="app-outline-card-delete text-muted-foreground hover:text-destructive"
               >

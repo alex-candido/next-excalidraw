@@ -124,7 +124,9 @@ describe("bindingRepairer", () => {
 
   it("does not touch a frame that already has a valid children array", () => {
     const frame = { type: "frame", id: "frame_4", x: 0, y: 0, children: ["a", "b"] } as ExcalidrawElementSkeleton
-    const result = repair([frame])
+    const a = { type: "rectangle", id: "a", x: 0, y: 0 } as ExcalidrawElementSkeleton
+    const b = { type: "rectangle", id: "b", x: 0, y: 0 } as ExcalidrawElementSkeleton
+    const result = repair([frame, a, b])
     expect(result[0]).toBe(frame)
   })
 
@@ -144,5 +146,27 @@ describe("bindingRepairer", () => {
     const frameOut = result.find(el => (el as Raw).id === "frame_5") as Raw
 
     expect(frameOut.children).toEqual(["a", "b", "c"])
+  })
+
+  it("removes a dangling id from frame.children (id that doesn't exist in the slide) — convertToExcalidrawElements throws otherwise", () => {
+    const frame = {
+      type: "frame", id: "frame_6", x: 0, y: 0,
+      children: ["real_child", "made_up_id_that_does_not_exist"],
+    } as ExcalidrawElementSkeleton
+    const realChild = { type: "rectangle", id: "real_child", x: 0, y: 0 } as ExcalidrawElementSkeleton
+
+    const result = repair([frame, realChild])
+    const frameOut = result.find(el => (el as Raw).id === "frame_6") as Raw
+
+    expect(frameOut.children).toEqual(["real_child"])
+  })
+
+  it("does not touch frame.children when every id already exists (zero-copy)", () => {
+    const frame = { type: "frame", id: "frame_7", x: 0, y: 0, children: ["a", "b"] } as ExcalidrawElementSkeleton
+    const a = { type: "rectangle", id: "a", x: 0, y: 0 } as ExcalidrawElementSkeleton
+    const b = { type: "rectangle", id: "b", x: 0, y: 0 } as ExcalidrawElementSkeleton
+
+    const result = repair([frame, a, b])
+    expect(result[0]).toBe(frame)
   })
 })

@@ -3,6 +3,7 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useShallow } from "zustand/react/shallow";
 import { createAppStore } from "@/lib/zustand";
+import { OutlineType } from "@/lib/drizzle/schema/outline";
 
 export interface AppPresentationsStudioScene {
   type: "excalidraw";
@@ -22,6 +23,11 @@ export interface AppPresentationsStudioSlide {
   scene: AppPresentationsStudioScene;
   isLocal?: boolean;
   outlineId?: string;
+  // Mesmo campo do Outline (outline.type) — precisa estar no slide pra
+  // aplicar a mesma trava de posição (cover/closing fixos) aqui no Studio.
+  // undefined pra slide local ainda sem outline (onAddSlide) — tratado como
+  // "content" nos guards abaixo.
+  outlineType?: number;
 }
 
 export type StudioPanelKey = "settings" | "source" | "history";
@@ -65,7 +71,7 @@ interface StudioStoreState {
   hydrate: (slides: AppPresentationsStudioSlide[]) => void;
   setHasHydrated: (value: boolean) => void;
   setIsSaving: (isSaving: boolean) => void;
-  reconcileCreatedSlides: (created: { tempId: string; id: string; outlineId: string }[]) => void;
+  reconcileCreatedSlides: (created: { tempId: string; id: string; outlineId: string; type: number }[]) => void;
 
   registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
   captureActiveSlideElements: () => void;
@@ -138,6 +144,10 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   // id real do banco, sem mexer em mais nada do slide (elements/scene já
   // continuam os mesmos). activeSlideId também precisa acompanhar a troca,
   // senão fica apontando pra um id que não existe mais em lugar nenhum.
+  // `type` também vem do servidor aqui (não do onAddSlide) — é ele quem
+  // decide cover vs. content (primeiro slide da presentation vira cover,
+  // ver slide-service.ts createManual), então outlineType local (sempre
+  // "content" até aqui) precisa ser corrigido pra travar a posição certo.
   reconcileCreatedSlides: (created) => {
     if (created.length === 0) return;
     const byTempId = new Map(created.map((c) => [c.tempId, c]));
@@ -145,7 +155,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       slides: state.slides.map((slide) => {
         const match = byTempId.get(slide.id);
         if (!match) return slide;
-        return { ...slide, id: match.id, outlineId: match.outlineId, isLocal: false };
+        return { ...slide, id: match.id, outlineId: match.outlineId, outlineType: match.type, isLocal: false };
       }),
       activeSlideId: byTempId.get(state.activeSlideId)?.id ?? state.activeSlideId,
     }));
@@ -176,25 +186,37 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
 
   // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só
   // local (mesmo tratamento combinado pro outline). Ver pm.md Backlog.
+  // Insere antes do encerramento (se existir) — mesma regra do onAdd do
+  // outline, senão "Adicionar slide" com um closing já na lista quebraria a
+  // estrutura abertura→conteúdo→encerramento.
   onAddSlide: () =>
-    set((state) => ({
-      slides: [
-        ...state.slides,
-        {
-          id: crypto.randomUUID(),
-          order: state.slides.length,
-          title: "Novo slide",
-          scene: buildEmptyScene(),
-          isLocal: true,
-        },
-      ],
-    })),
+    set((state) => {
+      const closingIndex = state.slides.findIndex((slide) => slide.outlineType === OutlineType.closing);
+      const insertAt = closingIndex === -1 ? state.slides.length : closingIndex;
+      const newSlide: AppPresentationsStudioSlide = {
+        id: crypto.randomUUID(),
+        order: insertAt,
+        title: "Novo slide",
+        scene: buildEmptyScene(),
+        isLocal: true,
+        outlineType: OutlineType.content,
+      };
+      const next = [...state.slides.slice(0, insertAt), newSlide, ...state.slides.slice(insertAt)];
+      return { slides: next.map((slide, i) => ({ ...slide, order: i })) };
+    }),
 
   onDuplicateSlide: (id) =>
     set((state) => {
       const index = state.slides.findIndex((slide) => slide.id === id);
       if (index === -1) return state;
-      const duplicate = { ...state.slides[index], id: crypto.randomUUID(), isLocal: true };
+      // Duplicata de cover/closing é sempre "content" — só pode haver uma
+      // capa e um encerramento (mesma trava de posição abaixo depende disso).
+      const duplicate = {
+        ...state.slides[index],
+        id: crypto.randomUUID(),
+        isLocal: true,
+        outlineType: OutlineType.content,
+      };
       return {
         slides: [
           ...state.slides.slice(0, index + 1),
@@ -204,11 +226,23 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       };
     }),
 
+  // cover/closing têm posição fixa (primeiro/último) — mesma trava do
+  // Outline (ver app-outline-store.ts:onReorder), agora replicada aqui pra
+  // não ser possível embaralhar a estrutura só porque se está no Studio.
   onReorderSlides: (activeId, overId) =>
     set((state) => {
       const oldIndex = state.slides.findIndex((slide) => slide.id === activeId);
       const newIndex = state.slides.findIndex((slide) => slide.id === overId);
       if (oldIndex === -1 || newIndex === -1) return state;
+
+      const active = state.slides[oldIndex];
+      if (active.outlineType === OutlineType.cover || active.outlineType === OutlineType.closing) return state;
+
+      const firstIsCover = state.slides[0]?.outlineType === OutlineType.cover;
+      const lastIsClosing = state.slides[state.slides.length - 1]?.outlineType === OutlineType.closing;
+      if (firstIsCover && newIndex === 0) return state;
+      if (lastIsClosing && newIndex === state.slides.length - 1) return state;
+
       return {
         slides: arrayMove(state.slides, oldIndex, newIndex).map((slide, index) => ({
           ...slide,
@@ -225,6 +259,8 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   onDeleteSlide: (id) => {
     const { slides, activeSlideId } = get();
     if (slides.length <= 1) return;
+    const target = slides.find((slide) => slide.id === id);
+    if (target?.outlineType === OutlineType.cover || target?.outlineType === OutlineType.closing) return;
     const remaining = slides.filter((slide) => slide.id !== id).map((slide, i) => ({ ...slide, order: i }));
     const nextActiveId = id === activeSlideId
       ? (slides.find((slide) => slide.id !== id)?.id ?? "")

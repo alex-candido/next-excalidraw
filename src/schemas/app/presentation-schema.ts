@@ -7,6 +7,7 @@ import {
   PresentationScenario,
   PresentationTheme,
 } from "@/lib/drizzle/schema/presentation"
+import { PresentationEntryOrigin } from "@/lib/drizzle/schema/presentation-entry"
 import { generationResponseSchema } from "@/schemas/app/generation-schema"
 import { outlineSchema } from "@/schemas/app/outline-schema"
 import { outlineRegenerateResultSchema } from "@/schemas/app/presentations/multi-schema"
@@ -98,6 +99,13 @@ export const presentationCreateSchema = z.object({
   // métrica de popularidade; nunca gate de comportamento/validação. A entry
   // custom é criada de qualquer jeito, com ou sem esse campo.
   sourceSuggestionId: z.string().uuid().optional(),
+  // Explícito, não inferido da ausência de userPrompt (mais frágil — quebra
+  // se o form principal algum dia permitir prompt opcional). origin=blank só
+  // no fluxo "Nova presentation em branco" (app-start-new-modal.tsx), que
+  // nunca chama generateOutline() — presentationService().create() usa isso
+  // pra decidir se semeia a estrutura mínima (capa/conteúdo/encerramento)
+  // direto, já que nada mais vai criar outline/slide pra essa presentation.
+  origin: z.number().int().default(PresentationEntryOrigin.prompt),
 })
 
 export type PresentationCreate = z.infer<typeof presentationCreateSchema>

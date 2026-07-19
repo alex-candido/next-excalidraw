@@ -2,7 +2,6 @@
   "app": {
     "outline": {
       "hero": {
-        "back": "Voltar",
         "generate": "Gerar Slides",
         "generating": "Gerando...",
         "regenerate": "Regenerar",

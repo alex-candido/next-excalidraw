@@ -282,6 +282,7 @@ erDiagram
 | `presentation_entry` | `kind` | `0` suggestion · `1` custom |
 | `presentation_entry` | `status` | `0` active · `1` inactive |
 | `presentation_entry` | `type` | `0` single · `1` multi |
+| `presentation_entry` | `origin` | `0` blank · `1` prompt (default) |
 | `presentation_entry` | `language` | `0` en · `1` es · `2` fr · `3` de · `4` it · `5` pt-BR · `6` ru · `7` zh · `8` ja · `9` ko |
 | `presentation_entry` | `aspect_ratio` | `0` 16:9 · `1` 4:3 · `2` 9:16 · `3` 1:1 · `4` A4 · `5` custom |
 | `presentation_entry` | `amount` | `0` auto · `1` minimal (4–6) · `2` concise (7–10) · `3` detailed (11–15) · `4` extensive (16–20) |
@@ -295,6 +296,7 @@ erDiagram
 
 - `presentation_entry.type = 0 (single)` → máximo 1 outline + 1 slide na presentation associada
 - `presentation_entry.type = 1 (multi)` → N outlines + N slides
+- `presentation_entry.origin = 0 (blank)` → criada pelo modal de criação rápida (`app-start-new-modal.tsx`), sem prompt — nunca dispara `generateOutline()`; `presentationService().create()` semeia direto 3 outlines (`cover`/`content`/`closing`) + 3 slides vazios, na mesma transação. `origin = 1 (prompt)` → fluxo principal (`/app/start`), sempre com prompt real, dispara geração via IA
 - Toda `presentation` tem exatamente 1 `presentation_entry` com `kind=custom` associada (`presentation_id` único) — nunca 0, nunca mais de 1. Criados juntos em `presentationService().create()`
 - Owner da presentation é sempre `presentation.user_id` — role `owner` não existe em `presentation_member`
 - `invite_token` — Ciclo 5 (Colaboração); token para `/invite/[token]`

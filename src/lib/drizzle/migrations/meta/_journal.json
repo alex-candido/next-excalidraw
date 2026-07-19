@@ -57,6 +57,13 @@
       "when": 1784334046381,
       "tag": "0007_nervous_tomas",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784424319646,
+      "tag": "0008_gray_talisman",
+      "breakpoints": true
     }
   ]
 }

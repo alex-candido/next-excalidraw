@@ -12,6 +12,7 @@ export type PresentationUpdate = Partial<Pick<PresentationInsert, "title" | "sta
 const ENTRY_COLUMNS = {
   id:          presentationEntry.id,
   type:        presentationEntry.type,
+  origin:      presentationEntry.origin,
   language:    presentationEntry.language,
   prompt:      presentationEntry.prompt,
   aspectRatio: presentationEntry.aspectRatio,

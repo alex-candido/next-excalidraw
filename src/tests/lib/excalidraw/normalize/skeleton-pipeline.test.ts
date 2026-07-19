@@ -27,6 +27,17 @@ describe("normalizeSkeletons — without context (safety only)", () => {
     expect(Number.isFinite(arrowOut.height)).toBe(true)
   })
 
+  it("assigns distinct ids to elements missing one entirely, before binding-repair runs", () => {
+    const a = { type: "text", x: 20, y: 20, text: "título" } as ExcalidrawElementSkeleton
+    const b = { type: "text", x: 20, y: 60, text: "subtítulo" } as ExcalidrawElementSkeleton
+
+    const [aOut, bOut] = normalizeSkeletons([a, b])
+
+    expect(typeof (aOut as Raw).id).toBe("string")
+    expect(typeof (bOut as Raw).id).toBe("string")
+    expect((aOut as Raw).id).not.toBe((bOut as Raw).id)
+  })
+
   it("does not apply theme, text-wrap or grid-snap when context is omitted", () => {
     const el = { type: "rectangle", id: "r1", x: 33, y: 11, backgroundColor: "#anything", fillStyle: "solid", role: "danger" } as ExcalidrawElementSkeleton
     const [result] = normalizeSkeletons([el])

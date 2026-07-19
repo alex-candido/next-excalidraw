@@ -20,6 +20,7 @@ import {
   PresentationTheme,
   PresentationType,
 } from "@/lib/drizzle/schema/presentation";
+import { PresentationEntryOrigin } from "@/lib/drizzle/schema/presentation-entry";
 import { LAYOUT_HEADER_HEIGHT_PX } from "@/components/layouts/layout-header";
 import { scrollToElement } from "@/lib/utils";
 
@@ -57,6 +58,7 @@ export function AppStartNewModal({
     const { presentationId } = await create.mutateAsync({
       type,
       title,
+      origin: PresentationEntryOrigin.blank,
       language: PresentationLanguage.en,
       aspectRatio: 0,
       slideCount: 0,

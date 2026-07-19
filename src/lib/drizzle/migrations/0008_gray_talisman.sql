@@ -1,0 +1,1 @@
+ALTER TABLE "presentation_entry" ADD COLUMN "origin" smallint DEFAULT 1 NOT NULL;

@@ -49,3 +49,7 @@ next-env.d.ts
 
 # reference repos (study only)
 temp/
+
+# exports de slide gerados pelo botão de debug (Studio, dev only) — ver
+# app-presentations-studio-actions.tsx / api/v1/debug/export-slides
+/debug/

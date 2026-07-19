@@ -1,5 +1,6 @@
 import { presentationEntryRepository } from "@/server/repositories/app/presentation-entry-repository"
 import { PresentationType } from "@/lib/drizzle/schema/presentation"
+import { PresentationEntryOrigin } from "@/lib/drizzle/schema/presentation-entry"
 import type { Metrics } from "@/schemas/app/metrics-schema"
 
 // Calculado ao vivo por request — sem cache/pré-computação por enquanto.
@@ -8,14 +9,12 @@ import type { Metrics } from "@/schemas/app/metrics-schema"
 // passa a ler o snapshot em vez de agregar na hora.
 export function metricsService() {
   async function get(userId: string): Promise<Metrics> {
-    const entries = await presentationEntryRepository().findTypeAndPromptByUser(userId)
+    const entries = await presentationEntryRepository().findTypeAndOriginByUser(userId)
 
     const total = entries.length
     const multi = entries.filter((e) => e.type === PresentationType.multi).length
     const single = entries.filter((e) => e.type === PresentationType.single).length
-    // prompt vazio = criada em branco (sem passar pela IA) — ver
-    // presentationService().create()/logCustomEntry().
-    const aiGenerated = entries.filter((e) => e.prompt.trim().length > 0).length
+    const aiGenerated = entries.filter((e) => e.origin === PresentationEntryOrigin.prompt).length
 
     return {
       presentations: { total, multi, single },

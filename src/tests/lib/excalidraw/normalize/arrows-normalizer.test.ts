@@ -112,4 +112,39 @@ describe("normalizeArrows", () => {
 
     expect(normalizeArrows([src, dst, a])).toHaveLength(3)
   })
+
+  it("strips a `points` field the AI left despite the prompt forbidding it — the exact growth_line_1 production bug (2026-07-19)", () => {
+    // convertToExcalidrawElements's arrow case spreads `...element` AFTER
+    // setting a default `points`, then recalculates width/height FROM
+    // whatever points survived (getSizeFromPoints) — a malformed points
+    // array silently overwrites otherwise-correct x/y/width/height with NaN.
+    const a = {
+      type: "arrow", id: "growth_line_1", x: undefined, y: undefined, width: undefined, height: undefined,
+      points: [[undefined, undefined], [undefined, undefined], [undefined, undefined], [undefined, undefined]],
+    } as unknown as ExcalidrawElementSkeleton
+
+    const [result] = normalizeArrows([a])
+    const el = result as Record<string, unknown>
+
+    expect(Number.isFinite(el.x)).toBe(true)
+    expect(Number.isFinite(el.y)).toBe(true)
+    expect(Number.isFinite(el.width)).toBe(true)
+    expect(Number.isFinite(el.height)).toBe(true)
+    expect(el.points).toBeUndefined()
+  })
+
+  it("strips `points` even on an already-bound, already-valid arrow", () => {
+    const src = rect("src", 0, 0)
+    const dst = rect("dst", 200, 0)
+    const a = { ...arrow("a1", "src", "dst"), points: [[0, 0], [100, 0]] } as ExcalidrawElementSkeleton
+
+    const [, , result] = normalizeArrows([src, dst, a])
+    expect((result as Record<string, unknown>).points).toBeUndefined()
+  })
+
+  it("does not touch elements with no `points` key at all (zero-copy)", () => {
+    const a = { type: "arrow", id: "a1", x: 10, y: 20, width: 100, height: 0 } as ExcalidrawElementSkeleton
+    const [result] = normalizeArrows([a])
+    expect(result).toBe(a)
+  })
 })

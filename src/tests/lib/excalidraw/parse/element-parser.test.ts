@@ -48,6 +48,28 @@ describe("validateSkeletons", () => {
     const elements = types.map((type, i) => ({ type, id: `el${i}`, x: 0, y: 0 }))
     expect(validateSkeletons(elements)).toHaveLength(types.length)
   })
+
+  it("strips width/height from a free text element (prompt forbids them, convertToExcalidrawElements would silently trust them over the computed metric)", () => {
+    const result = validateSkeletons([
+      { type: "text", id: "t1", x: 0, y: 0, text: "hi", width: 9999, height: 9999 },
+    ])
+    const el = result[0] as Record<string, unknown>
+    expect("width" in el).toBe(false)
+    expect("height" in el).toBe(false)
+  })
+
+  it("does not touch width/height on non-text elements", () => {
+    const result = validateSkeletons([{ type: "rectangle", id: "r1", x: 0, y: 0, width: 100, height: 60 }])
+    const el = result[0] as Record<string, unknown>
+    expect(el.width).toBe(100)
+    expect(el.height).toBe(60)
+  })
+
+  it("leaves a text element without width/height untouched", () => {
+    const el = { type: "text", id: "t1", x: 0, y: 0, text: "hi", strokeColor: "#000000", backgroundColor: "transparent" }
+    const result = validateSkeletons([el])
+    expect(result[0]).toEqual(el)
+  })
 })
 
 describe("parseSkeletons", () => {

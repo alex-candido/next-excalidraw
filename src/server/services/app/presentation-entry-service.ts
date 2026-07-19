@@ -61,6 +61,7 @@ export function presentationEntryService() {
   // engolida: propaga e derruba a criação da presentation também.
   async function logCustomEntry(presentationId: string, input: {
     type: number
+    origin: number
     language: number
     prompt: string
     aspectRatio: number
@@ -77,6 +78,7 @@ export function presentationEntryService() {
       presentationId,
       sourceSuggestionId: input.sourceSuggestionId ?? null,
       type: input.type,
+      origin: input.origin,
       language: input.language,
       prompt: input.prompt,
       aspectRatio: input.aspectRatio,

@@ -121,6 +121,23 @@ export function bindingRepairer() {
       }
     }
 
+    // Pass 6: remove de frame.children qualquer id que não existe em mais
+    // nenhum elemento do slide (id inventado/errado pela IA, ou órfão por
+    // ter sido filtrado/removido em outra etapa). Se sobreviver até
+    // convertToExcalidrawElements, um id não mapeado faz a função LANÇAR
+    // ("Element with X wasn't mapped correctly") — não é NaN, derruba a
+    // conversão inteira do slide. Roda depois do Pass 3 pra considerar
+    // também os ids que ele acabou de adicionar.
+    for (const el of skeletons) {
+      const raw = el as Raw
+      if (raw.type !== "frame") continue
+      const children = childrenOf(raw)
+      const valid = children.filter((childId) => byId.has(childId))
+      if (valid.length !== children.length) {
+        getPatch(raw.id as string).children = valid
+      }
+    }
+
     if (patches.size === 0) return skeletons
 
     return skeletons.map(el => {

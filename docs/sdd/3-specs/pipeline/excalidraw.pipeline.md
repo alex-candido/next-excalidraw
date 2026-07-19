@@ -54,7 +54,9 @@ Função: `elementParser()` retorna `{ parse, validate }`.
 | `.parse(text)` | string bruta do LLM | `ExcalidrawElementSkeleton[]` | agente respondeu texto livre (fallback) |
 | `.validate(raw[])` | array genérico (tool call) | `ExcalidrawElementSkeleton[]` | caminho principal via `slideStructureTool` |
 
-Ambos aplicam `applyFallbacks`: normaliza `\n` em `text`, garante `strokeColor` e `backgroundColor`, e filtra tipos inválidos (aceita: `rectangle | ellipse | diamond | text | arrow | line | frame`).
+Ambos aplicam `applyFallbacks`: normaliza `\n` em `text`, garante `strokeColor` e `backgroundColor`, remove `width`/`height` de `text` livre, e filtra tipos inválidos (aceita: `rectangle | ellipse | diamond | text | arrow | line | frame`).
+
+**`width`/`height` removidos de `text`:** o prompt proíbe (`ELEM_TEXT`: "calculados automaticamente — não forneça"), mas se a IA mandar mesmo assim, `convertToExcalidrawElements` faz `{ width: metrics.width, ...element }` — o spread do skeleton por cima do valor medido sobrescreve em silêncio (mesmo padrão do `points` em `arrows-normalizer.ts`, ver ADR-020/ADR-021). Escopado ao parser (caminho de geração via IA) — o `bulkUpdate` do Studio nunca passa por aqui, então texto editado manualmente não é afetado.
 
 **Interno: `json-repairer.ts`**
 
@@ -71,7 +73,7 @@ Pipeline interno do `.parse(text)`:
 
 ---
 
-### normalize/ — 6 módulos em dois estágios
+### normalize/ — 8 módulos em dois estágios
 
 Orquestrados por `normalizeSkeletons()` (`skeleton-pipeline.ts`):
 
@@ -79,7 +81,9 @@ Orquestrados por `normalizeSkeletons()` (`skeleton-pipeline.ts`):
 validate (parser)
   │
   ├─ Estágio 1 — segurança geométrica (sempre, mesmo sem context)
+  │    → ids       (id-generator — garante id em todo elemento)
   │    → repair    (binding-repairer)
+  │    → bounds    (frame-bounds-resolver — x/y/width/height de frame a partir dos children)
   │    → order     (element-orderer)
   │    → normalize (arrows-normalizer)
   │
@@ -93,6 +97,14 @@ Chamado em **dois** pontos:
 1. `slide-structure-tool.ts` — caminho principal (tool call), **sem** context (a tool não conhece tema/idioma/canvas da Presentation) → só Estágio 1
 2. `slide-workflow.ts`, no fechamento do step, **com** context completo → Estágio 1 + 2, sobre o resultado final (tool ou fallback de texto livre). Reexecutar o Estágio 1 sobre o caminho da tool é redundante mas idempotente; é o único jeito de garantir que o fallback de texto livre (que nunca passa pela tool) também seja normalizado.
 
+#### `id-generator.ts`
+
+Função: `idGenerator()` retorna `{ generate }`.
+
+Primeiro passo do Estágio 1 — garante `id` em todo elemento (`crypto.randomUUID()` quando ausente ou string vazia). `skeleton-serializer.ts` chama `convertToExcalidrawElements(..., { regenerateIds: false })`, então um skeleton sem `id` vira `id: undefined` no elemento final; múltiplos elementos assim colidem no mesmo id (React key, `scene.getElement(id)`, thumbnail). Roda antes do `binding-repairer` pra que o `Map` por id dele já enxergue os ids recém-gerados. Zero-copy quando todo elemento já tem id.
+
+**Bug real (produção):** varredura no banco encontrou um slide com 6 elementos (2 `text`, 4 `arrow`) sem `id` nenhum. Ver ADR-021.
+
 #### `binding-repairer.ts`
 
 Função: `bindingRepairer()` retorna `{ repair }`.
@@ -105,11 +117,25 @@ Pass 2: container com boundElements → garante que cada texto tem containerId c
 Pass 3: elemento com frameId → garante que o frame tem esse id em children
 Pass 4: frame com children → garante que cada filho referenciado tem frameId de volta
 Pass 5: frame que continua sem children depois disso (nenhum filho referenciando) → children: []
+Pass 6: frame.children → remove qualquer id que não existe em mais nenhum elemento
+        do slide (inventado pela IA, ou órfão por outra etapa ter descartado o elemento)
 ```
 
 Retorna skeletons inalterados se não há patches necessários (zero-copy).
 
 **Bug real (produção, 2026-07-19):** um slide de arquitetura (frames "Camada de Apresentação/Negócio/Dados") tinha os elementos filhos com `frameId` apontando certinho pro frame, mas os 3 frames sem `children` nenhum — `convertToExcalidrawElements` espera `children` como array e quebra (`Cannot read properties of undefined (reading 'forEach')`) ao processar um frame sem essa chave, travando a hidratação inteira do Studio pra essa presentation. Pass 3/5 cobrem esse caso.
+
+**Pass 6 — id órfão:** se um id inventado/errado sobrevive em `frame.children` até `convertToExcalidrawElements`, a função **lança** (`Element with X wasn't mapped correctly`) — diferente do caso acima, não é `NaN`/crash silencioso, derruba a conversão do slide inteiro. Roda depois do Pass 3 pra considerar também os ids que ele acabou de adicionar. Ver ADR-021.
+
+#### `frame-bounds-resolver.ts`
+
+Função: `frameBoundsResolver()` retorna `{ resolve }`.
+
+Calcula `x`/`y`/`width`/`height` de todo `frame` como a bounding box união dos rects de seus `children` (já resolvidos) + margem de 10px — exatamente o que o prompt promete (`ELEM_FRAME`: "Coordenadas calculadas pelos children com margem de 10px"), mas que nada implementava. **Sempre** recalcula, mesmo quando a IA já forneceu `x`/`y`/`width`/`height` — nunca confia no valor fornecido (mesma lógica do `points` em `arrows-normalizer.ts`). Frame sem `children` resolvíveis cai num rect fallback fixo (`x:0,y:0,width:100,height:100`) só se a geometria já não for finita; se já for finita, mantém intocado.
+
+**Por quê é necessário:** diferente de shape/arrow, o caso `"frame"` de `convertToExcalidrawElements` **não tem nenhum fallback** de bounds (nem o `||` que os outros elementos têm) — um frame sem `x`/`y`/`width`/`height` vira `NaN` puro. Roda logo depois do `binding-repairer` (que já garantiu `children` só com ids reais do slide).
+
+**Bug real (produção):** frame `comparison_matrix` (slide `bd5dc8a4-ab3f-45a2-8191-3169a115a9d3`) sem `id`/`x`/`y`/`width`/`height`, apesar de 8 `children` reais e válidos. Ver ADR-021.
 
 #### `element-orderer.ts`
 
@@ -144,6 +170,8 @@ Para cada arrow/line:
 ```
 
 **Nunca** devolve uma seta com `x`/`y`/`width`/`height` não-finitos — encontrado em produção (2026-07-18): a IA gerou uma seta com `start.id` mas sem `end`, que antes desse fix passava intocada e virava `NaN` na hora de renderizar (SVG preview e editor). Ver ADR-014.
+
+Também **sempre remove `points`** de qualquer arrow/line, mesmo quando o resto do elemento já está correto — o prompt proíbe a IA de mandar esse campo (ver ELEM_ARROW), mas ela às vezes manda mesmo assim, com coordenadas ausentes/`undefined`. Se sobrar, `convertToExcalidrawElements` dá prioridade a `points` sobre o `x`/`y`/`width`/`height` que a gente calculou (recalcula via `getSizeFromPoints`), reintroduzindo `NaN` mesmo depois do fix acima. Encontrado em produção (2026-07-19), sistêmico — 26 de 36 slides existentes no banco tinham esse campo. Ver ADR-020.
 
 #### `theme-applicator.ts`
 

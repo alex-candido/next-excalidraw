@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "crypto"
-import { db } from "@/lib/drizzle"
+import { db, type DbClient } from "@/lib/drizzle"
 import { presentationRepository } from "@/server/repositories/app/presentation-repository"
 import { presentationFavoriteRepository } from "@/server/repositories/app/presentation-favorite-repository"
 import { outlineRepository } from "@/server/repositories/app/outline-repository"
@@ -8,10 +8,43 @@ import { presentationEntryService } from "@/server/services/app/presentation-ent
 import { storageService } from "@/server/services/storage-service"
 import { PresentationStatus, PresentationType } from "@/lib/drizzle/schema/presentation"
 import { StorageRecordType } from "@/lib/drizzle/schema/storage-attachment"
+import { PresentationEntryOrigin } from "@/lib/drizzle/schema/presentation-entry"
+import { OutlineType, OutlineRepresentation } from "@/lib/drizzle/schema/outline"
+import { SlideStatus } from "@/lib/drizzle/schema/slide"
 import type { PresentationCreate } from "@/schemas/app/presentation-schema"
 
 function generateCode() {
   return randomBytes(4).toString("hex")
+}
+
+// Presentation origin=blank (ver app-start-new-modal.tsx) nunca dispara
+// geração via IA — sem isso, ficava presa pra sempre com 0 outlines/slides
+// (bug real, presentation 88d0580b-f659-4aa5-a352-f227b83b5ca7). Sempre
+// nasce com a estrutura mínima obrigatória (capa + conteúdo + encerramento),
+// os 3 vazios, prontos pro usuário preencher direto no Studio — mesmo padrão
+// de campos vazios usado em createManual (slide-service.ts).
+async function seedBlankStructure(presentationId: string, tx: DbClient) {
+  const outlines = await outlineRepository().createMany(
+    [
+      { presentationId, order: 0, type: OutlineType.cover,   title: "", representation: OutlineRepresentation.auto },
+      { presentationId, order: 1, type: OutlineType.content, title: "", representation: OutlineRepresentation.auto },
+      { presentationId, order: 2, type: OutlineType.closing, title: "", representation: OutlineRepresentation.auto },
+    ],
+    tx,
+  )
+
+  await slideRepository().createMany(
+    outlines.map((o, i) => ({
+      presentationId,
+      outlineId: o.id,
+      order: i,
+      elements: [],
+      appState: {},
+      files: {},
+      status: SlideStatus.active,
+    })),
+    tx,
+  )
 }
 
 export type PresentationListTab = "all" | "recent" | "multi" | "single" | "favorites" | "trash"
@@ -71,6 +104,7 @@ export function presentationService() {
       // pula a criação da entry em si.
       await presentationEntryService().logCustomEntry(row.id, {
         type: input.type,
+        origin: input.origin,
         language: input.language,
         prompt: input.userPrompt ?? "",
         aspectRatio: input.aspectRatio,
@@ -82,6 +116,14 @@ export function presentationService() {
         keywords: input.keywords,
         sourceSuggestionId: input.sourceSuggestionId,
       }, tx)
+
+      // origin=blank = fluxo sem IA (app-start-new-modal.tsx nunca chama
+      // generateOutline() depois). Distingue do fluxo com prompt real, que
+      // dispara a geração logo em seguida via client e não precisa de
+      // nenhuma estrutura pré-criada.
+      if (input.origin === PresentationEntryOrigin.blank) {
+        await seedBlankStructure(row.id, tx)
+      }
 
       return { presentationId: row.id, type: input.type }
     })
@@ -199,6 +241,7 @@ export function presentationService() {
 
       await presentationEntryService().logCustomEntry(cloned.id, {
         type:        source.entry.type,
+        origin:      source.entry.origin,
         language:    source.entry.language,
         prompt:      source.entry.prompt,
         aspectRatio: source.entry.aspectRatio,

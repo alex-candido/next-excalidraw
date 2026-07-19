@@ -1,5 +1,7 @@
 import type { ExcalidrawElementSkeleton } from "@excalidraw/excalidraw/data/transform"
+import { idGenerator } from "@/lib/excalidraw/normalize/id-generator"
 import { bindingRepairer } from "@/lib/excalidraw/normalize/binding-repairer"
+import { frameBoundsResolver } from "@/lib/excalidraw/normalize/frame-bounds-resolver"
 import { elementOrderer } from "@/lib/excalidraw/normalize/element-orderer"
 import { arrowNormalizer } from "@/lib/excalidraw/normalize/arrows-normalizer"
 import { themeApplicator } from "@/lib/excalidraw/normalize/theme-applicator"
@@ -16,10 +18,12 @@ export type SkeletonEnrichmentContext = {
 
 // Único ponto de orquestração dos módulos de normalize/. Dois estágios:
 //
-// 1. Segurança geométrica (sempre) — repair (containerId/boundElements) →
-//    order (z-order) → arrows (x/y/width/height de setas vinculadas). Não
-//    depende de nada externo à Presentation — roda sempre, mesmo sem saber
-//    tema/idioma/canvas (ex: dentro da tool, que só recebe `elements`).
+// 1. Segurança geométrica (sempre) — ids (garante id em todo elemento) →
+//    repair (containerId/boundElements/frame.children) → frame-bounds (x/y/
+//    width/height de frame a partir dos children) → order (z-order) →
+//    arrows (x/y/width/height de setas vinculadas). Não depende de nada
+//    externo à Presentation — roda sempre, mesmo sem saber tema/idioma/
+//    canvas (ex: dentro da tool, que só recebe `elements`).
 // 2. Enriquecimento (opcional, requer `context`) — theme (cor por role/
 //    fillStyle) → text-wrap (quebra de texto livre) → grid-snap (múltiplos
 //    de 20px). Só roda quando o chamador passa o contexto resolvido da
@@ -28,8 +32,10 @@ export function normalizeSkeletons(
   skeletons: ExcalidrawElementSkeleton[],
   context?:  SkeletonEnrichmentContext,
 ): ExcalidrawElementSkeleton[] {
-  const repaired = bindingRepairer().repair(skeletons)
-  const ordered = elementOrderer().order(repaired)
+  const withIds = idGenerator().generate(skeletons)
+  const repaired = bindingRepairer().repair(withIds)
+  const framed = frameBoundsResolver().resolve(repaired)
+  const ordered = elementOrderer().order(framed)
   const withArrows = arrowNormalizer().normalize(ordered)
 
   if (!context) return withArrows
