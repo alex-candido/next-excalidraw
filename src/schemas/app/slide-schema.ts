@@ -18,7 +18,7 @@ export const CANVAS_DIMENSIONS: Record<number, { width: number; height: number; 
 
 export const slideWorkflowInputSchema = z.object({
   outlineId:      z.string(),
-  order:          z.number().int().min(1),
+  order:          z.number().int().min(0),
   type:           z.enum(OUTLINE_TYPES),
   title:          z.string(),
   description:    z.string(),
@@ -68,9 +68,10 @@ export const slideBulkUpdateItemSchema = z.object({
   order:    z.number().int(),
   elements: z.array(z.record(z.string(), z.unknown())),
   appState: z.record(z.string(), z.unknown()).default({}),
-  // Só o slide de capa manda isso — SVG (exportToSvg, serializado em texto)
-  // do próprio slide, calculado no client no mesmo save que persiste
-  // `elements`, nunca separado (evita o campo dessincronizar do conteúdo real).
+  // SVG (exportToSvg, serializado em texto) do próprio slide, calculado no
+  // client no mesmo save que persiste `elements`, nunca separado (evita o
+  // campo dessincronizar do conteúdo real). Omitido quando o slide não
+  // mudou desde o último cálculo (ver use-app-studio-save.ts).
   thumbnail: z.string().optional(),
 })
 
@@ -84,9 +85,9 @@ export const slideBulkUpdateSchema = z.object({
   deletedIds: z.array(z.string().uuid()).optional(),
 })
 
-// Endpoint dedicado, separado do bulkUpdate — cobre o caso de já existir
-// capa sem thumbnail e o usuário nunca ter clicado em "Salvar" (elements não
-// mudou, só falta preencher o campo). Ver use-app-studio-hydration.ts.
+// Endpoint dedicado, separado do bulkUpdate — cobre o caso de um slide já
+// existir sem thumbnail e o usuário nunca ter clicado em "Salvar" (elements
+// não mudou, só falta preencher o campo). Ver use-app-studio-hydration.ts.
 export const slideThumbnailUpdateSchema = z.object({
   thumbnail: z.string().min(1),
 })

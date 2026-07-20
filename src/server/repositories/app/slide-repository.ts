@@ -58,8 +58,9 @@ export function slideRepository() {
     let count = 0
     for (const item of items) {
       const data: SlideUpdate = { order: item.order, elements: item.elements, appState: item.appState }
-      // Só a capa manda thumbnail (o SVG calculado no mesmo save) — os demais
-      // itens do lote não têm essa chave, então não sobrescreve com undefined.
+      // Item só manda thumbnail se o slide realmente mudou desde o último
+      // cálculo (ver use-app-studio-save.ts) — sem essa chave não sobrescreve
+      // a existente com undefined.
       if (item.thumbnail !== undefined) data.thumbnail = item.thumbnail
       await db.update(slide).set(data).where(eq(slide.id, item.id))
       count++

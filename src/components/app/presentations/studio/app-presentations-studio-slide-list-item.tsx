@@ -74,15 +74,19 @@ export function AppPresentationsStudioSlideListItem({
   const familyStyle = meta ? FAMILY_STYLE[meta.family] : undefined;
   const isContent = outlineType === undefined || outlineType === OutlineType.content;
 
-  const thumbnailContent = previewElements.length > 0 ? (
-    <AppPresentationsStudioSlidePreview elements={previewElements} />
-  ) : thumbnail ? (
+  // Prioriza a thumbnail armazenada (persistida no Save/geração, ver
+  // refreshSlideThumbnail em app-studio-store.ts) — só cai pro render ao vivo
+  // (exportToSvg, mais caro) na janela transitória em que o slide já tem
+  // elements mas ainda não teve nenhuma thumbnail calculada.
+  const thumbnailContent = thumbnail ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={resolveThumbnailSrc(thumbnail)}
       alt={title}
       className="app-presentations-studio-slide-list-item-thumbnail-image size-full object-cover"
     />
+  ) : previewElements.length > 0 ? (
+    <AppPresentationsStudioSlidePreview elements={previewElements} />
   ) : null;
 
   const menu = (

@@ -6,23 +6,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAppPresentation, appPresentationKeys } from "@/hooks/app/use-app-presentation";
 import { useAppGeneration } from "@/hooks/app/use-app-generation";
 import { useAppSlide } from "@/hooks/app/use-app-slide";
-import { computeCoverThumbnail } from "@/hooks/app/studio/use-app-studio-save";
 import { slideActions } from "@/actions/app/app-slide-actions";
 import { OutlineType } from "@/lib/drizzle/schema/outline";
 import { SlideStatus } from "@/lib/drizzle/schema/slide";
+import { renderSvgThumbnail } from "@/lib/excalidraw/serialize/svg-thumbnail";
 import type { GenerationStatusSummary } from "@/schemas/app/generation-schema";
 import {
   type AppPresentationsStudioScene,
-  type AppPresentationsStudioSlide,
   useStudioStore,
 } from "@/store/app-studio-store";
 
 const POLL_INTERVAL_MS = 3000;
-
-function findCoverSlide(slides: AppPresentationsStudioSlide[], outlines: { id: string; type: number }[] | undefined) {
-  const outlineTypeById = new Map(outlines?.map((o) => [o.id, o.type]) ?? []);
-  return slides.find((s) => !s.isLocal && s.outlineId && outlineTypeById.get(s.outlineId) === OutlineType.cover);
-}
 
 export function useAppStudioHydration(presentationId: string) {
   const { useDetail } = useAppPresentation();
@@ -33,6 +27,7 @@ export function useAppStudioHydration(presentationId: string) {
   const resetForPresentation = useStudioStore((s) => s.resetForPresentation);
   const hydrate = useStudioStore((s) => s.hydrate);
   const setStoreHasHydrated = useStudioStore((s) => s.setHasHydrated);
+  const setSlideThumbnail = useStudioStore((s) => s.setSlideThumbnail);
 
   // Estado local (não o da store) só controla quando parar de dar poll —
   // separado do `hasHydrated` da store (que é o que a UI lê pra saber se a
@@ -130,18 +125,29 @@ export function useAppStudioHydration(presentationId: string) {
     setHasHydrated(true);
     setStoreHasHydrated(true);
 
-    // Cobre o caso de o usuário nunca clicar em "Salvar" (só olhar o Studio e
-    // ir direto pra Apresentar, por exemplo) — sem isso a capa nunca seria
-    // gerada. Só dispara se a capa ainda não tiver thumbnail (não repete a
-    // cada vez que o Studio é aberto).
-    const coverSlide = findCoverSlide(hydratedBatch, presentation?.outlines);
-    if (coverSlide && !coverSlide.thumbnail && coverSlide.scene.elements.length > 0) {
-      computeCoverThumbnail(coverSlide.scene.elements, coverSlide.scene.appState)
-        .then((thumbnail) => slideActions().setThumbnail(presentationId, coverSlide.id, { thumbnail }))
-        .then(() => queryClient.invalidateQueries({ queryKey: appPresentationKeys.all }))
-        .catch((err) => console.warn("Falha ao gerar thumbnail da capa:", err));
+    // Slide recém-gerado pela IA nunca teve thumbnail calculada ainda (só
+    // ganha uma quando o usuário troca de slide/salva no Studio, ver
+    // refreshSlideThumbnail em app-studio-store.ts) — sem isso, quem nunca
+    // clicar em "Salvar" (ex: vai direto pra Apresentar) veria a sidebar e o
+    // card da presentation (capa) sempre em branco. Calcula 1x por slide,
+    // aqui na conclusão da hidratação, nunca de novo depois.
+    const slidesMissingThumbnail = hydratedBatch.filter((s) => !s.thumbnail && s.scene.elements.length > 0);
+    for (const slide of slidesMissingThumbnail) {
+      renderSvgThumbnail(slide.scene.elements, slide.scene.appState)
+        .then((thumbnail) => {
+          setSlideThumbnail(slide.id, thumbnail);
+          return slideActions().setThumbnail(presentationId, slide.id, { thumbnail });
+        })
+        .then(() => {
+          // Card da listagem/detail de presentations lê a thumbnail da capa —
+          // só essa mudança precisa invalidar aquela query.
+          if (slide.outlineType === OutlineType.cover) {
+            queryClient.invalidateQueries({ queryKey: appPresentationKeys.all });
+          }
+        })
+        .catch((err) => console.warn("Falha ao gerar thumbnail do slide:", err));
     }
-  }, [rawSlides, isSerializerReady, hasHydrated, expectedSlideCount, presentation, hydrate, setStoreHasHydrated, presentationId, queryClient, slideGeneration]);
+  }, [rawSlides, isSerializerReady, hasHydrated, expectedSlideCount, presentation, hydrate, setStoreHasHydrated, setSlideThumbnail, presentationId, queryClient, slideGeneration]);
 
   return {
     presentation,

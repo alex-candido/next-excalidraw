@@ -10,12 +10,13 @@ interface AppPresentationsStudioSlidePreviewProps {
   className?: string;
 }
 
-// Prévia ao vivo (não imagem persistida/salva) — recalcula a cada edição do
-// slide ativo, igual antes. A diferença: o resultado do exportToSvg é
-// serializado e vira o `src` de uma única <img> (mesmo encoding da capa
-// persistida, ver lib/utils/thumbnail.ts), em vez de uma árvore inteira de
-// nós <svg> sendo desmontada/remontada no DOM a cada tick — mais barato pro
-// DOM/reflow com a mesma frequência de atualização. Ver docs/sdd/1-product/pm/decisions.md.
+// Fallback ao vivo (não imagem persistida) — só é montado enquanto o slide
+// ainda não tem `thumbnail` calculada (ver app-presentations-studio-slide-
+// list-item.tsx), nunca durante edição normal: recalcular a cada onChange era
+// o que causava lentidão na página, então a sidebar hoje prioriza a
+// thumbnail armazenada (refreshSlideThumbnail em app-studio-store.ts). O
+// resultado do exportToSvg é serializado e vira o `src` de uma única <img>
+// (mesmo encoding da thumbnail persistida, ver lib/utils/thumbnail.ts).
 export function AppPresentationsStudioSlidePreview({ elements, className }: AppPresentationsStudioSlidePreviewProps) {
   const [src, setSrc] = useState<string | null>(null);
 

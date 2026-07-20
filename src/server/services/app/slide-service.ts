@@ -73,7 +73,8 @@ export function slideService() {
         })
 
         results.push({ id: slide.id, order: slide.order, outlineId: slide.outlineId })
-      } catch {
+      } catch (err) {
+        console.error(`slideService().generate: falha ao gerar slide do outline ${item.outlineId} (order=${index})`, err)
         await generationRepository().update(gen.id, {
           status:      GenerationStatus.failed,
           completedAt: new Date(),
@@ -172,8 +173,8 @@ export function slideService() {
   // save — antes disso ele só existe local (isLocal no Zustand). Todo slide
   // precisa de um outline (FK obrigatória), então cria os dois juntos: o
   // primeiro outline que a presentation ganhar (do zero ou nesta mesma leva)
-  // é sempre type=cover, os seguintes são content — mesma regra usada em
-  // qualquer presentation (ver findCoverSlide no client).
+  // é sempre type=cover, os seguintes são content — mesma regra de posição
+  // usada em qualquer presentation (ver deriveSlideTypes no client).
   async function createManual(presentationId: string, userId: string, input: SlideManualCreate["slides"]) {
     const presentation = await presentationRepository().findById(presentationId)
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })

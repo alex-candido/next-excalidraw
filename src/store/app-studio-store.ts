@@ -4,6 +4,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { useShallow } from "zustand/react/shallow";
 import { createAppStore } from "@/lib/zustand";
 import { OutlineType } from "@/lib/drizzle/schema/outline";
+import { renderSvgThumbnail } from "@/lib/excalidraw/serialize/svg-thumbnail";
 
 export interface AppPresentationsStudioScene {
   type: "excalidraw";
@@ -73,13 +74,6 @@ interface StudioStoreState {
   activePanel: StudioPanelKey | null;
   hasHydrated: boolean;
   excalidrawApi: ExcalidrawImperativeAPI | null;
-  // Elements do slide ativo, atualizado ao vivo pelo onChange do Excalidraw
-  // (throttled) — só existe pra alimentar a prévia da sidebar em tempo real,
-  // sem precisar tocar o array `slides` inteiro a cada edição (isso re-
-  // renderizaria a lista inteira várias vezes por segundo). null enquanto
-  // não houver nenhuma edição ainda nesta troca de slide — nesse caso o
-  // consumidor cai pro scene.elements já capturado.
-  liveActiveElements: readonly ExcalidrawElement[] | null;
   // Slides removidos localmente (onDeleteSlide) que já existiam no banco —
   // só pra mandar no próximo Save (ver use-app-studio-save.ts). Nunca inclui
   // slide isLocal (nunca existiu no banco, não tem o que apagar lá).
@@ -95,7 +89,11 @@ interface StudioStoreState {
 
   registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
   captureActiveSlideElements: () => void;
-  setLiveActiveElements: (elements: readonly ExcalidrawElement[] | null) => void;
+  setSlideThumbnail: (id: string, thumbnail: string) => void;
+  // Recalcula e guarda a thumbnail (SVG) do slide em memória — só chamado
+  // quando o slide é "fechado" (troca de slide ativo) ou no Save, nunca a
+  // cada edição (era isso que causava lentidão: recalcular a cada onChange).
+  refreshSlideThumbnail: (id: string) => Promise<void>;
   onSelectSlide: (id: string) => void;
   onAddSlide: () => void;
   onDuplicateSlide: (id: string) => void;
@@ -118,7 +116,6 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   activePanel: null,
   hasHydrated: false,
   excalidrawApi: null,
-  liveActiveElements: null,
   deletedSlideIds: new Set(),
 
   resetForPresentation: (presentationId) => {
@@ -131,7 +128,6 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       activePanel: null,
       hasHydrated: false,
       excalidrawApi: null,
-      liveActiveElements: null,
       deletedSlideIds: new Set(),
     });
   },
@@ -197,12 +193,31 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
     }));
   },
 
-  setLiveActiveElements: (elements) => set({ liveActiveElements: elements }),
+  setSlideThumbnail: (id, thumbnail) =>
+    set((state) => ({
+      slides: state.slides.map((slide) => (slide.id === id ? { ...slide, thumbnail } : slide)),
+    })),
+
+  refreshSlideThumbnail: async (id) => {
+    const slide = get().slides.find((s) => s.id === id);
+    if (!slide || slide.scene.elements.length === 0) return;
+    try {
+      const thumbnail = await renderSvgThumbnail(slide.scene.elements, slide.scene.appState);
+      get().setSlideThumbnail(id, thumbnail);
+    } catch (err) {
+      console.warn("Falha ao gerar thumbnail do slide:", err);
+    }
+  },
 
   onSelectSlide: (id) => {
-    if (id === get().activeSlideId) return;
+    const { activeSlideId } = get();
+    if (id === activeSlideId) return;
     get().captureActiveSlideElements();
-    set({ activeSlideId: id, liveActiveElements: null });
+    set({ activeSlideId: id });
+    // Slide que está sendo deixado acabou de ter scene.elements atualizado
+    // (captureActiveSlideElements acima) — agora sim é hora de recalcular a
+    // thumbnail dele, não durante a edição.
+    void get().refreshSlideThumbnail(activeSlideId);
   },
 
   // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só
@@ -317,17 +332,13 @@ export function useStudioCanDelete() {
   return useStudioStore((s) => s.slides.length > MIN_SLIDES);
 }
 
-// Elements pra prévia de UM slide da sidebar — se for o ativo e já tiver
-// edição ao vivo (liveActiveElements), usa ela; senão cai pro scene.elements
-// já capturado (slides inativos nunca mudam enquanto outro está sendo
-// editado, então não precisam de nada "ao vivo").
+// Elements pra prévia de UM slide da sidebar — fallback pro
+// AppPresentationsStudioSlidePreview (render ao vivo) enquanto o slide ainda
+// não tem `thumbnail` calculada (ver refreshSlideThumbnail/onSelectSlide).
+// Nunca reage a edição em tempo real: scene.elements só muda em
+// captureActiveSlideElements (troca de slide/save), não a cada onChange.
 export function useStudioSlidePreviewElements(slideId: string) {
-  return useStudioStore((s) => {
-    const slide = s.slides.find((sl) => sl.id === slideId);
-    if (!slide) return [];
-    if (slideId === s.activeSlideId && s.liveActiveElements) return s.liveActiveElements;
-    return slide.scene.elements;
-  });
+  return useStudioStore((s) => s.slides.find((sl) => sl.id === slideId)?.scene.elements ?? []);
 }
 
 // Ações são referências estáveis (definidas 1x na criação do store), mas o
@@ -337,7 +348,6 @@ export function useStudioActions() {
   return useStudioStore(
     useShallow((s) => ({
       registerExcalidrawApi: s.registerExcalidrawApi,
-      setLiveActiveElements: s.setLiveActiveElements,
       onSelectSlide: s.onSelectSlide,
       onAddSlide: s.onAddSlide,
       onDuplicateSlide: s.onDuplicateSlide,
