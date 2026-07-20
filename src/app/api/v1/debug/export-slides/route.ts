@@ -7,7 +7,7 @@ import path from "path"
 // jsPDF no client) sem depender de screenshot manual do usuário. Nunca deve
 // existir em produção: escreve direto no filesystem do processo, sem
 // autenticação/rate-limit — não é uma feature de produto (ver
-// app-presentations-studio-actions.tsx, botão "Exportar (debug)"). Ver docs/adr.md.
+// app-presentations-studio-header.tsx, botão "Exportar (debug)"). Ver docs/adr.md.
 const PRESENTATION_ID_PATTERN = /^[0-9a-f-]{36}$/i
 
 export async function POST(req: NextRequest) {

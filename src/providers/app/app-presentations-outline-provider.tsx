@@ -10,6 +10,7 @@ import { useOutlineIsGenerating } from "@/store/app-outline-store";
 
 export {
   useOutlineActions,
+  useOutlineCanDelete,
   useOutlineCard,
   useOutlineIsGenerating,
   useOutlineIsRegeneratingAll,

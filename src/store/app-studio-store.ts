@@ -23,14 +23,15 @@ export interface AppPresentationsStudioSlide {
   scene: AppPresentationsStudioScene;
   isLocal?: boolean;
   outlineId?: string;
-  // Mesmo campo do Outline (outline.type) — precisa estar no slide pra
-  // aplicar a mesma trava de posição (cover/closing fixos) aqui no Studio.
-  // undefined pra slide local ainda sem outline (onAddSlide) — tratado como
-  // "content" nos guards abaixo.
+  // Mesmo campo do Outline (outline.type), mas sempre derivado da posição no
+  // array (ver deriveSlideTypes) — nunca lido/escrito diretamente fora dela.
   outlineType?: number;
+  // Vem do outline pareado (outline.representation), só pra exibir o ícone
+  // na slide list — nunca editado aqui (representação só muda no Outline).
+  representation?: number;
 }
 
-export type StudioPanelKey = "settings" | "source" | "history";
+export type StudioPanelKey = "settings" | "templates" | "assistant" | "source" | "history";
 
 export function buildEmptyScene(): AppPresentationsStudioScene {
   return {
@@ -50,6 +51,20 @@ const EMPTY_SLIDE: AppPresentationsStudioSlide = {
   scene: buildEmptyScene(),
 };
 
+// Mesma regra do Outline (ver MIN_OUTLINES/deriveTypes em app-outline-store.ts):
+// outlineType não é mais fixo por item, é derivado da posição a cada
+// reorder/add/delete/hydrate. Único limite que resta: nunca menos que
+// MIN_SLIDES (garante 1 capa + 1 conteúdo + 1 encerramento sempre existindo).
+export const MIN_SLIDES = 3;
+
+function deriveSlideTypes(slides: AppPresentationsStudioSlide[]): AppPresentationsStudioSlide[] {
+  return slides.map((slide, index) => ({
+    ...slide,
+    order: index,
+    outlineType: index === 0 ? OutlineType.cover : index === slides.length - 1 ? OutlineType.closing : OutlineType.content,
+  }));
+}
+
 interface StudioStoreState {
   presentationId: string;
   slides: AppPresentationsStudioSlide[];
@@ -65,12 +80,17 @@ interface StudioStoreState {
   // não houver nenhuma edição ainda nesta troca de slide — nesse caso o
   // consumidor cai pro scene.elements já capturado.
   liveActiveElements: readonly ExcalidrawElement[] | null;
+  // Slides removidos localmente (onDeleteSlide) que já existiam no banco —
+  // só pra mandar no próximo Save (ver use-app-studio-save.ts). Nunca inclui
+  // slide isLocal (nunca existiu no banco, não tem o que apagar lá).
+  deletedSlideIds: Set<string>;
 
   // Chamadas pelo provider (orquestração com react-query), não por consumidor de UI.
   resetForPresentation: (presentationId: string) => void;
   hydrate: (slides: AppPresentationsStudioSlide[]) => void;
   setHasHydrated: (value: boolean) => void;
   setIsSaving: (isSaving: boolean) => void;
+  clearDeletedSlideIds: () => void;
   reconcileCreatedSlides: (created: { tempId: string; id: string; outlineId: string; type: number }[]) => void;
 
   registerExcalidrawApi: (api: ExcalidrawImperativeAPI | null) => void;
@@ -99,6 +119,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   hasHydrated: false,
   excalidrawApi: null,
   liveActiveElements: null,
+  deletedSlideIds: new Set(),
 
   resetForPresentation: (presentationId) => {
     if (get().presentationId === presentationId) return;
@@ -111,6 +132,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       hasHydrated: false,
       excalidrawApi: null,
       liveActiveElements: null,
+      deletedSlideIds: new Set(),
     });
   },
 
@@ -130,7 +152,7 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
 
       const merged = [...state.slides, ...toAdd].sort((a, b) => a.order - b.order);
       return {
-        slides: merged,
+        slides: deriveSlideTypes(merged),
         activeSlideId: state.activeSlideId || merged[0]?.id || "",
       };
     }),
@@ -144,19 +166,18 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
   // id real do banco, sem mexer em mais nada do slide (elements/scene já
   // continuam os mesmos). activeSlideId também precisa acompanhar a troca,
   // senão fica apontando pra um id que não existe mais em lugar nenhum.
-  // `type` também vem do servidor aqui (não do onAddSlide) — é ele quem
-  // decide cover vs. content (primeiro slide da presentation vira cover,
-  // ver slide-service.ts createManual), então outlineType local (sempre
-  // "content" até aqui) precisa ser corrigido pra travar a posição certo.
+  // outlineType não depende mais do que o servidor decidiu — deriveSlideTypes
+  // recalcula pela posição atual do array, que já estava certa desde o
+  // onAddSlide (inserido antes do encerramento).
   reconcileCreatedSlides: (created) => {
     if (created.length === 0) return;
     const byTempId = new Map(created.map((c) => [c.tempId, c]));
     set((state) => ({
-      slides: state.slides.map((slide) => {
+      slides: deriveSlideTypes(state.slides.map((slide) => {
         const match = byTempId.get(slide.id);
         if (!match) return slide;
-        return { ...slide, id: match.id, outlineId: match.outlineId, outlineType: match.type, isLocal: false };
-      }),
+        return { ...slide, id: match.id, outlineId: match.outlineId, isLocal: false };
+      })),
       activeSlideId: byTempId.get(state.activeSlideId)?.id ?? state.activeSlideId,
     }));
   },
@@ -186,9 +207,9 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
 
   // Sem suporte no backend ainda pra inserir/remover/reordenar slide — fica só
   // local (mesmo tratamento combinado pro outline). Ver pm.md Backlog.
-  // Insere antes do encerramento (se existir) — mesma regra do onAdd do
-  // outline, senão "Adicionar slide" com um closing já na lista quebraria a
-  // estrutura abertura→conteúdo→encerramento.
+  // Insere antes do encerramento (se existir) — senão "Adicionar slide"
+  // nasceria depois do item que vai virar encerramento. outlineType real
+  // vem do deriveSlideTypes, não precisa fixar na mão.
   onAddSlide: () =>
     set((state) => {
       const closingIndex = state.slides.findIndex((slide) => slide.outlineType === OutlineType.closing);
@@ -199,56 +220,35 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
         title: "Novo slide",
         scene: buildEmptyScene(),
         isLocal: true,
-        outlineType: OutlineType.content,
       };
       const next = [...state.slides.slice(0, insertAt), newSlide, ...state.slides.slice(insertAt)];
-      return { slides: next.map((slide, i) => ({ ...slide, order: i })) };
+      return { slides: deriveSlideTypes(next) };
     }),
 
   onDuplicateSlide: (id) =>
     set((state) => {
       const index = state.slides.findIndex((slide) => slide.id === id);
       if (index === -1) return state;
-      // Duplicata de cover/closing é sempre "content" — só pode haver uma
-      // capa e um encerramento (mesma trava de posição abaixo depende disso).
-      const duplicate = {
-        ...state.slides[index],
-        id: crypto.randomUUID(),
-        isLocal: true,
-        outlineType: OutlineType.content,
-      };
+      const duplicate = { ...state.slides[index], id: crypto.randomUUID(), isLocal: true };
       return {
-        slides: [
+        slides: deriveSlideTypes([
           ...state.slides.slice(0, index + 1),
           duplicate,
           ...state.slides.slice(index + 1),
-        ].map((slide, i) => ({ ...slide, order: i })),
+        ]),
       };
     }),
 
-  // cover/closing têm posição fixa (primeiro/último) — mesma trava do
-  // Outline (ver app-outline-store.ts:onReorder), agora replicada aqui pra
-  // não ser possível embaralhar a estrutura só porque se está no Studio.
+  // Reorder é sempre livre — não existe mais slide travado por posição.
+  // outlineType é recalculado pra todo mundo depois (ver deriveSlideTypes):
+  // quem cair na posição 0/última vira a capa/encerramento nova.
   onReorderSlides: (activeId, overId) =>
     set((state) => {
       const oldIndex = state.slides.findIndex((slide) => slide.id === activeId);
       const newIndex = state.slides.findIndex((slide) => slide.id === overId);
       if (oldIndex === -1 || newIndex === -1) return state;
 
-      const active = state.slides[oldIndex];
-      if (active.outlineType === OutlineType.cover || active.outlineType === OutlineType.closing) return state;
-
-      const firstIsCover = state.slides[0]?.outlineType === OutlineType.cover;
-      const lastIsClosing = state.slides[state.slides.length - 1]?.outlineType === OutlineType.closing;
-      if (firstIsCover && newIndex === 0) return state;
-      if (lastIsClosing && newIndex === state.slides.length - 1) return state;
-
-      return {
-        slides: arrayMove(state.slides, oldIndex, newIndex).map((slide, index) => ({
-          ...slide,
-          order: index,
-        })),
-      };
+      return { slides: deriveSlideTypes(arrayMove(state.slides, oldIndex, newIndex)) };
     }),
 
   onToggleHiddenSlide: (id) =>
@@ -256,17 +256,25 @@ export const useStudioStore = createAppStore<StudioStoreState>("studio", (set, g
       slides: state.slides.map((slide) => (slide.id === id ? { ...slide, isHidden: !slide.isHidden } : slide)),
     })),
 
+  // Única regra que resta: nunca menos que MIN_SLIDES (garante 1 capa + 1
+  // conteúdo + 1 encerramento sempre existindo) — não importa mais qual
+  // slide está sendo apagado, cover/closing incluídos.
   onDeleteSlide: (id) => {
-    const { slides, activeSlideId } = get();
-    if (slides.length <= 1) return;
+    const { slides, activeSlideId, deletedSlideIds } = get();
+    if (slides.length <= MIN_SLIDES) return;
     const target = slides.find((slide) => slide.id === id);
-    if (target?.outlineType === OutlineType.cover || target?.outlineType === OutlineType.closing) return;
-    const remaining = slides.filter((slide) => slide.id !== id).map((slide, i) => ({ ...slide, order: i }));
+    const remaining = deriveSlideTypes(slides.filter((slide) => slide.id !== id));
     const nextActiveId = id === activeSlideId
       ? (slides.find((slide) => slide.id !== id)?.id ?? "")
       : activeSlideId;
-    set({ slides: remaining, activeSlideId: nextActiveId });
+    // isLocal nunca existiu no banco — nada a marcar pra apagar no Save.
+    const nextDeletedIds = target && !target.isLocal
+      ? new Set(deletedSlideIds).add(id)
+      : deletedSlideIds;
+    set({ slides: remaining, activeSlideId: nextActiveId, deletedSlideIds: nextDeletedIds });
   },
+
+  clearDeletedSlideIds: () => set({ deletedSlideIds: new Set() }),
 
   onOpenPanel: (panel) => set((state) => ({ activePanel: state.activePanel === panel ? null : panel })),
 
@@ -301,6 +309,12 @@ export function useStudioActivePanel() {
 
 export function useStudioIsWaitingSlides() {
   return useStudioStore((s) => !s.hasHydrated);
+}
+
+// Regra é sempre a mesma pra todo mundo (não é por item) — um hook só, os
+// itens da slide list leem direto em vez de receber via prop.
+export function useStudioCanDelete() {
+  return useStudioStore((s) => s.slides.length > MIN_SLIDES);
 }
 
 // Elements pra prévia de UM slide da sidebar — se for o ativo e já tiver

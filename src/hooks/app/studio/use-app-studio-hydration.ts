@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useAppPresentation, appPresentationKeys } from "@/hooks/app/use-app-presentation";
+import { useAppGeneration } from "@/hooks/app/use-app-generation";
 import { useAppSlide } from "@/hooks/app/use-app-slide";
 import { computeCoverThumbnail } from "@/hooks/app/studio/use-app-studio-save";
 import { slideActions } from "@/actions/app/app-slide-actions";
 import { OutlineType } from "@/lib/drizzle/schema/outline";
 import { SlideStatus } from "@/lib/drizzle/schema/slide";
+import type { GenerationStatusSummary } from "@/schemas/app/generation-schema";
 import {
   type AppPresentationsStudioScene,
   type AppPresentationsStudioSlide,
@@ -25,6 +27,7 @@ function findCoverSlide(slides: AppPresentationsStudioSlide[], outlines: { id: s
 export function useAppStudioHydration(presentationId: string) {
   const { useDetail } = useAppPresentation();
   const { useList } = useAppSlide();
+  const { useStatus } = useAppGeneration();
   const queryClient = useQueryClient();
 
   const resetForPresentation = useStudioStore((s) => s.resetForPresentation);
@@ -48,16 +51,32 @@ export function useAppStudioHydration(presentationId: string) {
   }, [presentationId, resetForPresentation]);
 
   const { data: presentation, isLoading: isLoadingPresentation } = useDetail(presentationId);
-  // slideService().generate() cria os slides um de cada vez, em sequência —
-  // usado só pra saber quando PARAR de dar poll (bateu a quantidade
-  // esperada de outlines), não mais pra decidir se hidrata ou não: a
-  // hidratação em si roda a cada poll, incremental (ver hydrate() na store).
   const expectedSlideCount = presentation?.outlines.length ?? 0;
-  const { data: rawSlides, isLoading: isLoadingSlides } = useList(presentationId, {
+
+  // Contagem de slide continua o sinal principal — cobre presentation em
+  // branco (seedBlankStructure) e slide manual (createManual), nenhum dos
+  // dois passa pela tabela `generation` (só slideService().generate(), via
+  // IA, cria linha lá). Status de geração é só um sinal EXTRA: destrava o
+  // poll quando uma geração falha e a contagem nunca vai bater sozinha
+  // (senão ficaria esperando pra sempre um slide que nunca vai chegar).
+  const isGenerationResolved = (status: GenerationStatusSummary | undefined) =>
+    !!status && status.total > 0 && status.pending === 0;
+
+  const shouldKeepPolling = (rawSlideCount: number, status: GenerationStatusSummary | undefined) => {
+    if (hasHydrated || expectedSlideCount === 0) return false;
+    if (rawSlideCount >= expectedSlideCount) return false;
+    return !isGenerationResolved(status);
+  };
+
+  const { data: slideGeneration } = useStatus(presentationId, "slide", {
     refetchInterval: (data) =>
-      !hasHydrated && expectedSlideCount > 0 && (data?.length ?? 0) < expectedSlideCount
+      !hasHydrated && expectedSlideCount > 0 && !isGenerationResolved(data)
         ? POLL_INTERVAL_MS
         : false,
+  });
+
+  const { data: rawSlides, isLoading: isLoadingSlides } = useList(presentationId, {
+    refetchInterval: (data) => (shouldKeepPolling(data?.length ?? 0, slideGeneration) ? POLL_INTERVAL_MS : false),
   });
 
   // convertToExcalidrawElements toca `window` na avaliação do módulo — import adiado
@@ -80,6 +99,7 @@ export function useAppStudioHydration(presentationId: string) {
 
     const outlineTitleById = new Map(presentation?.outlines.map((o) => [o.id, o.title]) ?? []);
     const outlineTypeById = new Map(presentation?.outlines.map((o) => [o.id, o.type]) ?? []);
+    const outlineRepresentationById = new Map(presentation?.outlines.map((o) => [o.id, o.representation]) ?? []);
     const serialize = serializeRef.current;
     if (!serialize) return;
 
@@ -99,11 +119,12 @@ export function useAppStudioHydration(presentationId: string) {
         scene: serialize((s.elements ?? []) as unknown[]),
         outlineId: s.outlineId,
         outlineType: outlineTypeById.get(s.outlineId),
+        representation: outlineRepresentationById.get(s.outlineId),
       }));
 
     hydrate(hydratedBatch);
 
-    const isComplete = expectedSlideCount === 0 || rawSlides.length >= expectedSlideCount;
+    const isComplete = expectedSlideCount === 0 || !shouldKeepPolling(rawSlides.length, slideGeneration);
     if (!isComplete) return;
 
     setHasHydrated(true);
@@ -120,7 +141,7 @@ export function useAppStudioHydration(presentationId: string) {
         .then(() => queryClient.invalidateQueries({ queryKey: appPresentationKeys.all }))
         .catch((err) => console.warn("Falha ao gerar thumbnail da capa:", err));
     }
-  }, [rawSlides, isSerializerReady, hasHydrated, expectedSlideCount, presentation, hydrate, setStoreHasHydrated, presentationId, queryClient]);
+  }, [rawSlides, isSerializerReady, hasHydrated, expectedSlideCount, presentation, hydrate, setStoreHasHydrated, presentationId, queryClient, slideGeneration]);
 
   return {
     presentation,

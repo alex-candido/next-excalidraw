@@ -65,6 +65,7 @@ export const slideGenerateSchema = z.object({
 
 export const slideBulkUpdateItemSchema = z.object({
   id:       z.string().uuid(),
+  order:    z.number().int(),
   elements: z.array(z.record(z.string(), z.unknown())),
   appState: z.record(z.string(), z.unknown()).default({}),
   // Só o slide de capa manda isso — SVG (exportToSvg, serializado em texto)
@@ -74,7 +75,13 @@ export const slideBulkUpdateItemSchema = z.object({
 })
 
 export const slideBulkUpdateSchema = z.object({
-  slides: z.array(slideBulkUpdateItemSchema).min(1),
+  slides: z.array(slideBulkUpdateItemSchema),
+  // Reorder/exclusão no Studio ficam só locais até o Save (mesmo padrão de
+  // onAddSlide) — deletedIds é o que foi removido localmente desde a última
+  // hidratação/save. Apaga o outline pareado (cascade cuida do slide, ver
+  // schema/slide.ts: outlineId com onDelete "cascade"), nunca só o slide,
+  // senão o outline órfão continua aparecendo no Outline sem slide nenhum.
+  deletedIds: z.array(z.string().uuid()).optional(),
 })
 
 // Endpoint dedicado, separado do bulkUpdate — cobre o caso de já existir

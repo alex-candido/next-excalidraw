@@ -48,11 +48,12 @@ import { cn } from "@/lib/utils";
 import {
   useAppPresentationsOutline,
   useOutlineActions,
+  useOutlineCanDelete,
   useOutlineCard,
   useOutlineRegeneratingIds,
 } from "@/providers/app/app-presentations-outline-provider";
 
-const TYPE_CONFIG = {
+export const TYPE_CONFIG = {
   [OutlineType.cover]: {
     key: "cover" as const,
     border: "border-l-amber-500",
@@ -185,13 +186,11 @@ export function AppPresentationsOutlineCard({ id, isExpanded, onToggleExpand, ca
   const { onTitleChange, onDescriptionChange, onRepresentationChange, onDelete } = useOutlineActions();
   const { onRegenerateCard } = useAppPresentationsOutline();
   const isRegenerating = useOutlineRegeneratingIds().has(id);
-  // isRestricted precisa ser seguro mesmo com item ainda undefined — useSortable
-  // precisa ser chamado sempre, antes de qualquer return condicional (regra de
-  // hooks), por isso vem antes da checagem de `item`. cover/closing têm posição
-  // fixa (primeiro/último, ver onReorder na store) — arrastar é desabilitado
-  // aqui pra não sugerir uma ação que a store vai rejeitar silenciosamente.
-  const isRestricted = item?.type === OutlineType.cover || item?.type === OutlineType.closing;
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: isRestricted });
+  const canDelete = useOutlineCanDelete();
+  // Arrastar é sempre livre agora — type (capa/conteúdo/encerramento) é
+  // derivado da posição, não trava mais item nenhum (ver deriveTypes em
+  // app-outline-store.ts). useSortable sem `disabled`.
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   if (!item) return null;
 
@@ -199,7 +198,11 @@ export function AppPresentationsOutlineCard({ id, isExpanded, onToggleExpand, ca
   const meta = REPRESENTATION_META[item.representation];
   const style = FAMILY_STYLE[meta.family];
   const Icon = meta.icon;
-  const visibleGroups = isRestricted
+  // Capa/encerramento continuam restritos a representações "gerais" — isso
+  // é sobre o TIPO de conteúdo fazer sentido (um título não é fluxograma),
+  // não mais sobre posição travada.
+  const isEdgeType = item.type === OutlineType.cover || item.type === OutlineType.closing;
+  const visibleGroups = isEdgeType
     ? ALL_GROUPS.filter((g) => g.key === "general")
     : ALL_GROUPS;
 
@@ -218,11 +221,10 @@ export function AppPresentationsOutlineCard({ id, isExpanded, onToggleExpand, ca
     >
       <button
         type="button"
-        disabled={isRestricted}
         {...attributes}
         {...listeners}
         aria-label={t("dragHandle")}
-        className="app-outline-card-drag-handle flex w-8 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
+        className="app-outline-card-drag-handle flex w-8 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
       >
         <GripVertical className="size-4" />
       </button>
@@ -282,7 +284,7 @@ export function AppPresentationsOutlineCard({ id, isExpanded, onToggleExpand, ca
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => onDelete(item.id)}
-                disabled={isRestricted}
+                disabled={!canDelete}
                 aria-label={t("delete")}
                 className="app-outline-card-delete text-muted-foreground hover:text-destructive"
               >

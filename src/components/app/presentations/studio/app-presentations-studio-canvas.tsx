@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExcalidrawEditor } from "@/components/excalidraw/excalidraw-editor";
 import { useStudioActions, useStudioActiveSlide } from "@/providers/app/app-presentations-studio-provider";
 
-import { AppPresentationsStudioToolbar } from "@/components/app/presentations/studio/app-presentations-studio-toolbar";
+import { AppPresentationsStudioPanel } from "@/components/app/presentations/studio/panel/app-presentations-studio-panel";
 
 const LIVE_PREVIEW_THROTTLE_MS = 200;
 
@@ -34,8 +34,7 @@ export function AppPresentationsStudioCanvas() {
   };
 
   return (
-    <div className="app-presentations-studio-canvas flex min-h-0 flex-col overflow-hidden rounded-xl border bg-background md:h-[calc(100vh-5.5rem)]! md:min-w-0 md:flex-1">
-      <AppPresentationsStudioToolbar />
+    <div className="app-presentations-studio-canvas relative flex min-h-0 flex-col overflow-hidden rounded-xl border bg-background md:h-[calc(100vh-5.5rem)]! md:min-w-0 md:flex-1">
       <div className="min-h-0 flex-1">
         <ExcalidrawEditor
           key={activeSlide.id}
@@ -47,6 +46,7 @@ export function AppPresentationsStudioCanvas() {
           }}
         />
       </div>
+      <AppPresentationsStudioPanel />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { createContext, ReactNode, useContext } from "react";
 
+import { useAppPresentation } from "@/hooks/app/use-app-presentation";
 import { useAppStudioHydration } from "@/hooks/app/studio/use-app-studio-hydration";
 import { useAppStudioSave } from "@/hooks/app/studio/use-app-studio-save";
 import { routing } from "@/i18n/routing";
@@ -13,6 +14,7 @@ export {
   useStudioActivePanel,
   useStudioActiveSlide,
   useStudioActiveSlideId,
+  useStudioCanDelete,
   useStudioIsSaving,
   useStudioIsWaitingSlides,
   useStudioSlidePreviewElements,
@@ -37,6 +39,7 @@ type AppPresentationsStudioContextProps = {
   isLoading: boolean;
   expectedSlideCount: number;
   onSave: () => void;
+  onRenameTitle: (title: string) => void;
 };
 
 const AppPresentationsStudioContext = createContext<AppPresentationsStudioContextProps | undefined>(undefined);
@@ -51,7 +54,9 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
   const lang = routeParams.lang ?? routing.defaultLocale;
 
   const { presentation, isLoading, expectedSlideCount } = useAppStudioHydration(presentationId);
-  const { onSave } = useAppStudioSave(presentationId, presentation);
+  const { onSave } = useAppStudioSave(presentationId);
+  const { useRename } = useAppPresentation();
+  const rename = useRename();
 
   const value: AppPresentationsStudioContextProps = {
     title: presentation?.title ?? "",
@@ -61,6 +66,7 @@ export const AppPresentationsStudioProvider = ({ children }: { children: ReactNo
     isLoading,
     expectedSlideCount,
     onSave,
+    onRenameTitle: (title) => rename.mutate({ id: presentationId, title }),
   };
 
   return (

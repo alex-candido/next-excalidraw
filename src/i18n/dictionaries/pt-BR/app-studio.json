@@ -2,11 +2,12 @@
   "app": {
     "studio": {
       "header": {
-        "back": "Voltar",
+        "navMenu": "Navegação",
+        "navMenuStart": "Início",
+        "navMenuPresentations": "Apresentações",
+        "navMenuNew": "Nova presentation em branco",
+        "engine": "Excalidraw",
         "moreActions": "Mais ações",
-        "meta": {
-          "created": "Criado em {date} · por {author}"
-        },
         "export": "Exportar",
         "exportPng": "Exportar como PNG",
         "exportSvg": "Exportar como SVG",
@@ -17,18 +18,28 @@
         "unfavorite": "Remover dos favoritos",
         "copyLink": "Copiar link",
         "trash": "Mover para lixeira",
-        "slideConfig": "Configurações",
-        "source": "Source",
         "save": "Salvar",
         "saving": "Salvando...",
-        "versionHistory": "Histórico",
-        "present": "Apresentar"
+        "present": "Apresentar",
+        "panelActions": {
+          "settings": "Configurações",
+          "templates": "Templates",
+          "assistant": "Assistente",
+          "source": "Código-fonte",
+          "history": "Histórico"
+        }
       },
       "slideList": {
-        "engine": "Excalidraw",
-        "editName": "Editar nome da apresentação",
+        "title": "Slides · {count}",
         "add": "Novo slide",
+        "viewList": "Visualização em lista",
+        "viewCard": "Visualização em cards",
         "generating": "Gerando slide {loaded} de {expected}...",
+        "groups": {
+          "cover": "Capa",
+          "content": "Conteúdo",
+          "closing": "Encerramento"
+        },
         "item": {
           "dragHandle": "Reordenar slide",
           "hiddenBadge": "Oculto",
@@ -47,11 +58,31 @@
         "close": "Fechar painel",
         "titles": {
           "settings": "Configurações",
+          "templates": "Templates",
+          "assistant": "Assistente",
           "source": "Source",
           "history": "Histórico"
         },
         "settings": {
           "comingSoon": "Configurações da apresentação em breve."
+        },
+        "templates": {
+          "description": "Insira um slide pronto sem passar pela IA.",
+          "comingSoon": "Em breve",
+          "categories": {
+            "cover": "Capa",
+            "flowchart": "Fluxograma",
+            "comparison": "Comparação",
+            "timeline": "Linha do tempo",
+            "summary": "Resumo",
+            "closing": "Encerramento"
+          }
+        },
+        "assistant": {
+          "comingSoon": "Em breve",
+          "exampleUserMessage": "Deixe o título maior e centralize a seta",
+          "exampleAgentMessage": "Feito — título em 32px, seta recentralizada.",
+          "inputPlaceholder": "Peça uma edição em linguagem natural…"
         },
         "source": {
           "comingSoon": "Visualização do source em breve."

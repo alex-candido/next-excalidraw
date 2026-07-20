@@ -36,6 +36,14 @@ export function outlineRepository() {
     await client.delete(outline).where(eq(outline.presentationId, presentationId))
   }
 
+  // Usado por slideService().bulkUpdate() (deletedIds) — apaga o outline, que
+  // cascade-apaga o slide pareado (ver schema/slide.ts). Nunca chamado com
+  // ids fora da presentation atual (resolvido antes via slide.findManyByIds).
+  async function deleteByIds(ids: string[], client: DbClient = db) {
+    if (ids.length === 0) return
+    await client.delete(outline).where(inArray(outline.id, ids))
+  }
+
   async function bulkUpdate(items: { id: string; title: string; description: string; concepts: string[]; representation: number; layout: string }[]) {
     let count = 0
     for (const item of items) {
@@ -51,5 +59,5 @@ export function outlineRepository() {
     return count
   }
 
-  return { createMany, findById, findByPresentationId, update, bulkUpdate, deleteByPresentationId }
+  return { createMany, findById, findByPresentationId, update, bulkUpdate, deleteByPresentationId, deleteByIds }
 }

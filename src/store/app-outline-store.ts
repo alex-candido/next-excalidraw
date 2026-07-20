@@ -52,6 +52,25 @@ const DEFAULT_PARAMS: AppPresentationsOutlineParams = {
   language: 0, aspectRatio: 0, slideCount: 0, audience: 0, scenario: 0, amount: 0, theme: 0,
 };
 
+// Mínimo pra sempre ter pelo menos 1 capa + 1 conteúdo + 1 encerramento —
+// única regra estrutural que resta (ver decisão 2026-07-19, substitui a
+// trava fixa por item que existia antes).
+export const MIN_OUTLINES = 3;
+
+// `type` não é mais um atributo fixo por item — é sempre derivado da
+// POSIÇÃO no array (primeiro = cover, último = closing, meio = content).
+// Reaplicado a cada reorder/add/delete/hydrate: se o usuário arrasta o que
+// era capa pra posição 2, o item que assumir a posição 0 vira a capa nova
+// automaticamente, sem trava nenhuma pra impedir. Mesmo padrão em
+// app-studio-store.ts (lá o campo se chama outlineType).
+function deriveTypes(items: OutlineCardState[]): OutlineCardState[] {
+  return items.map((item, index) => ({
+    ...item,
+    order: index,
+    type: index === 0 ? OutlineType.cover : index === items.length - 1 ? OutlineType.closing : OutlineType.content,
+  }));
+}
+
 // Store global (não por-componente) — mesmo padrão do Studio
 // (store/app-studio-store.ts): montado globalmente em providers/app/index.tsx,
 // troca de presentation precisa resetar explicitamente.
@@ -84,7 +103,7 @@ export const useOutlineStore = createAppStore<OutlineStoreState>("outline", (set
   },
 
   hydrate: (outlines, prompt, params) =>
-    set({ outlines, prompt, params, persistedPrompt: prompt, persistedParams: params, hasHydrated: true }),
+    set({ outlines: deriveTypes(outlines), prompt, params, persistedPrompt: prompt, persistedParams: params, hasHydrated: true }),
 
   // Chamado pelo hook de regenerate quando o poll detecta que o updatedAt do
   // outline mudou de verdade (ver use-app-outline-regenerate.ts) — atualiza só
@@ -105,7 +124,7 @@ export const useOutlineStore = createAppStore<OutlineStoreState>("outline", (set
   // commitado. O rascunho (prompt/params) já está igual, mas atualiza junto
   // por segurança (evita qualquer divergência de uma edição no meio do request).
   applyRegenerateAllResult: (outlines, prompt, params) =>
-    set({ outlines, prompt, params, persistedPrompt: prompt, persistedParams: params }),
+    set({ outlines: deriveTypes(outlines), prompt, params, persistedPrompt: prompt, persistedParams: params }),
 
   markRegenerating: (id) => set((state) => ({ regeneratingIds: new Set(state.regeneratingIds).add(id) })),
 
@@ -149,46 +168,32 @@ export const useOutlineStore = createAppStore<OutlineStoreState>("outline", (set
       outlines: state.outlines.map((o) => (o.id === id ? { ...o, representation: value, layout: "" } : o)),
     })),
 
-  // cover/closing têm posição fixa (primeiro/último) — nunca podem ser
-  // arrastados, e nenhum outro item pode assumir a posição deles. Sem essa
-  // guarda, dnd-kit deixava mover "Encerramento" pro meio da lista ou
-  // "Capa" pra longe da posição 0 sem nenhum aviso.
+  // Reorder é sempre livre — não existe mais item travado por posição.
+  // type é recalculado pra todo mundo depois: quem cair na posição 0/última
+  // vira a capa/encerramento nova, automaticamente (ver deriveTypes).
   onReorder: (activeId, overId) =>
     set((state) => {
       const oldIndex = state.outlines.findIndex((o) => o.id === activeId);
       const newIndex = state.outlines.findIndex((o) => o.id === overId);
       if (oldIndex === -1 || newIndex === -1) return state;
 
-      const active = state.outlines[oldIndex];
-      if (active.type === OutlineType.cover || active.type === OutlineType.closing) return state;
-
-      const firstIsCover = state.outlines[0]?.type === OutlineType.cover;
-      const lastIsClosing = state.outlines[state.outlines.length - 1]?.type === OutlineType.closing;
-      if (firstIsCover && newIndex === 0) return state;
-      if (lastIsClosing && newIndex === state.outlines.length - 1) return state;
-
-      return {
-        outlines: arrayMove(state.outlines, oldIndex, newIndex).map((item, index) => ({ ...item, order: index })),
-      };
+      return { outlines: deriveTypes(arrayMove(state.outlines, oldIndex, newIndex)) };
     }),
 
-  // cover/closing são a garantia estrutural que a IA promete (schema
-  // outline.type + prompt "sempre comece com cover e termine com closing")
-  // — apagáveis, o resto do reorder/guard perde o sentido (mesma trava do
-  // Studio, ver app-studio-store.ts:onDeleteSlide).
+  // Única regra que resta: nunca menos que MIN_OUTLINES itens (garante 1
+  // capa + 1 conteúdo + 1 encerramento sempre existindo) — não importa mais
+  // qual item está sendo apagado, cover/closing incluídos.
   onDelete: (id) =>
     set((state) => {
-      const target = state.outlines.find((o) => o.id === id);
-      if (target?.type === OutlineType.cover || target?.type === OutlineType.closing) return state;
-      return {
-        outlines: state.outlines.filter((o) => o.id !== id).map((item, index) => ({ ...item, order: index })),
-      };
+      if (state.outlines.length <= MIN_OUTLINES) return state;
+      return { outlines: deriveTypes(state.outlines.filter((o) => o.id !== id)) };
     }),
 
   // Insere antes do encerramento (se existir) em vez de sempre no final —
-  // senão "Adicionar cena" com um item type=closing já na lista quebrava a
-  // estrutura abertura→conteúdo→encerramento (a lista não reordena por
-  // `order` na hora de renderizar, confia na ordem do array).
+  // senão "Adicionar cena" nasceria depois do item que vai virar
+  // encerramento, quebrando a estrutura capa→conteúdo→encerramento. type
+  // real (sempre "content" aqui, já que nunca é o primeiro nem o último)
+  // vem do deriveTypes, não precisa fixar na mão.
   onAdd: () =>
     set((state) => {
       const closingIndex = state.outlines.findIndex((o) => o.type === OutlineType.closing);
@@ -207,7 +212,7 @@ export const useOutlineStore = createAppStore<OutlineStoreState>("outline", (set
       };
 
       const next = [...state.outlines.slice(0, insertAt), newItem, ...state.outlines.slice(insertAt)];
-      return { outlines: next.map((item, index) => ({ ...item, order: index })) };
+      return { outlines: deriveTypes(next) };
     }),
 }));
 
@@ -253,6 +258,12 @@ export function useOutlineIsGenerating() {
 
 export function useOutlineIsWaitingHydration() {
   return useOutlineStore((s) => !s.hasHydrated);
+}
+
+// Regra é sempre a mesma pra todo mundo (não é por item) — um hook só, os
+// cards leem direto em vez de receber via prop.
+export function useOutlineCanDelete() {
+  return useOutlineStore((s) => s.outlines.length > MIN_OUTLINES);
 }
 
 export function useOutlineActions() {

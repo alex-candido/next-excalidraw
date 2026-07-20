@@ -89,6 +89,15 @@ export function slideService() {
     if (!presentation) throw Object.assign(new Error("Presentation not found"), { status: 404 })
     if (presentation.userId !== userId) throw Object.assign(new Error("Forbidden"), { status: 403 })
 
+    // Reorder/exclusão do Studio ficam locais até o Save (mesmo padrão de
+    // onAddSlide/createManual) — deletedIds resolve pra outlineId pareado e
+    // apaga o outline (cascade cuida do slide, ver schema/slide.ts). Ids que
+    // não pertencem a essa presentation são ignorados, nunca confiados às cegas.
+    if (input.deletedIds?.length) {
+      const toDelete = await slideRepository().findManyByIds(input.deletedIds, presentationId)
+      await outlineRepository().deleteByIds(toDelete.map((s) => s.outlineId))
+    }
+
     const updated = await slideRepository().bulkUpdate(input.slides)
     return { updated }
   }

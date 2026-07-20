@@ -1,9 +1,9 @@
 import { db, type DbClient } from "@/lib/drizzle"
 import { slide } from "@/lib/drizzle/schema/slide"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 
 export type SlideInsert = typeof slide.$inferInsert
-export type SlideUpdate = Partial<Pick<SlideInsert, "elements" | "appState" | "thumbnail">>
+export type SlideUpdate = Partial<Pick<SlideInsert, "order" | "elements" | "appState" | "thumbnail">>
 
 export function slideRepository() {
   async function create(data: SlideInsert) {
@@ -26,6 +26,16 @@ export function slideRepository() {
     })
   }
 
+  // Usado por bulkUpdate pra resolver deletedIds (slide -> outlineId pareado)
+  // antes de apagar — sempre escopado por presentationId, nunca confia em ids
+  // crus vindos do client sem checar a quem pertencem.
+  async function findManyByIds(ids: string[], presentationId: string) {
+    if (ids.length === 0) return []
+    return db.query.slide.findMany({
+      where: (s, { and }) => and(inArray(s.id, ids), eq(s.presentationId, presentationId)),
+    })
+  }
+
   async function update(id: string, data: SlideUpdate) {
     const [row] = await db
       .update(slide)
@@ -44,10 +54,10 @@ export function slideRepository() {
     return row
   }
 
-  async function bulkUpdate(items: { id: string; elements: unknown[]; appState: Record<string, unknown>; thumbnail?: string }[]) {
+  async function bulkUpdate(items: { id: string; order: number; elements: unknown[]; appState: Record<string, unknown>; thumbnail?: string }[]) {
     let count = 0
     for (const item of items) {
-      const data: SlideUpdate = { elements: item.elements, appState: item.appState }
+      const data: SlideUpdate = { order: item.order, elements: item.elements, appState: item.appState }
       // Só a capa manda thumbnail (o SVG calculado no mesmo save) — os demais
       // itens do lote não têm essa chave, então não sobrescreve com undefined.
       if (item.thumbnail !== undefined) data.thumbnail = item.thumbnail
@@ -57,5 +67,5 @@ export function slideRepository() {
     return count
   }
 
-  return { create, createMany, findById, findByPresentationId, update, updateThumbnail, bulkUpdate }
+  return { create, createMany, findById, findByPresentationId, findManyByIds, update, updateThumbnail, bulkUpdate }
 }
