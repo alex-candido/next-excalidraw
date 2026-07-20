@@ -468,3 +468,27 @@ Estrutura semeada (`seedBlankStructure`, dentro da mesma transação de `create(
 - Booleano `blank` só na request (não persistido) — descartada em favor do enum: menos consistente com o resto do schema, e fecha a porta pra futuras variações de origem (ex: duplicada, importada) sem quebrar a API.
 
 **Consequências:** migration `0008_gray_talisman.sql` (`ALTER TABLE presentation_entry ADD COLUMN origin smallint DEFAULT 1 NOT NULL`), aplicada. `presentation-repository.ts`'s `ENTRY_COLUMNS` ganhou `origin` (senão `source.entry.origin` fica `undefined` em `duplicate()`). Presentation `88d0580b-...` corrigida manualmente (mesma técnica de backfill pontual dos ADRs anteriores): `origin` setado pra `blank`, 3 outlines + 3 slides inseridos direto.
+
+---
+
+## ADR-023 — Hidratação do Studio: `bindingRepairer` sempre roda, `convertToExcalidrawElements` só roda se o dado ainda for skeleton cru
+
+**Data:** 2026-07  
+**Status:** Aceito
+
+**Contexto:** duas falhas relacionadas, mesma raiz. (1) `use-app-studio-hydration.ts` travava com `Cannot read properties of undefined (reading 'forEach')` em `skeleton-serializer.ts` → `convertToExcalidrawElements`, mesma classe de bug do ADR-018 (`frame` sem `children`), numa presentation **recém-gerada**. Slide afetado: diagrama de 3 frames (`frame_input`/`frame_process`/`frame_output`, 26 elements), o único dos 8 slides da geração com uma resposta de IA sensivelmente maior/mais lenta (~6m30s contra 10-30s dos demais) — causa raiz da geração em si não confirmada (conferido no Inngest Dev Server, `/v0/gql` `history` do run: 1 única tentativa, `attempt: 0`, sem retry). (2) Depois de mitigar (1), o usuário reportou texto e seta se deslocando **progressivamente** — piorando a cada refresh/Save — num padrão bem diferente de dado estático quebrado.
+
+**Duas tentativas erradas antes de achar a causa (2):**
+- `normalizeSkeletons` completo na hidratação: `arrowNormalizer`/`frameBoundsResolver` assumem skeleton bruto (`start`/`end` como `{id}`, geometria derivada de children) — rodando sobre dado já convertido (ver próximo parágrafo), `arrowNormalizer` não acha `start`/`end`, trata a seta como sem binding e descarta `points` real via `withoutPoints()`. Revertida.
+- Hipótese de que `AppPresentationsStudioCanvas` remontar via `updateScene` numa instância persistente (em vez de `key={activeSlide.id}`) acumulava o desvio a cada troca de slide — testada revertendo o canvas pro remount antigo; **o deslocamento continuou idêntico**, descartando essa hipótese. `updateScene` sempre trabalhou só com `ExcalidrawElement[]` real (nunca skeleton), então nunca poderia ser a causa.
+
+**Causa raiz real:** `slide.elements` só é skeleton bruto (saída da IA) até o primeiro Save — a partir daí `onSave` persiste `scene.elements` **já convertido** (`ExcalidrawElement[]` real: `versionNonce`, `points`/`startBinding` resolvidos etc. — bug já documentado em `pm/active.md`, P1, não é possível salvar skeleton depois que o usuário edita no editor real). A documentação oficial do Excalidraw (`temp/excalidraw_ai/dev-docs`) é explícita: `convertToExcalidrawElements` só pode ser chamado **uma vez**, antes do elemento existir no editor — nunca de novo em cima de um elemento já convertido. A hidratação sempre chamava de novo, incondicionalmente; cada chamada extra remedia texto e reprocessava bindings como skeleton cru, deformando um pouco a posição. Cada Save resalva o resultado já deformado, e a próxima hidratação deforma mais — daí "piora a cada refresh".
+
+**Decisão:** `skeleton-serializer.ts` sempre roda `bindingRepairer().repair(skeletons)` (só `children`/`frameId`/`containerId`/`boundElements`, nunca geometria — seguro nos dois formatos, resolve a falha 1). Antes de chamar `convertToExcalidrawElements`, checa `isAlreadyConverted()` (primeiro elemento tem `versionNonce`? só existe depois da 1ª conversão) — se já convertido, **pula a conversão** e usa os elements como estão; só converte skeleton bruto de verdade (slide nunca salvo). Reverte a parte do ADR-018 que decidia *não* proteger a leitura, de forma cirúrgica.
+
+**Alternativas descartadas:**
+- `normalizeSkeletons` completo — descartada, deforma dado já convertido.
+- Reverter `AppPresentationsStudioCanvas` pro remount por `key` permanentemente — descartada após teste: não era a causa, e o remount a cada troca de slide era a lentidão que motivou o `updateScene` em primeiro lugar (ver conversa anterior).
+- Consertar o bug do `onSave` (persistir formato convertido) em vez de tornar a hidratação tolerante aos dois formatos — não descartada, só adiada: é o problema raiz mais profundo (`pm/active.md`), fora do escopo desta investigação.
+
+**Consequências:** `bindingRepairer` roda 1x a mais por slide a cada hidratação (custo pequeno, função pura). `convertToExcalidrawElements` só roda em skeleton nunca salvo — elimina a deformação progressiva confirmada pelo usuário após o fix. Slide `9704aba6-...` e o texto da capa (`cover_title`/`cover_subtitle`, posição `x` negativa) da presentation `2185e8aa-...` ficaram com dado errado **introduzido pelas próprias tentativas erradas desta investigação** (não pela geração original) — presentation descartada pelo usuário, que preferiu gerar uma nova pra validar os fixes do zero em vez de corrigir o dado manualmente. O bug de `onSave` persistir formato convertido (`pm/active.md`) continua em aberto.
