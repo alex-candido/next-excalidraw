@@ -51,7 +51,7 @@ function getEdgeCenter(rect: Rect, edge: Edge): Point {
 }
 
 function hasFiniteGeometry(raw: Raw): boolean {
-  return Number.isFinite(raw.x) && Number.isFinite(raw.y)
+  return Number.isFinite(raw.x) && Number.isFinite(raw.y) && Number.isFinite(raw.width) && Number.isFinite(raw.height)
 }
 
 // Number.isFinite(value: unknown) não é um type guard — não estreita
@@ -99,6 +99,28 @@ function withoutPoints(el: ExcalidrawElementSkeleton): ExcalidrawElementSkeleton
   return rest as ExcalidrawElementSkeleton
 }
 
+// `start`/`end` do skeleton aceitam duas formas (ambas válidas no schema do
+// Excalidraw): binding por id (`{ id }`, ancora numa aresta do elemento
+// referenciado) ou ponto explícito (`{ x, y }`, sem binding nenhum). Um ponto
+// explícito é modelado aqui como um Rect de tamanho zero — toda aresta de um
+// rect 0x0 colapsa pro próprio ponto (ver getEdgeCenter), então o resto do
+// algoritmo (determineEdges/getEdgeCenter/applyGeometry) trata os dois casos
+// de forma idêntica, sem ramo especial. Produção real (2026-07-21): a IA
+// mandou `start: { x, y }` sem `id` e sem `end` — o código antigo só sabia
+// checar `.id`, tratava como "sem binding nenhum" e descartava o ponto.
+function toRect(ref: Raw | undefined, elementMap: Map<string, ExcalidrawElementSkeleton>): Rect | undefined {
+  if (!ref) return undefined
+  const id = ref.id as string | undefined
+  if (id) {
+    const target = elementMap.get(id)
+    return target ? getRect(target) : undefined
+  }
+  if (Number.isFinite(ref.x) && Number.isFinite(ref.y)) {
+    return { x: ref.x as number, y: ref.y as number, width: 0, height: 0 }
+  }
+  return undefined
+}
+
 export function arrowNormalizer() {
   function normalize(skeletons: ExcalidrawElementSkeleton[]): ExcalidrawElementSkeleton[] {
     const elementMap = new Map<string, ExcalidrawElementSkeleton>()
@@ -111,35 +133,30 @@ export function arrowNormalizer() {
       const raw = el as Raw
       if (raw.type !== "arrow" && raw.type !== "line") return el
 
-      const startId = (raw.start as Raw | undefined)?.id as string | undefined
-      const endId   = (raw.end   as Raw | undefined)?.id as string | undefined
+      const startRect = toRect(raw.start as Raw | undefined, elementMap)
+      const endRect   = toRect(raw.end as Raw | undefined, elementMap)
 
-      // Sem binding nenhum — caso válido de seta solta com geometria
-      // explícita (ver ELEM_ARROW no prompt); a rede de segurança abaixo
-      // cobre o caso raro de vir sem binding E sem x/y.
-      if (!startId && !endId) {
+      // Sem binding nenhum (nem id, nem ponto explícito) — caso válido de
+      // seta solta com geometria explícita (ver ELEM_ARROW no prompt); a
+      // rede de segurança abaixo cobre o caso raro de vir sem x/y/width/
+      // height também.
+      if (!startRect && !endRect) {
         return withoutPoints(hasFiniteGeometry(raw) ? el : applyFallbackGeometry(el, raw))
       }
 
-      const startEl = startId ? elementMap.get(startId) : undefined
-      const endEl   = endId ? elementMap.get(endId) : undefined
-
-      if (startEl && endEl) {
-        const startRect = getRect(startEl)
-        const endRect   = getRect(endEl)
+      if (startRect && endRect) {
         const { startEdge, endEdge } = determineEdges(startRect, endRect)
         return withoutPoints(applyGeometry(el, getEdgeCenter(startRect, startEdge), getEdgeCenter(endRect, endEdge)))
       }
 
-      // Binding incompleto: só um lado foi informado, ou o id do outro lado
-      // não corresponde a nenhum elemento do slide (referência inválida da
-      // IA). Ancora no lado que resolveu e usa um comprimento padrão na
-      // direção convencional (esquerda→direita) em vez de deixar a seta sem
-      // x/y — nunca propagar NaN pro Excalidraw.
-      const anchorEl = startEl ?? endEl
-      if (anchorEl) {
-        const anchorIsStart = !!startEl
-        const anchorRect = getRect(anchorEl)
+      // Binding incompleto: só um lado foi informado (id ou ponto), ou o id
+      // do outro lado não corresponde a nenhum elemento do slide (referência
+      // inválida da IA). Ancora no lado que resolveu e usa um comprimento
+      // padrão na direção convencional (esquerda→direita) em vez de deixar a
+      // seta sem x/y — nunca propagar NaN pro Excalidraw.
+      const anchorRect = startRect ?? endRect
+      if (anchorRect) {
+        const anchorIsStart = !!startRect
         const anchorPt = getEdgeCenter(anchorRect, anchorIsStart ? "right" : "left")
         const otherPt: Point = anchorIsStart
           ? { x: anchorPt.x + DEFAULT_ARROW_LENGTH, y: anchorPt.y }

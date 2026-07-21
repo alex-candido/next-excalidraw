@@ -147,4 +147,72 @@ describe("normalizeArrows", () => {
     const [result] = normalizeArrows([a])
     expect(result).toBe(a)
   })
+
+  it("resolves `start` given as an explicit {x,y} point (no id) with no `end` at all — the exact state_vector production bug (2026-07-21)", () => {
+    // A IA mandou `start` como ponto explícito em vez de binding {id}, e nem
+    // mandou `end` — startId/endId ficavam ambos undefined, caía no ramo "sem
+    // binding nenhum", e como raw.x/raw.y (posição do próprio elemento, não
+    // do ponto) eram finitos, hasFiniteGeometry deixava passar sem width/
+    // height. Resultado: seta sem width/height alguma chegando no Excalidraw
+    // (`Linear element is not normalized`).
+    const a = {
+      type: "arrow", id: "state_vector", x: 600, y: 240,
+      start: { x: 590, y: 230 },
+    } as unknown as ExcalidrawElementSkeleton
+
+    const [result] = normalizeArrows([a])
+    const el = result as Record<string, unknown>
+
+    expect(el.x).toBe(590)
+    expect(el.y).toBe(230)
+    expect(Number.isFinite(el.width)).toBe(true)
+    expect(Number.isFinite(el.height)).toBe(true)
+  })
+
+  it("resolves both `start` and `end` given as explicit {x,y} points (no ids, no element binding)", () => {
+    const a = {
+      type: "arrow", id: "a1", x: 0, y: 0,
+      start: { x: 10, y: 20 },
+      end:   { x: 110, y: 20 },
+    } as unknown as ExcalidrawElementSkeleton
+
+    const [result] = normalizeArrows([a])
+    const el = result as Record<string, unknown>
+
+    expect(el.x).toBe(10)
+    expect(el.y).toBe(20)
+    expect(el.width).toBe(100)
+    expect(el.height).toBe(0)
+  })
+
+  it("resolves a mix of explicit {x,y} point and element-id binding", () => {
+    const dst = rect("dst", 300, 100) // center: 350, 130
+    const a = {
+      type: "arrow", id: "a1", x: 0, y: 0,
+      start: { x: 100, y: 130 },
+      end:   { id: "dst" },
+    } as unknown as ExcalidrawElementSkeleton
+
+    const [, result] = normalizeArrows([dst, a])
+    const el = result as Record<string, unknown>
+
+    expect(el.x).toBe(100)
+    expect(el.y).toBe(130)
+    expect(Number.isFinite(el.width)).toBe(true)
+    expect(Number.isFinite(el.height)).toBe(true)
+  })
+
+  it("applies fallback height when width/height is missing even though x/y are present and there is no start/end at all — the exact dist_indicator production bug (2026-07-21)", () => {
+    // hasFiniteGeometry só checava x/y — uma seta solta (sem start/end) com
+    // x/y/width válidos mas height ausente passava batido, sem cair no
+    // fallback que preenche o campo faltante.
+    const a = { type: "arrow", id: "dist_indicator", x: 200, y: 280, width: 400 } as ExcalidrawElementSkeleton
+    const [result] = normalizeArrows([a])
+    const el = result as Record<string, unknown>
+
+    expect(el.x).toBe(200)
+    expect(el.y).toBe(280)
+    expect(el.width).toBe(400)
+    expect(Number.isFinite(el.height)).toBe(true)
+  })
 })
